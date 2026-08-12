@@ -1,9 +1,9 @@
 {
   "name": "Ayush Practice - JNV Selection Test",
   "short_name": "Ayush Practice",
-  "description": "6-month JNV Selection Test (Class 6 entrance) practice app for Class 4 with Mental Ability, Arithmetic and Language questions.",
-  "start_url": ".",
-  "scope": ".",
+  "description": "6-month JNV Selection Test practice app for Class 4 with Mental Ability, Arithmetic and Language questions.",
+  "start_url": "/Ayush-practice/",
+  "scope": "/Ayush-practice/",
   "display": "standalone",
   "background_color": "#f2f5f8",
   "theme_color": "#174a7e",
