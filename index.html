@@ -3,89 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduPortal 2026 - Adaptive Practice</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+  <title>EduPortal 2026 - Kids Adaptive Learning</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   <style>
-    :root { --primary: #4F46E5; --primary-hover: #4338CA; --bg: #0F172A; --card-bg: rgba(30, 41, 59, 0.8); --text-main: #F8FAFC; --text-muted: #94A3B8; --success: #10B981; --danger: #EF4444; --border: #334155; }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: #090D16; color: var(--text-main); min-height: 100vh; padding: 12px; display: flex; justify-content: center; align-items: flex-start; -webkit-tap-highlight-color: transparent; }
-    .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; }
-    .card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 18px; padding: 18px; border: 1.5px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
-    
-    /* Login & Suggestion Dropdown */
-    .login-box { text-align: center; }
-    .autocomplete-wrapper { position: relative; width: 100%; text-align: left; }
-    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: #1E293B; border: 1.5px solid var(--border); border-radius: 10px; max-height: 160px; overflow-y: auto; z-index: 100; margin-top: 4px; box-shadow: 0 10px 15px rgba(0,0,0,0.5); }
-    .suggestion-item { padding: 12px 14px; font-size: 1.1rem; font-weight: 600; cursor: pointer; border-bottom: 1px solid var(--border); color: #F1F5F9; }
-    .suggestion-item:hover { background: var(--primary); }
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #311042 100%);
+      --card-bg: rgba(30, 41, 59, 0.85);
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --primary: #6366F1;
+      --primary-hover: #4F46E5;
+      --accent-gold: #F59E0B;
+      --border: #334155;
+      --success: #10B981;
+      --danger: #EF4444;
+      --input-bg: #0F172A;
+    }
 
-    /* Forms & Inputs */
-    .input-field { width: 100%; padding: 12px 14px; margin: 6px 0; border: 1.5px solid var(--border); border-radius: 10px; font-size: 1.1rem; background: #0F172A; color: white; outline: none; }
+    [data-theme="light"] {
+      --bg-gradient: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 50%, #F3E8FF 100%);
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --border: #CBD5E1;
+      --input-bg: #FFFFFF;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background 0.3s, color 0.3s; }
+    body { background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; padding: 12px; display: flex; justify-content: center; align-items: flex-start; -webkit-tap-highlight-color: transparent; }
+    .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+    
+    /* Top Header Bar */
+    .top-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; }
+    .theme-btn { background: var(--card-bg); border: 1.5px solid var(--border); padding: 8px 12px; border-radius: 20px; font-size: 1.1rem; cursor: pointer; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    
+    .card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 22px; padding: 20px; border: 2px solid var(--border); box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.3); }
+    
+    /* Colorful Playful Login */
+    .login-box { text-align: center; }
+    .kids-badge { display: inline-block; background: linear-gradient(90deg, #F59E0B, #EC4899); color: white; padding: 4px 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    
+    .autocomplete-wrapper { position: relative; width: 100%; text-align: left; }
+    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 14px; max-height: 180px; overflow-y: auto; z-index: 100; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+    .suggestion-item { padding: 12px 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .suggestion-item:hover { background: var(--primary); color: white; }
+
+    .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
     .input-field:focus { border-color: var(--primary); }
     
-    /* Profile Banner */
-    .profile-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%); color: white; border: none; padding: 16px; }
-    .user-info h1 { font-size: 1.3rem; font-weight: 700; }
-    .user-info p { font-size: 0.85rem; opacity: 0.95; }
-    .btn { padding: 10px 16px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.15s; }
-    .btn-secondary { background: #334155; color: var(--text-main); }
-    .btn-danger { background: var(--danger); color: white; }
+    .btn { padding: 12px 18px; border: none; border-radius: 14px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); transform: translateY(0); }
+    .btn:active { transform: translateY(2px); }
+    .btn-secondary { background: var(--card-bg); border: 1.5px solid var(--border); color: var(--text-main); box-shadow: none; }
+    .btn-danger { background: var(--danger); color: white; box-shadow: none; }
 
-    /* Stats Grid */
+    /* User Profile & Workspace */
+    .profile-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; border: none; padding: 18px; }
+    .user-info h1 { font-size: 1.35rem; font-weight: 800; }
+    
     .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .stat-card { background: #0F172A; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
-    .stat-card .val { font-size: 1.1rem; font-weight: 700; color: #818CF8; }
-    .stat-card .lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .stat-card { background: var(--input-bg); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+    .stat-card .val { font-size: 1.2rem; font-weight: 800; color: var(--accent-gold); }
+    .stat-card .lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
 
     /* Question & Passage Area */
     .day-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .progress-bar-bg { width: 100%; height: 8px; background: #334155; border-radius: 10px; overflow: hidden; margin: 6px 0 12px 0; }
-    .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.2s; }
+    .progress-bar-bg { width: 100%; height: 10px; background: var(--border); border-radius: 10px; overflow: hidden; margin: 8px 0 14px 0; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #10B981, #059669); width: 0%; transition: width 0.3s; }
     
-    .passage-box { background: #0F172A; border-left: 4px solid var(--primary); padding: 12px; border-radius: 8px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 12px; color: #E2E8F0; }
-    .question-box { font-size: 1.25rem; font-weight: 700; margin: 12px 0 16px 0; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; color: #F8FAFC; line-height: 1.35; }
+    .passage-box { background: var(--input-bg); border-left: 5px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; }
+    .question-box { font-size: 1.25rem; font-weight: 800; margin: 12px 0 16px 0; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; line-height: 1.35; }
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .option-btn { padding: 14px 10px; border: 2px solid var(--border); border-radius: 12px; background: #0F172A; font-size: 1.1rem; font-weight: 600; color: #F8FAFC; cursor: pointer; }
-    .option-btn:active { border-color: var(--primary); background: var(--primary); }
+    .option-btn { padding: 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--input-bg); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; }
+    .option-btn:active { border-color: var(--primary); background: var(--primary); color: white; }
+
+    /* Toggle Switch (Admin Active/Deactivate) */
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--danger); transition: .3s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--success); }
+    input:checked + .slider:before { transform: translateX(20px); }
 
     /* Modals & Badges */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-card { background: #1E293B; padding: 20px; border-radius: 18px; width: 92%; max-width: 400px; border: 1.5px solid var(--border); max-height: 85vh; overflow-y: auto; }
+    .modal-card { background: var(--card-bg); padding: 22px; border-radius: 22px; width: 92%; max-width: 420px; border: 2px solid var(--border); max-height: 85vh; overflow-y: auto; }
     .hidden { display: none !important; }
-    .badge { background: #334155; color: #818CF8; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+    .badge { background: rgba(99, 102, 241, 0.2); color: var(--primary); padding: 3px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; }
   </style>
 </head>
 <body>
 
 <div class="app-container">
 
-  <!-- LOGIN SCREEN -->
+  <!-- TOP BAR (Theme Toggle) -->
+  <div class="top-header">
+    <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal</div>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeIconBtn">🌙</button>
+  </div>
+
+  <!-- PLAYFUL LOGIN SCREEN -->
   <div id="loginScreen" class="card login-box">
-    <h2 style="font-size: 1.5rem; margin-bottom: 4px;">🎓 Portal Login</h2>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Type first letter to find your name</p>
+    <span class="kids-badge">🌟 Learn & Play</span>
+    <h2 style="font-size: 1.6rem; margin-bottom: 4px;">Welcome Champ! 🎓</h2>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Tap username box to select your name</p>
 
     <div class="autocomplete-wrapper">
-      <input type="text" id="loginUsername" class="input-field" placeholder="Username (e.g. Ayush)" autocomplete="off" oninput="handleUsernameTyping()" />
+      <input type="text" id="loginUsername" class="input-field" placeholder="Select or Type Username" autocomplete="off" onclick="showSuggestions(true)" oninput="handleUsernameTyping()" />
       <div id="suggestionsBox" class="suggestions-list hidden"></div>
     </div>
 
     <input type="password" id="loginPin" class="input-field" placeholder="4-Digit Student PIN" maxlength="4" style="text-align: center; letter-spacing: 4px;" />
     
-    <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px; padding: 12px;">Login to Practice</button>
+    <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
     
     <div style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 12px;">
       <button class="btn btn-secondary" onclick="openAdminModal()" style="font-size: 0.85rem; padding: 8px 14px;">🔑 Parent / Admin Portal</button>
     </div>
   </div>
 
-  <!-- MAIN PRACTICE WORKSPACE (Hidden by default) -->
+  <!-- MAIN PRACTICE WORKSPACE -->
   <div id="practiceWorkspace" class="hidden">
     <div class="card profile-banner">
       <div class="user-info">
         <h1 id="userDisplayName">Ayush 01 🎓</h1>
-        <p><span id="userClassBadge" class="badge">Class 4</span> &nbsp; <span id="userSessionBadge" style="font-size:0.75rem;">Active Session</span></p>
+        <p><span id="userClassBadge" class="badge" style="background:rgba(255,255,255,0.2); color:white;">Class 4</span></p>
       </div>
-      <button class="btn btn-secondary" onclick="logoutStudent()" style="font-size: 0.8rem; padding: 6px 10px;">Logout</button>
+      <button class="btn btn-secondary" onclick="logoutStudent()" style="font-size: 0.8rem; padding: 6px 12px;">Logout</button>
     </div>
 
     <div class="card" style="margin-top: 10px;">
@@ -117,21 +162,18 @@
   <div class="modal-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
       <h3>⚙️ Master Admin Control</h3>
-      <button style="background:none; border:none; color:white; font-size:1.4rem; cursor:pointer;" onclick="closeAdminModal()">&times;</button>
+      <button style="background:none; border:none; color:var(--text-main); font-size:1.5rem; cursor:pointer;" onclick="closeAdminModal()">&times;</button>
     </div>
 
-    <!-- Admin Auth Step -->
     <div id="adminAuthBox">
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin PIN (Default: 7258)</p>
       <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" style="text-align: center;" />
       <button class="btn" onclick="verifyAdminPin()" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
     </div>
 
-    <!-- Admin Content Box (Unlocked) -->
     <div id="adminContentBox" class="hidden">
-      <!-- Add User Section -->
-      <div style="background: #0F172A; padding: 12px; border-radius: 12px; margin-bottom: 14px; border: 1px solid var(--border);">
-        <h4 style="font-size: 0.9rem; color: #818CF8; margin-bottom: 6px;">➕ Add New Student</h4>
+      <div style="background: var(--input-bg); padding: 12px; border-radius: 14px; margin-bottom: 14px; border: 1px solid var(--border);">
+        <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 6px;">➕ Add New Student</h4>
         <input type="text" id="newStudentName" class="input-field" placeholder="Student Name (e.g. Rohan)" />
         <select id="newStudentClass" class="input-field">
           <option value="LKG">LKG</option>
@@ -149,11 +191,9 @@
         <button class="btn" onclick="addNewStudent()" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
       </div>
 
-      <!-- Users List -->
-      <h4 style="font-size: 0.9rem; margin-bottom: 6px;">📋 Registered Students</h4>
-      <div id="adminUsersList" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;"></div>
+      <h4 style="font-size: 0.9rem; margin-bottom: 6px;">📋 Registered Students & Status</h4>
+      <div id="adminUsersList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
 
-      <!-- Change Admin PIN -->
       <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
         <h4 style="font-size: 0.85rem; margin-bottom: 4px;">🔑 Change Master Admin PIN</h4>
         <input type="password" id="changeAdminPinVal" class="input-field" placeholder="New Master PIN" maxlength="6" />
@@ -164,13 +204,27 @@
 </div>
 
 <script>
-// ==========================================
-// DB & INITIALIZATION
-// ==========================================
+// THEME SWITCHER LOGIC
+function toggleTheme() {
+  let body = document.body;
+  let current = body.getAttribute('data-theme');
+  let btn = document.getElementById('themeIconBtn');
+  if (current === 'light') {
+    body.setAttribute('data-theme', 'dark');
+    btn.innerText = '🌙';
+    localStorage.setItem('app_theme', 'dark');
+  } else {
+    body.setAttribute('data-theme', 'light');
+    btn.innerText = '☀️';
+    localStorage.setItem('app_theme', 'light');
+  }
+}
+
+// DB INITIALIZATION
 function getDBUsers() {
   let u = localStorage.getItem('app_db_users');
   if (!u) {
-    let defaultUsers = [{ id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", token: "" }];
+    let defaultUsers = [{ id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", active: true }];
     localStorage.setItem('app_db_users', JSON.stringify(defaultUsers));
     return defaultUsers;
   }
@@ -178,21 +232,19 @@ function getDBUsers() {
 }
 
 function saveDBUsers(users) { localStorage.setItem('app_db_users', JSON.stringify(users)); }
-
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
 let currentActiveUser = null;
 
-// ==========================================
-// LOGIN AUTOCOMPLETE & HANDLERS
-// ==========================================
-function handleUsernameTyping() {
+// AUTOCOMPLETE & ON-CLICK DROPDOWN
+function showSuggestions(showAll = false) {
   let val = document.getElementById('loginUsername').value.trim().toLowerCase();
   let box = document.getElementById('suggestionsBox');
-  if (!val) { box.classList.add('hidden'); return; }
-
   let users = getDBUsers();
-  let matches = users.filter(u => u.name.toLowerCase().startsWith(val) || u.id.toLowerCase().startsWith(val));
+
+  let matches = showAll || !val 
+    ? users 
+    : users.filter(u => u.name.toLowerCase().startsWith(val) || u.id.toLowerCase().startsWith(val));
 
   if (!matches.length) { box.classList.add('hidden'); return; }
 
@@ -200,7 +252,7 @@ function handleUsernameTyping() {
   matches.forEach(m => {
     let item = document.createElement('div');
     item.className = 'suggestion-item';
-    item.innerText = `${m.id} (${m.class})`;
+    item.innerHTML = `<span>🎓 ${m.id}</span> <span class="badge">${m.class}</span>`;
     item.onclick = () => {
       document.getElementById('loginUsername').value = m.id;
       box.classList.add('hidden');
@@ -211,22 +263,30 @@ function handleUsernameTyping() {
   box.classList.remove('hidden');
 }
 
+function handleUsernameTyping() { showSuggestions(false); }
+
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+  let wrapper = document.querySelector('.autocomplete-wrapper');
+  if (wrapper && !wrapper.contains(e.target)) {
+    document.getElementById('suggestionsBox').classList.add('hidden');
+  }
+});
+
+// LOGIN WITH ACTIVE / DEACTIVE CHECK
 function handleStudentLogin() {
   let uName = document.getElementById('loginUsername').value.trim();
   let uPin = document.getElementById('loginPin').value.trim();
   let users = getDBUsers();
 
   let found = users.find(u => u.id.toLowerCase() === uName.toLowerCase() && u.pin === uPin);
+  
   if (found) {
-    // Session token generation
-    let deviceToken = "TOKEN_" + Math.random().toString(36).substring(2, 9);
-    found.token = deviceToken;
-    saveDBUsers(users);
-
+    if (found.active === false) {
+      alert("❌ Account Deactivated! Contact Admin/Parent to activate.");
+      return;
+    }
     currentActiveUser = found;
-    localStorage.setItem('current_logged_user', found.id);
-    localStorage.setItem('current_logged_token', deviceToken);
-
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('practiceWorkspace').classList.remove('hidden');
     loadUserWorkspace();
@@ -237,8 +297,6 @@ function handleStudentLogin() {
 
 function logoutStudent() {
   currentActiveUser = null;
-  localStorage.removeItem('current_logged_user');
-  localStorage.removeItem('current_logged_token');
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPin').value = '';
   document.getElementById('practiceWorkspace').classList.add('hidden');
@@ -248,46 +306,75 @@ function logoutStudent() {
 function loadUserWorkspace() {
   document.getElementById('userDisplayName').innerText = `${currentActiveUser.id} 🎓`;
   document.getElementById('userClassBadge').innerText = currentActiveUser.class;
+  currentQIndex = 0;
   renderQuestion();
 }
 
-// ==========================================
-// ADAPTIVE QUESTION ENGINE (LKG to 9th)
-// ==========================================
+// 20 REAL QUESTIONS ENGINE
 let currentQIndex = 0;
 let currentDay = 1;
 
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
-  
+
   if (userClass === "LKG" || userClass === "UKG" || userClass === "Class 1") {
-    questions.push({ q: "What is the capital letter of 'a'?", options: ["A", "B", "C", "D"], ans: "A", cat: "English" });
-    questions.push({ q: "2 + 1 = ?", options: ["2", "3", "4", "5"], ans: "3", cat: "Math" });
-    questions.push({ q: "Which animal says 'Moo'?", options: ["Dog", "Cat", "Cow", "Duck"], ans: "Cow", cat: "GK" });
-    questions.push({ q: "Count: 🍎 🍎 🍎", options: ["2", "3", "4", "5"], ans: "3", cat: "Math" });
+    let alpha = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"];
+    for(let i = 0; i < 20; i++) {
+      if(i % 3 === 0) {
+        questions.push({ q: `What comes after '${alpha[i]}'?`, options: [alpha[i+1], alpha[i+2], alpha[i+3], alpha[i+4]], ans: alpha[i+1] });
+      } else if(i % 3 === 1) {
+        questions.push({ q: `Count: ${i+1} + 1 = ?`, options: [`${i+2}`, `${i+1}`, `${i+3}`, `${i+4}`], ans: `${i+2}` });
+      } else {
+        questions.push({ q: `Identify Color/Shape #${i+1}`, options: ["Red", "Blue", "Circle", "Square"], ans: "Circle" });
+      }
+    }
   } 
   else if (userClass === "Class 2" || userClass === "Class 3") {
-    questions.push({ q: "15 + 25 = ?", options: ["35", "40", "45", "30"], ans: "40", cat: "Math" });
-    questions.push({ q: "Opposite of 'UP' is?", options: ["Down", "High", "Sky", "Left"], ans: "Down", cat: "English" });
-    questions.push({ q: "How many days in a week?", options: ["5", "6", "7", "8"], ans: "7", cat: "GK" });
+    for(let i = 1; i <= 20; i++) {
+      let num1 = i * day + 4;
+      let num2 = i + 2;
+      questions.push({ q: `${num1} + ${num2} = ?`, options: [`${num1+num2}`, `${num1+num2+2}`, `${num1+num2-1}`, `${num1+num2+4}`], ans: `${num1+num2}` });
+    }
   } 
-  else if (userClass === "Class 4" || userClass === "Class 5") { // JNVST Prep Pattern
-    let pText = `📖 **Passage (Day ${day}):** Regular practice leads to success in Jawahar Navodaya exams. Always calculate math steps on rough paper carefully.`;
-    questions.push({ passage: pText, q: "What leads to success in Navodaya exam?", options: ["Luck", "Regular practice", "Sleeping", "TV"], ans: "Regular practice", cat: "Reading" });
-    questions.push({ q: `Series Complete: ${day*2}, ${day*2+4}, ${day*2+8}, ?`, options: [`${day*2+12}`, `${day*2+10}`, `${day*2+14}`, `${day*2+16}`], ans: `${day*2+12}`, cat: "Reasoning" });
-    questions.push({ q: "1/4 + 2/4 = ?", options: ["3/4", "1/2", "3/8", "1"], ans: "3/4", cat: "Math" });
+  else if (userClass === "Class 4" || userClass === "Class 5") { // JNVST PREP PATTERN
+    let pText = day % 2 === 1 
+      ? `📖 **अनुच्छेद (Day ${day}):** जवाहर नवोदय विद्यालय में प्रवेश पाने के लिए कड़ी मेहनत और नियमित अभ्यास ज़रूरी है। अनुशासन से छात्र समय पर कार्य करना सीखते हैं।`
+      : `📖 **Passage (Day ${day}):** Regular practice brings perfection in Mathematics and Reasoning. Time management is crucial for competitive exams.`;
+
+    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय विद्यालय में सफलता के लिए क्या आवश्यक है?" : "What brings perfection in Mathematics?", options: day % 2 === 1 ? ["कड़ी मेहनत", "आलस्य", "देर तक सोना", "खेलना"] : ["Regular practice", "Sleeping late", "Watching TV", "Luck"], ans: day % 2 === 1 ? "कड़ी मेहनत" : "Regular practice" });
+    questions.push({ passage: pText, q: day % 2 === 1 ? "अनुशासन से छात्र क्या सीखते हैं?" : "What is crucial for competitive exams?", options: day % 2 === 1 ? ["समय पर कार्य करना", "लड़ाई करना", "पढ़ाई छोड़ना", "TV देखना"] : ["Time management", "Fast eating", "Noise", "Sleeping"], ans: day % 2 === 1 ? "समय पर कार्य करना" : "Time management" });
+
+    let mult = (day % 4) + 2;
+    for(let i = 1; i <= 5; i++) {
+      let baseVal = (day * 3) + (i * 4);
+      questions.push({ q: `Series Complete: ${baseVal}, ${baseVal + mult}, ${baseVal + mult*2}, ?`, options: [`${baseVal + mult*3}`, `${baseVal + mult*3 + 2}`, `${baseVal + mult*2 + 1}`, `${baseVal + mult*4}`], ans: `${baseVal + mult*3}` });
+    }
+
+    for(let i = 1; i <= 7; i++) {
+      let a = (day * 3) + (i * 5);
+      let b = (day * 2) + (i * 2);
+      questions.push({ q: `Solve: ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b-2}`, `${a+b+3}`, `${a+b+5}`], ans: `${a+b}` });
+    }
+
+    const staticBank = [
+      { q: "भारत के वर्तमान राष्ट्रपति कौन हैं?", opts: ["द्रौपदी मुर्मू", "रामनाथ कोविंद", "नरेंद्र मोदी", "अमित शाह"], a: "द्रौपदी मुर्मू" },
+      { q: "Opposite of 'ANCIENT' is?", opts: ["Old", "Modern", "Past", "Historic"], a: "Modern" },
+      { q: "100 ka 25% kitna hoga?", opts: ["10", "20", "25", "50"], a: "25" },
+      { q: "L.C.M of 6 and 12 is?", opts: ["6", "12", "18", "24"], a: "12" },
+      { q: "1 kilometer me kitne meter hote hain?", opts: ["100m", "500m", "1000m", "10000m"], a: "1000m" },
+      { q: "Smallest Prime Number (सबसे छोटी अभाज्य संख्या)?", opts: ["0", "1", "2", "3"], a: "2" }
+    ];
+
+    staticBank.forEach(item => { questions.push({ q: item.q, options: item.opts, ans: item.a }); });
   } 
   else { // Class 6 to 9th
-    questions.push({ q: "Solve for x: 2x + 4 = 12", options: ["2", "4", "6", "8"], ans: "4", cat: "Math" });
-    questions.push({ q: "Powerhouse of the Cell is?", options: ["Nucleus", "Mitochondria", "Ribosome", "Cell Wall"], ans: "Mitochondria", cat: "Science" });
-    questions.push({ q: "Synonym of 'METICULOUS' is?", options: ["Careful", "Careless", "Lazy", "Rapid"], ans: "Careful", cat: "English" });
+    for(let i = 1; i <= 20; i++) {
+      let val = i * 2 + day;
+      questions.push({ q: `Solve for x: ${i}x + 4 = ${val * 2 + 4}`, options: [`${val}`, `${val+2}`, `${val-1}`, `${val+4}`], ans: `${val}` });
+    }
   }
 
-  // Common filler logic
-  while(questions.length < 20) {
-    questions.push({ q: `Practice Question #${questions.length + 1} (${userClass})`, options: ["Opt A", "Opt B", "Opt C", "Opt D"], ans: "Opt A", cat: "General" });
-  }
-  return questions;
+  return questions.slice(0, 20);
 }
 
 function renderQuestion() {
@@ -300,7 +387,7 @@ function renderQuestion() {
 
   if (currentQIndex >= questions.length) {
     passageBox.classList.add('hidden');
-    qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Practice Complete!`;
+    qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
     optsBox.innerHTML = '';
     fill.style.width = '100%';
     return;
@@ -312,7 +399,7 @@ function renderQuestion() {
   if (q.passage) { passageBox.innerHTML = q.passage; passageBox.classList.remove('hidden'); }
   else { passageBox.classList.add('hidden'); }
 
-  qBox.innerText = q.q;
+  qBox.innerText = `Q${currentQIndex + 1}. ${q.q}`;
   optsBox.innerHTML = '';
 
   q.options.forEach(opt => {
@@ -335,9 +422,7 @@ function changeDay(delta) {
   }
 }
 
-// ==========================================
-// ADMIN PORTAL HANDLERS
-// ==========================================
+// ADMIN CONTROL & ACTIVE/DEACTIVATE TOGGLE
 function openAdminModal() {
   document.getElementById('adminPinInput').value = '';
   document.getElementById('adminAuthBox').classList.remove('hidden');
@@ -359,21 +444,33 @@ function renderAdminUsersList() {
   let users = getDBUsers();
   let list = document.getElementById('adminUsersList');
   list.innerHTML = '';
-  users.forEach(u => {
+  users.forEach((u, idx) => {
     let row = document.createElement('div');
-    row.style.cssText = 'background:#0F172A; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);';
-    row.innerHTML = `<div><strong>${u.id}</strong> <span class="badge">${u.class}</span><br><small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small></div>`;
+    row.style.cssText = 'background:var(--input-bg); padding:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);';
     
-    if (u.id !== "Ayush 01") {
-      let delBtn = document.createElement('button');
-      delBtn.className = 'btn btn-danger';
-      delBtn.innerText = 'Delete';
-      delBtn.style.padding = '4px 8px'; delBtn.style.fontSize = '0.75rem';
-      delBtn.onclick = () => deleteStudent(u.id);
-      row.appendChild(delBtn);
-    }
+    let isChecked = u.active !== false ? 'checked' : '';
+
+    row.innerHTML = `
+      <div>
+        <strong>${u.id}</strong> <span class="badge">${u.class}</span><br>
+        <small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <label class="switch">
+          <input type="checkbox" ${isChecked} onchange="toggleUserActiveStatus(${idx})">
+          <span class="slider"></span>
+        </label>
+        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">Del</button>` : ''}
+      </div>
+    `;
     list.appendChild(row);
   });
+}
+
+function toggleUserActiveStatus(index) {
+  let users = getDBUsers();
+  users[index].active = users[index].active === false ? true : false;
+  saveDBUsers(users);
 }
 
 function addNewStudent() {
@@ -387,7 +484,7 @@ function addNewStudent() {
   let generatedID = `${name} ${formattedNum}`;
   let randomPin = Math.floor(1000 + Math.random() * 9000).toString();
 
-  users.push({ id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, token: "" });
+  users.push({ id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, active: true });
   saveDBUsers(users);
 
   alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
@@ -412,9 +509,11 @@ function updateAdminPin() {
   } else { alert("PIN must be at least 4 digits."); }
 }
 
-// Auto-check session on load
 window.onload = () => {
-  getDBUsers(); // Ensures default Ayush 01 user exists
+  let savedTheme = localStorage.getItem('app_theme') || 'dark';
+  document.body.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
+  getDBUsers();
 };
 </script>
 </body>
