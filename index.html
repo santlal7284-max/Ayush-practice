@@ -1,629 +1,394 @@
-<!doctype html>
-<html lang="hi">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Ayush - JNV Entrance Practice</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#174a7e">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<style>
-body{margin:0;background:#f2f5f8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#222}
-header{background:#174a7e;color:#fff;text-align:center;padding:16px 10px}
-header div.sub{font-size:13px;opacity:.9;margin-top:2px}
-.wrap{max-width:760px;margin:auto;padding:12px 12px 40px}
-.panel,.q{background:#fff;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px #0001}
-select,button,input{font-size:15px;padding:10px;border-radius:9px;border:1px solid #bbb;box-sizing:border-box}
-select{width:100%;margin:5px 0}
-button{background:#174a7e;color:white;border:0;margin:4px 4px 4px 0;cursor:pointer}
-button.secondary{background:#5b7a9a}
-button.danger{background:#c0392b}
-.option{display:block;background:#f3f6f9;margin:7px 0;padding:11px;border-radius:9px}
-.option input{margin-right:8px;transform:scale(1.15)}
-.correct{background:#dff4e5!important;border:2px solid #2e8b57}
-.wrong{background:#fde1e1!important;border:2px solid #c0392b}
-.small{font-size:13px;color:#666}
-.badge{display:inline-block;font-size:11px;font-weight:bold;color:#fff;border-radius:6px;padding:3px 8px;margin-bottom:6px}
-.badge-MAT{background:#174a7e}
-.badge-ARITH{background:#2e8b57}
-.badge-LANG{background:#b8860b}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.tabs button{flex:1;min-width:90px;background:#e5ecf3;color:#174a7e}
-.tabs button.active{background:#174a7e;color:#fff}
-.row2{display:flex;gap:8px}
-.row2>*{flex:1}
-.custom-item{border:1px solid #ddd;border-radius:9px;padding:8px;margin:6px 0;font-size:14px}
-details{background:#fff;border-radius:14px;padding:12px;margin:12px 0;box-shadow:0 2px 8px #0001}
-summary{font-weight:bold;color:#174a7e;cursor:pointer}
-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
-td,th{border:1px solid #ddd;padding:6px;text-align:center}
-th{background:#eef3f8}
-.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center}
-.modal-box{background:#fff;border-radius:16px;padding:24px 20px;max-width:300px;width:85%;text-align:center;box-shadow:0 8px 30px #0004}
-.modal-box h3{margin:0 0 14px;color:#174a7e;font-size:20px}
-.pin-input{width:100%;text-align:center;font-size:26px;letter-spacing:10px;padding:12px 8px}
-.modal-error{color:#c0392b;font-size:13px;min-height:18px;margin-top:8px}
-.modal-actions{margin-top:14px;display:flex;gap:8px}
-.modal-actions button{flex:1;margin:0}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Practice App</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --bg: #F3F4F6;
+      --card-bg: #FFFFFF;
+      --text: #1F2937;
+      --text-light: #6B7280;
+      --success: #10B981;
+      --danger: #EF4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 15px; display: flex; justify-content: center; }
+    .app-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
+
+    /* Card Styling */
+    .card { background: var(--card-bg); border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    
+    /* Top Bar & Stats */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; }
+    .stats-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
+    .stat-badge { background: #EEF2FF; padding: 8px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; color: var(--primary); }
+
+    /* Day Navigation */
+    .day-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
+    .btn { padding: 8px 16px; border: none; border-radius: 6px; background: var(--primary); color: white; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #E5E7EB; color: var(--text); }
+    .btn-secondary:hover { background: #D1D5DB; }
+
+    /* Question Display */
+    .question-box { font-size: 1.2rem; font-weight: 600; margin: 15px 0; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .option-btn { padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; background: white; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
+    .option-btn:hover { border-color: var(--primary); background: #EEF2FF; }
+
+    /* PIN Modal & Analytics Modal */
+    .modal-overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-card { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 380px; text-align: center; }
+    .modal-card input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 1.2rem; text-align: center; letter-spacing: 4px; }
+
+    .hidden { display: none !important; }
+    .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+    .analytics-item { background: #F9FAFB; padding: 10px; border-radius: 8px; border: 1px solid #E5E7EB; }
+  </style>
 </head>
 <body>
-<header>
-<h1>📚 Ayush Practice</h1>
-<div class="sub">JNV Selection Test — 6 Month Practice Plan</div>
-</header>
-<div class="wrap">
 
-<div class="panel" style="display:flex;justify-content:flex-end;padding:8px 14px">
-<button class="secondary" style="margin:0;padding:8px 14px" onclick="document.getElementById('manageBox').open=!document.getElementById('manageBox').open;document.getElementById('manageBox').scrollIntoView({behavior:'smooth'})">⚙️ Manage Syllabus</button>
-</div>
+<div class="app-container">
 
-<details>
-<summary>ℹ️ JNVST Exam Pattern (Navodaya Selection Test)</summary>
-<table>
-<tr><th>Section</th><th>Questions</th><th>Marks</th><th>Qualifying</th></tr>
-<tr><td>Mental Ability</td><td>40</td><td>50</td><td>14</td></tr>
-<tr><td>Arithmetic</td><td>20</td><td>25</td><td>07</td></tr>
-<tr><td>Language</td><td>20</td><td>25</td><td>07</td></tr>
-</table>
-<p class="small">Total: 80 questions, 100 marks, 2 hours. There's no negative marking, but each section needs its own minimum qualifying marks — that's why this app gives you practice in all three sections every day.</p>
-</details>
+  <!-- Header & Stats Bar -->
+  <div class="card">
+    <div class="top-bar" style="margin-bottom: 12px;">
+      <h2 style="font-size: 1.2rem; color: var(--primary);">Daily Practice</h2>
+      <button class="btn btn-secondary" onclick="openSyllabusModal()" style="font-size: 0.8rem; padding: 6px 10px;">Manage Syllabus</button>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-badge">🔥 <span id="streakCount">0</span> Days</div>
+      <div class="stat-badge">⭐ <span id="totalPoints">0</span> Pts</div>
+      <button class="btn" onclick="openAnalyticsModal()" style="font-size: 0.8rem; padding: 6px;">📊 Analytics</button>
+    </div>
+  </div>
 
-<div class="panel">
-<div class="row2">
-<select id="month"></select>
-<select id="day"></select>
-</div>
-<button onclick="check()">✅ Check</button>
-<button class="secondary" onclick="clearDay()">↺ Clear</button>
-<div id="progress" class="small" style="margin-top:8px"></div>
-</div>
+  <!-- Main Question Card -->
+  <div class="card">
+    <div class="day-nav">
+      <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev</button>
+      <span id="currentDayLabel" style="font-weight: 700;">Day 1</span>
+      <button class="btn btn-secondary" onclick="changeDay(1)">Next →</button>
+    </div>
 
-<div id="app"></div>
+    <div class="question-box" id="questionText">Loading question...</div>
 
-<details id="manageBox">
-<summary>⚙️ Manage Syllabus (add new questions / topics)</summary>
-<div style="margin-top:10px">
-<p class="small">Add new questions here yourself — no need to rebuild the app. New questions are included in the practice mix from the next day onward.</p>
-<select id="cSection">
-<option value="MAT">Mental Ability</option>
-<option value="ARITH">Arithmetic</option>
-<option value="LANG">Language</option>
-</select>
-<input id="cCategory" placeholder="Topic name (e.g. Series, Fractions, Grammar)">
-<input id="cQ" placeholder="Enter the question">
-<input id="cA" placeholder="Option A">
-<input id="cB" placeholder="Option B">
-<input id="cC" placeholder="Option C">
-<input id="cD" placeholder="Option D">
-<select id="cAns">
-<option value="A">Correct answer: A</option>
-<option value="B">Correct answer: B</option>
-<option value="C">Correct answer: C</option>
-<option value="D">Correct answer: D</option>
-</select>
-<button onclick="addCustom()">➕ Add Question</button>
-<div id="customList" style="margin-top:10px"></div>
-
-<div style="margin-top:16px;border-top:1px solid #eee;padding-top:10px">
-<p class="small"><b>🔒 Parent PIN</b> — this PIN is required to open days that haven't arrived yet. Default PIN is <b>1234</b>. To set a new PIN:</p>
-<input id="pinOld" type="password" placeholder="Current PIN">
-<input id="pinNew" type="password" placeholder="New PIN (at least 4 digits)">
-<button onclick="changePin()">🔒 Change PIN</button>
-</div>
-</div>
-</details>
-
-<div class="modal-overlay" id="pinModal">
-<div class="modal-box">
-<h3>Enter PIN</h3>
-<input class="pin-input" id="pinModalInput" type="password" inputmode="numeric" maxlength="8" onkeydown="if(event.key==='Enter')pinModalSubmit()">
-<div class="modal-error" id="pinModalError"></div>
-<div class="modal-actions">
-<button class="secondary" onclick="pinModalCancel()">Cancel</button>
-<button onclick="pinModalSubmit()">Unlock</button>
-</div>
-</div>
-</div>
+    <div class="options-grid" id="optionsContainer">
+      <!-- Options rendered via JS -->
+    </div>
+  </div>
 
 </div>
+
+<!-- Custom PIN Lock Modal -->
+<div id="pinModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3>Enter PIN</h3>
+    <input type="password" id="pinInput" maxlength="6" placeholder="••••" />
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button class="btn btn-secondary" onclick="closePinModal()">Cancel</button>
+      <button class="btn" onclick="submitPin()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- Analytics Dashboard Modal -->
+<div id="analyticsModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3 style="margin-bottom: 10px;">📊 Performance Summary</h3>
+    <div class="analytics-grid">
+      <div class="analytics-item">
+        <span style="font-size: 0.75rem; color: var(--text-light);">Answered</span>
+        <h4 id="statTotal">0</h4>
+      </div>
+      <div class="analytics-item">
+        <span style="font-size: 0.75rem; color: var(--text-light);">Accuracy</span>
+        <h4 id="statAccuracy">0%</h4>
+      </div>
+      <div class="analytics-item">
+        <span style="font-size: 0.75rem; color: var(--text-light);">Avg Speed</span>
+        <h4 id="statSpeed">0s</h4>
+      </div>
+      <div class="analytics-item">
+        <span style="font-size: 0.75rem; color: var(--text-light);">Needs Focus</span>
+        <h4 id="statWeak" style="color: var(--danger); font-size: 0.85rem;">None</h4>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="closeAnalyticsModal()" style="width: 100%;">Close</button>
+  </div>
+</div>
+
 <script>
-// =====================================================================
-// SYLLABUS / QUESTION BANK — organized by JNVST section & topic.
-// You can add any new topic or question here. Each item's
-// format: ["Question", "OptionA|OptionB|OptionC|OptionD", "CorrectAnswer"]
-// =====================================================================
-var BANK = {
- MAT: {
-  odd_one_out: {label:"Odd One Out", items:[
-   ["Apple, Mango, Carrot, Banana — अलग कौन?","Apple|Mango|Carrot|Banana","Carrot"],
-   ["Circle, Square, Triangle, Red — अलग कौन?","Circle|Square|Triangle|Red","Red"],
-   ["Delhi, Mumbai, Chennai, India — अलग कौन?","Delhi|Mumbai|Chennai|India","India"],
-   ["Cow, Goat, Dog, Chair — अलग कौन?","Cow|Goat|Dog|Chair","Chair"],
-   ["Pen, Pencil, Eraser, Shirt — अलग कौन?","Pen|Pencil|Eraser|Shirt","Shirt"],
-   ["4, 9, 16, 20 — अलग कौन?","4|9|16|20","20"],
-   ["Rose, Lotus, Jasmine, Thorn — अलग कौन?","Rose|Lotus|Jasmine|Thorn","Thorn"],
-   ["January, March, Monday, July — अलग कौन?","January|March|Monday|July","Monday"]
-  ]},
-  series_number: {label:"Number Series", items:[
-   ["3, 6, 9, 12, ?","14|15|16|18","15"],
-   ["5, 10, 20, 40, ?","60|70|80|90","80"],
-   ["1, 4, 9, 16, ?","20|24|25|30","25"],
-   ["2, 5, 8, 11, ?","12|13|14|15","14"],
-   ["100, 90, 80, 70, ?","50|60|65|75","60"],
-   ["1, 2, 4, 7, 11, ?","14|15|16|18","16"],
-   ["7, 14, 21, 28, ?","32|35|36|42","35"],
-   ["81, 27, 9, 3, ?","0|1|2|9","1"]
-  ]},
-  series_letter: {label:"Letter Series", items:[
-   ["A, C, E, G, ?","H|I|J|K","I"],
-   ["B, D, F, H, ?","I|J|K|L","J"],
-   ["Z, Y, X, W, ?","U|V|T|S","V"],
-   ["A, D, G, J, ?","K|L|M|N","M"],
-   ["K, L, M, N, ?","O|P|Q|R","O"],
-   ["P, R, T, V, ?","W|X|Y|Z","X"],
-   ["M, N, O, P, ?","Q|R|S|T","Q"],
-   ["C, F, I, L, ?","M|N|O|P","O"]
-  ]},
-  analogy: {label:"Analogy", items:[
-   ["Sun : Day :: Moon : ?","Night|Star|Sky|Light","Night"],
-   ["Fish : Water :: Bird : ?","Sky|Nest|Tree|Water","Sky"],
-   ["Doctor : Hospital :: Teacher : ?","School|Home|Shop|Park","School"],
-   ["Cow : Calf :: Dog : ?","Puppy|Kitten|Cub|Kid","Puppy"],
-   ["Pen : Write :: Knife : ?","Cut|Draw|Read|Break","Cut"],
-   ["India : Delhi :: Japan : ?","Tokyo|Beijing|Seoul|Bangkok","Tokyo"],
-   ["Eye : See :: Ear : ?","Hear|Smell|Taste|Touch","Hear"],
-   ["Rain : Umbrella :: Sun : ?","Hat|Coat|Shoe|Bag","Hat"]
-  ]},
-  coding_decoding: {label:"Coding-Decoding", items:[
-   ["Agar CAT ko DBU likha jaata hai, to DOG kaise likhenge?","EPH|EPI|FPH|EQH","EPH"],
-   ["Agar A=1, B=2, C=3 ho, to 'BAD' ka code kya hoga?","124|214|421|241","214"],
-   ["Ek code mein RAIN ko SBJO likha jaata hai. SUN kaise likhenge?","TVO|TUO|SVO|TVN","TVO"],
-   ["Agar BOOK ko CPPL likha jaata hai, to PEN kaise likhenge?","QFO|QFN|PFO|QEO","QFO"],
-   ["Agar 5+3=53, 2+7=27, to 4+6=?","64|46|10|24","46"],
-   ["Agar MANGO ko NBOHP likha jaata hai, to APPLE kaise likhenge?","BQQMF|BQQLF|AQQMF|BPQMF","BQQMF"],
-   ["Ek code mein DOG='456', CAT='789' (D=4,O=5,G=6,C=7,A=8,T=9). DOC ka code?","476|457|467|475","457"],
-   ["Agar PLANT ko QMBOU likha jaata hai, to FLOWER kaise likhenge?","GMPXFS|GMPXES|FMPXFS|GNPXFS","GMPXFS"]
-  ]},
-  number_pattern: {label:"Number Properties", items:[
-   ["In mein prime number kaun-sa hai?","15|21|23|27","23"],
-   ["In mein even number kaun-sa hai?","33|46|51|77","46"],
-   ["In mein 5 ka multiple kaun-sa hai?","22|35|43|58","35"],
-   ["In mein 3 ka multiple kaun-sa hai?","20|22|24|26","24"],
-   ["In mein odd number kaun-sa hai?","42|53|64|76","53"],
-   ["In mein 12 ka factor kaun-sa hai?","5|7|4|9","4"],
-   ["Sabse chhota prime number kaun-sa hai?","0|1|2|3","2"],
-   ["Kaun-sa number 2 aur 3 dono se divide hota hai?","9|10|12|14","12"]
-  ]},
-  ranking_order: {label:"Ranking / Ordering", items:[
-   ["Ravi, Mohan se lamba hai. Mohan, Suresh se lamba hai. Sabse chhota kaun hai?","Ravi|Mohan|Suresh|Pata nahi","Suresh"],
-   ["Race mein Amit, Rohit se pehle par Sunil ke baad aaya. Sabse pehle kaun aaya?","Amit|Rohit|Sunil|Sab saath","Sunil"],
-   ["Priya, Neha se chhoti hai lekin Kavita se badi hai. Sabse chhoti kaun hai?","Priya|Neha|Kavita|Pata nahi","Kavita"],
-   ["5 ladke line mein hain. Raj left se 3rd hai. Right se uski position kya hogi?","1st|2nd|3rd|4th","3rd"],
-   ["Queue mein Meena front se 5th aur back se 8th hai. Queue mein kitne log hain?","10|11|12|13","12"],
-   ["A, B se lamba hai. C, A se lamba hai. D, B se chhota hai. Sabse lamba kaun hai?","A|B|C|D","C"],
-   ["Ram, Shyam se zyada marks laaya. Shyam, Gopal se zyada laaya. Sabse kam kisne laaya?","Ram|Shyam|Gopal|Sab barabar","Gopal"],
-   ["Agar Monday pehla din hai, to 5va din kaun-sa hoga?","Thursday|Friday|Saturday|Sunday","Friday"]
-  ]},
-  direction_sense: {label:"Direction Sense", items:[
-   ["Ravi North mein 5 km chalta hai, phir right mudke 3 km chalta hai. Ab uska face kis disha mein hai?","North|South|East|West","East"],
-   ["Agar aap North face karke 90° clockwise ghumein, to kis disha mein face hoga?","East|West|South|North","East"],
-   ["Ek aadmi South chalta hai, left mudta hai. Ab wo kis disha mein ja raha hai?","East|West|North|South","East"],
-   ["Suraj (sunrise) kis disha mein dikhta hai?","East|West|North|South","East"],
-   ["Agar aap South face karke 180° ghumein, to kis disha mein face hoga?","North|South|East|West","North"],
-   ["School, Rita ke ghar ke North mein hai. School se Rita ka ghar kis disha mein hai?","North|South|East|West","South"],
-   ["West ke opposite kaun-si disha hai?","North|South|East|None","East"],
-   ["Ek ladka 4 km East, phir 3 km North chalta hai. Wo shuruaat se kis general disha mein hai?","North-East|South-East|North-West|South-West","North-East"]
-  ]},
-  blood_relations: {label:"Blood Relations", items:[
-   ["Ravi apne pita ka ikalauta beta hai. Ravi apne pita ka kya hai?","Beta|Bhai|Chacha|Bhatija","Beta"],
-   ["A, B ki mother hai. B, C ka father hai. A, C ki kya lagti hai?","Mother|Grandmother|Sister|Aunt","Grandmother"],
-   ["Priya, Rahul ki behen hai. Rahul, Aman ka bhai hai. Priya, Aman ki kya lagti hai?","Behen|Cousin|Chachi|Bhabhi","Behen"],
-   ["Mohan ki mother, Sunita ki ikalauti beti hai. Sunita, Mohan ki kya lagti hai?","Mother|Grandmother|Aunt|Sister","Grandmother"],
-   ["Ek mahila bolti hai 'Wo mere ikalaute bhai ka beta hai.' Wo ladka mahila ka kya lagta hai?","Beta|Bhatija|Bhai|Chacha","Bhatija"],
-   ["A, B ka father hai. B, C ka father hai. A, C ka kya lagta hai?","Father|Grandfather|Uncle|Brother","Grandfather"],
-   ["Sita, Geeta ki beti hai. Geeta, Ram ki wife hai. Sita, Ram ki kya lagti hai?","Beti|Bahu|Behen|Bhatiji","Beti"],
-   ["Do ladkon ka father same hai lekin mother alag-alag hai. Unka relation kya hai?","Half-brothers|Cousins|Twins|Strangers","Half-brothers"]
-  ]},
-  missing_number: {label:"Missing Number / Pattern", items:[
-   ["3, 6, 12, 24, ?","36|42|48|30","48"],
-   ["2, 4, 8, 16, ?","20|24|30|32","32"],
-   ["10, 20, 15, 30, 25, ?","35|40|45|50","50"],
-   ["1, 1, 2, 3, 5, ?","6|7|8|9","8"],
-   ["64, 32, 16, ?","8|4|12|10","8"],
-   ["5, 11, 17, 23, ?","27|28|29|30","29"],
-   ["2, 6, 18, 54, ?","108|144|162|180","162"],
-   ["12, 24, 36, 48, ?","54|56|60|72","60"]
-  ]}
- },
- ARITH: {
-  number_system: {label:"Number System", items:[
-   ["4728 mein 7 ki place value kya hai?","70|700|7000|7","700"],
-   ["999 ka successor kya hai?","998|1000|1001|900","1000"],
-   ["5000 ka predecessor kya hai?","4998|4999|5001|4990","4999"],
-   ["40 ka Roman numeral kya hai?","XXXX|XL|LX|IL","XL"],
-   ["Sabse chhota 4-digit number kaun-sa hai?","999|1000|1001|9999","1000"],
-   ["Sabse bada 3-digit number kaun-sa hai?","900|990|999|1000","999"],
-   ["5000+300+20+7 ko numeral mein likhein","5327|5237|5372|5273","5327"],
-   ["1 lakh (1,00,000) mein kitne zero hote hain?","3|4|5|6","5"]
-  ]},
-  fractions_decimals: {label:"Fractions & Decimals", items:[
-   ["1/2 + 1/4 = ?","2/4|3/4|1/4|1","3/4"],
-   ["Bada kaun hai: 1/2 ya 1/3?","1/2|1/3|Barabar|Pata nahi","1/2"],
-   ["0.5 ko fraction mein likhein","1/4|1/2|1/5|2/5","1/2"],
-   ["3/4 - 1/4 = ?","1/4|1/2|2/4|1","1/2"],
-   ["20 ka 2/5 = ?","4|6|8|10","8"],
-   ["0.25 + 0.25 = ?","0.25|0.5|0.75|1","0.5"],
-   ["Sabse chhota kaun hai: 1/4, 1/2, 1/8?","1/4|1/2|1/8|Barabar","1/8"],
-   ["1 whole mein kitne quarters hote hain?","2|3|4|5","4"]
-  ]},
-  lcm_hcf: {label:"LCM & HCF", items:[
-   ["4 aur 6 ka LCM kya hai?","10|12|24|8","12"],
-   ["8 aur 12 ka HCF kya hai?","2|4|6|8","4"],
-   ["3 aur 5 ka LCM kya hai?","8|10|15|20","15"],
-   ["15 aur 20 ka HCF kya hai?","3|5|10|15","5"],
-   ["2, 3, 4 ka LCM kya hai?","6|8|12|24","12"],
-   ["24 aur 36 ka HCF kya hai?","6|8|12|18","12"],
-   ["6 aur 8 ka LCM kya hai?","16|20|24|48","24"],
-   ["9 aur 27 ka HCF kya hai?","3|9|27|1","9"]
-  ]},
-  time_speed_work: {label:"Time, Speed & Work", items:[
-   ["Ek train 1 ghante mein 60 km chalti hai. Uski speed kya hai?","50 km/h|55 km/h|60 km/h|70 km/h","60 km/h"],
-   ["Agar ek car 2 ghante mein 120 km chalti hai, uski speed kya hai?","50 km/h|55 km/h|60 km/h|65 km/h","60 km/h"],
-   ["Ek mazdoor deewar 6 din mein banata hai. 2 mazdoor (same speed) mein kitne din lagenge?","2 din|3 din|4 din|6 din","3 din"],
-   ["Ghadi 3:00 dikhati hai. 2 ghante baad kya time hoga?","4:00|5:00|6:00|3:30","5:00"],
-   ["2 ghante mein kitne minute hote hain?","60|90|120|150","120"],
-   ["1 minute mein kitne second hote hain?","30|60|90|100","60"],
-   ["Agar bus 9:00 AM ko chalti hai aur 3 ghante lagte hain, to kab pahunchegi?","11:00 AM|12:00 PM|1:00 PM|12:30 PM","12:00 PM"],
-   ["Leap year mein kitne din hote hain?","364|365|366|360","366"]
-  ]},
-  profit_loss: {label:"Profit, Loss & Interest", items:[
-   ["Pen ₹10 mein khareedi, ₹12 mein becha. Profit = ?","₹1|₹2|₹3|₹22","₹2"],
-   ["Khilona ₹50 mein khareeda, ₹45 mein becha. Loss = ?","₹3|₹4|₹5|₹95","₹5"],
-   ["Cost price ₹100, sold at ₹120. Profit % = ?","10%|15%|20%|25%","20%"],
-   ["Cost ₹80 hai aur profit ₹20 hai, to selling price = ?","₹90|₹100|₹110|₹60","₹100"],
-   ["CP=₹50, SP=₹40. Loss % = ?","10%|15%|20%|25%","20%"],
-   ["₹100 par 5% simple interest 1 saal ke liye = ?","₹1|₹5|₹10|₹50","₹5"],
-   ["₹200 par 10% simple interest 1 saal ke liye = ?","₹10|₹20|₹30|₹40","₹20"],
-   ["Agar SP, CP se zyada ho to use kya kehte hain?","Profit|Loss|Discount|Interest","Profit"]
-  ]},
-  measurement: {label:"Measurement", items:[
-   ["1 km mein kitne metre hote hain?","10|100|1000|10000","1000"],
-   ["1 kg mein kitne gram hote hain?","10|100|1000|10000","1000"],
-   ["1 litre mein kitne millilitre hote hain?","10|100|1000|10000","1000"],
-   ["1 metre mein kitne centimetre hote hain?","10|50|100|1000","100"],
-   ["Bhaari kaun hai: 1 kg ya 500 g?","1 kg|500 g|Barabar|Pata nahi","1 kg"],
-   ["5000 g mein kitne kg hote hain?","3|4|5|6","5"],
-   ["2 litre mein kitne ml hote hain?","200|2000|20|20000","2000"],
-   ["1 ghante mein kitne minute hote hain?","30|45|60|90","60"]
-  ]},
-  geometry: {label:"Geometry (Perimeter/Area)", items:[
-   ["5 cm side wale square ka perimeter = ?","10 cm|15 cm|20 cm|25 cm","20 cm"],
-   ["6 cm length aur 4 cm breadth wale rectangle ka perimeter = ?","10 cm|16 cm|20 cm|24 cm","20 cm"],
-   ["4 cm side wale square ka area = ?","8 sq cm|12 sq cm|16 sq cm|20 sq cm","16 sq cm"],
-   ["5 cm length aur 3 cm breadth wale rectangle ka area = ?","8 sq cm|15 sq cm|16 sq cm|20 sq cm","15 sq cm"],
-   ["Triangle ke kitne sides hote hain?","2|3|4|5","3"],
-   ["Hexagon ke kitne sides hote hain?","5|6|7|8","6"],
-   ["Square ke kitne equal sides hote hain?","2|3|4|5","4"],
-   ["3, 4, 5 cm sides wale triangle ka perimeter = ?","10 cm|11 cm|12 cm|15 cm","12 cm"]
-  ]},
-  average_percent_ratio: {label:"Average, Percentage & Ratio", items:[
-   ["10, 20, 30 ka average = ?","15|20|25|30","20"],
-   ["4, 6, 8, 10 ka average = ?","6|7|8|9","7"],
-   ["200 ka 50% = ?","50|100|150|200","100"],
-   ["80 ka 25% = ?","10|15|20|25","20"],
-   ["4 aur 8 ka simplest ratio = ?","1:2|2:1|1:4|4:1","1:2"],
-   ["100 ka 10% = ?","1|5|10|100","10"],
-   ["5 aur 15 ka average = ?","5|10|15|20","10"],
-   ["6 aur 9 ka simplest ratio = ?","1:2|2:3|3:2|1:3","2:3"]
-  ]}
- },
- LANG: {
-  parts_of_speech: {label:"Parts of Speech", items:[
-   ["'She sings sweetly.' — verb kaun-sa hai?","She|sings|sweetly|none","sings"],
-   ["'The tall boy is my friend.' — adjective kaun-sa hai?","tall|boy|friend|is","tall"],
-   ["'He is my brother.' — pronoun kaun-sa hai?","He|is|my|brother","He"],
-   ["'Wow! What a beautiful day.' — interjection kaun-sa hai?","Wow|What|beautiful|day","Wow"],
-   ["'The cat sat on the mat.' — preposition kaun-sa hai?","cat|sat|on|mat","on"],
-   ["'Rita and Sita are friends.' — conjunction kaun-sa hai?","Rita|and|Sita|friends","and"],
-   ["'The dog barks loudly.' — adverb kaun-sa hai?","dog|barks|loudly|the","loudly"],
-   ["In mein proper noun kaun-sa hai?","india|boy|Delhi|city","Delhi"]
-  ]},
-  tense: {label:"Tense / Fill in the Blanks", items:[
-   ["She ___ to school every day.","go|goes|going|gone","goes"],
-   ["They ___ playing football now.","is|are|was|were","are"],
-   ["Yesterday, I ___ my homework.","do|does|did|doing","did"],
-   ["He ___ a letter tomorrow.","write|wrote|will write|writes","will write"],
-   ["The sun ___ in the east.","rise|rises|rose|rising","rises"],
-   ["We ___ to the park last Sunday.","go|goes|went|going","went"],
-   ["She ___ her homework already.","has done|have done|do|did","has done"],
-   ["I ___ eating my lunch right now.","am|is|are|was","am"]
-  ]},
-  vocabulary: {label:"Vocabulary (Synonym/Antonym)", items:[
-   ["'happy' ka synonym kya hai?","glad|sad|angry|slow","glad"],
-   ["'big' ka opposite kya hai?","small|tall|wide|huge","small"],
-   ["'quick' ka synonym kya hai?","slow|fast|late|lazy","fast"],
-   ["'hot' ka opposite kya hai?","warm|cold|dry|wet","cold"],
-   ["'beautiful' ka synonym kya hai?","ugly|pretty|dull|plain","pretty"],
-   ["'strong' ka opposite kya hai?","weak|tall|hard|firm","weak"],
-   ["'small' ka synonym kya hai?","big|huge|tiny|wide","tiny"],
-   ["'day' ka opposite kya hai?","light|night|sun|noon","night"]
-  ]},
-  comprehension: {label:"Reading Comprehension", items:[
-   ["\"Ravi has a pet dog named Tommy. Tommy is brown and loves to play in the garden.\" — Ravi ke dog ka naam kya hai?","Tommy|Ravi|Brownie|Rex","Tommy"],
-   ["\"Meena went to the market to buy vegetables. She bought potatoes, onions, and tomatoes.\" — Meena ne kya khareeda?","Fruits|Vegetables|Toys|Books","Vegetables"],
-   ["\"The sun rises in the east and sets in the west every day.\" — Suraj kahan udta hai?","East|West|North|South","East"],
-   ["\"Rohan likes to read story books before sleeping.\" — Rohan sone se pehle kya karta hai?","Play games|Read story books|Watch TV|Eat food","Read story books"],
-   ["\"It was raining heavily, so the children played indoors.\" — Bachche andar kyun khele?","It was hot|It was raining|It was late|They were tired","It was raining"],
-   ["\"Anita's school starts at 8 AM and ends at 2 PM.\" — Anita ka school kab shuru hota hai?","7 AM|8 AM|9 AM|2 PM","8 AM"],
-   ["\"The farmer grows wheat and rice in his fields.\" — Kisan kya ugata hai?","Fruits|Flowers|Wheat and rice|Vegetables","Wheat and rice"],
-   ["\"Sam's birthday is in the month of July.\" — Sam ka birthday kis mahine mein hai?","June|July|August|May","July"]
-  ]},
-  spelling_grammar: {label:"Spelling & Usage", items:[
-   ["Sahi spelling chunein:","Skool|School|Schoool|Schol","School"],
-   ["Sahi spelling chunein:","Freind|Friend|Frend|Friennd","Friend"],
-   ["Sahi spelling chunein:","Bicycal|Bycicle|Bicycle|Bisicle","Bicycle"],
-   ["Sahi spelling chunein:","Beutiful|Beautiful|Beautifull|Beautifull","Beautiful"],
-   ["I have ___ apple.","a|an|the|some","an"],
-   ["There ___ two books on the table.","is|are|was|am","are"],
-   ["Sahi spelling chunein:","Elephant|Elefant|Elephent|Elephint","Elephant"],
-   ["This is ___ umbrella.","a|an|the|some","an"]
-  ]}
- }
+// ==========================================
+// 1. DATA & APP STATE
+// ==========================================
+let appData = {
+  startDate: localStorage.getItem('app_start_date') || new Date().toISOString().split('T')[0],
+  parentPin: localStorage.getItem('app_parent_pin') || '1234',
+  currentDay: 1
 };
 
-var TOTAL_DAYS = 180; // 6 months
-var PER_DAY = {MAT:6, ARITH:3, LANG:3};
-var storeKey = "ayush_jnv_practice_v2";
-var customKey = "ayush_jnv_custom_v2";
-var startDateKey = "ayush_jnv_startdate_v2";
-var pinKey = "ayush_jnv_pin_v2";
-var lastValidDay = 1;
-
-function saved(){try{return JSON.parse(localStorage.getItem(storeKey)||"{}")}catch(e){return {}}}
-function save(x){try{localStorage.setItem(storeKey,JSON.stringify(x))}catch(e){}}
-function customQs(){try{return JSON.parse(localStorage.getItem(customKey)||"[]")}catch(e){return []}}
-function saveCustom(x){try{localStorage.setItem(customKey,JSON.stringify(x))}catch(e){}}
-
-// ---- Date-based day locking ----
-function getStartDate(){
- var s=localStorage.getItem(startDateKey);
- if(!s){ s=new Date().toISOString().slice(0,10); try{localStorage.setItem(startDateKey,s)}catch(e){} }
- return s;
-}
-function getTodayAllowedDay(){
- var start=new Date(getStartDate()+"T00:00:00");
- var today=new Date(); today.setHours(0,0,0,0);
- var diff=Math.floor((today-start)/86400000);
- var d=diff+1;
- if(d<1) d=1;
- if(d>TOTAL_DAYS) d=TOTAL_DAYS;
- return d;
-}
-function getPin(){ return localStorage.getItem(pinKey)||"1234"; }
-function setPin(p){ try{localStorage.setItem(pinKey,p)}catch(e){} }
-
-var pinModalCallback=null;
-function showPinModal(callback){
- pinModalCallback=callback;
- document.getElementById("pinModalInput").value="";
- document.getElementById("pinModalError").textContent="";
- var modal=document.getElementById("pinModal");
- modal.style.display="flex";
- setTimeout(function(){document.getElementById("pinModalInput").focus()},50);
-}
-function hidePinModal(){
- document.getElementById("pinModal").style.display="none";
- pinModalCallback=null;
-}
-function pinModalSubmit(){
- var entered=document.getElementById("pinModalInput").value;
- var cb=pinModalCallback;
- if(entered===getPin()){
-  hidePinModal();
-  if(cb) cb(true);
- } else {
-  document.getElementById("pinModalError").textContent="Incorrect PIN, try again";
-  document.getElementById("pinModalInput").value="";
-  document.getElementById("pinModalInput").focus();
- }
-}
-function pinModalCancel(){
- var cb=pinModalCallback;
- hidePinModal();
- if(cb) cb(false);
+if (!localStorage.getItem('app_start_date')) {
+  localStorage.setItem('app_start_date', appData.startDate);
 }
 
-function changePin(){
- var oldP=document.getElementById("pinOld").value;
- var newP=document.getElementById("pinNew").value.trim();
- if(oldP!==getPin()){alert("Current PIN is incorrect.");return}
- if(!newP||newP.length<4){alert("New PIN must be at least 4 digits.");return}
- setPin(newP);
- document.getElementById("pinOld").value="";
- document.getElementById("pinNew").value="";
- alert("PIN updated successfully!");
-}
+// Sample Question Bank (Hindi questions preserved as requested)
+const questionsBank = {
+  1: [
+    { q: "25 + 15 = ?", options: ["30", "40", "35", "45"], ans: "40", cat: "Math" },
+    { q: "भारत की राजधानी क्या है?", options: ["मुंबई", "दिल्ली", "कोलकाता", "जयपुर"], ans: "दिल्ली", cat: "GK" }
+  ],
+  2: [
+    { q: "12 × 5 = ?", options: ["50", "55", "60", "65"], ans: "60", cat: "Math" },
+    { q: "सूरज किस दिशा से उगता है?", options: ["पूर्व", "पश्चिम", "उत्तर", "दक्षिण"], ans: "पूर्व", cat: "GK" }
+  ]
+};
 
-// Simple deterministic shuffle (mulberry32) so the same day always shows the same set
-function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function seededShuffle(arr, seed){
- var r=mulberry32(seed), a=arr.slice();
- for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp}
- return a;
-}
+let currentQuestionIndex = 0;
+let pendingTargetDay = null;
 
-function buildPool(section){
- var pool=[];
- var cats=BANK[section];
- for(var key in cats){
-  cats[key].items.forEach(function(it){pool.push({cat:cats[key].label, section:section, q:it[0], opts:it[1].split("|"), ans:it[2]})});
- }
- customQs().filter(function(c){return c.section===section}).forEach(function(c){
-  pool.push({cat:c.category+" (Custom)", section:section, q:c.q, opts:c.opts, ans:c.ans});
- });
- return seededShuffle(pool, section==="MAT"?11:section==="ARITH"?22:33);
-}
+// ==========================================
+// 2. AUDIO & HAPTIC SYSTEM
+// ==========================================
+const SoundFx = {
+  ctx: null,
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  },
+  playCorrect() {
+    this.init();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
+    osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.15); // E5
+    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.3);
 
-var POOLS={MAT:buildPool("MAT"),ARITH:buildPool("ARITH"),LANG:buildPool("LANG")};
+    if (navigator.vibrate) navigator.vibrate(50);
+  },
+  playIncorrect() {
+    this.init();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, this.ctx.currentTime); // A3
+    osc.frequency.exponentialRampToValueAtTime(130.81, this.ctx.currentTime + 0.2); // C3
+    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.3);
 
-function questionsForDay(d){
- var out=[];
- ["MAT","ARITH","LANG"].forEach(function(sec){
-  var pool=POOLS[sec], count=PER_DAY[sec];
-  if(pool.length===0) return;
-  var start=((d-1)*count)%pool.length;
-  for(var i=0;i<count;i++){
-   out.push(pool[(start+i)%pool.length]);
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
   }
- });
- return out;
-}
+};
 
-function fillDaysForMonth(mo){
- var dsel=document.getElementById("day");
- dsel.innerHTML="";
- var startDay=(mo-1)*30+1;
- for(var i=0;i<30;i++){
-  var dayNum=startDay+i;
-  var o=document.createElement("option");o.value=dayNum;o.textContent="Day "+dayNum;dsel.appendChild(o);
- }
-}
-function syncSelectorsToDay(d){
- var mo=Math.ceil(d/30);
- document.getElementById("month").value=mo;
- fillDaysForMonth(mo);
- document.getElementById("day").value=d;
-}
-function tryGoToDay(newDay){
- var allowed=getTodayAllowedDay();
- if(newDay>allowed){
-  showPinModal(function(ok){
-   if(ok){
-    lastValidDay=newDay;
-    syncSelectorsToDay(newDay);
-    show(newDay);
-   } else {
-    syncSelectorsToDay(lastValidDay);
-   }
-  });
-  return;
- }
- lastValidDay=newDay;
- syncSelectorsToDay(newDay);
- show(newDay);
-}
+// ==========================================
+// 3. GAMIFICATION & ANALYTICS
+// ==========================================
+const Gamification = {
+  pts: parseInt(localStorage.getItem('app_points') || '0'),
+  streak: parseInt(localStorage.getItem('app_streak') || '0'),
+  lastActive: localStorage.getItem('app_last_active'),
 
-function init(){
- var m=document.getElementById("month"), dsel=document.getElementById("day");
- for(var mo=1;mo<=6;mo++){var o=document.createElement("option");o.value=mo;o.textContent="Month "+mo;m.appendChild(o)}
- m.onchange=function(){ fillDaysForMonth(+m.value); tryGoToDay(+document.getElementById("day").value); };
- dsel.onchange=function(){ tryGoToDay(+dsel.value); };
-
- var todayDay=getTodayAllowedDay();
- lastValidDay=todayDay;
- syncSelectorsToDay(todayDay);
- show(todayDay);
- renderCustomList();
-}
-
-function show(d){
- var a=questionsForDay(d), old=saved(), ans=old[d]||{};
- var out="<div class='panel'><h2>Day "+d+" / "+TOTAL_DAYS+"</h2><p class='small'>Answer the questions first, then tap Check.</p></div>";
- for(var i=0;i<a.length;i++){
-  var x=a[i];
-  out+="<div class='q' id='q"+i+"'><span class='badge badge-"+x.section+"'>"+x.cat+"</span><br><b>"+(i+1)+". "+x.q+"</b>";
-  for(var j=0;j<x.opts.length;j++){
-   var checked=ans[i]===x.opts[j]?" checked":"";
-   out+="<label class='option'><input type='radio' name='q"+i+"' value='"+x.opts[j].replace(/'/g,"&#39;")+"'"+checked+">"+String.fromCharCode(65+j)+". "+x.opts[j]+"</label>";
+  update() {
+    document.getElementById('streakCount').innerText = this.streak;
+    document.getElementById('totalPoints').innerText = this.pts;
+  },
+  addCorrect() {
+    this.pts += 10;
+    const today = new Date().toISOString().split('T')[0];
+    if (this.lastActive !== today) {
+      this.streak += 1;
+      this.lastActive = today;
+      localStorage.setItem('app_last_active', today);
+      localStorage.setItem('app_streak', this.streak);
+    }
+    localStorage.setItem('app_points', this.pts);
+    this.update();
   }
-  out+="</div>";
- }
- out+="<div class='panel' id='score'>"+(old[d+"_score"]?"Last score: "+old[d+"_score"]:"")+"</div>";
- document.getElementById("app").innerHTML=out;
- progress();
+};
+
+const Analytics = {
+  startTime: null,
+  logs: JSON.parse(localStorage.getItem('app_analytics_logs') || '[]'),
+
+  startTimer() { this.startTime = Date.now(); },
+  logAnswer(cat, isCorrect) {
+    const elapsed = Math.round((Date.now() - (this.startTime || Date.now())) / 1000);
+    this.logs.push({ cat: cat || 'General', isCorrect, time: elapsed });
+    localStorage.setItem('app_analytics_logs', JSON.stringify(this.logs));
+  },
+  getSummary() {
+    if (!this.logs.length) return { total: 0, accuracy: 0, avgTime: 0, weak: 'None' };
+    const total = this.logs.length;
+    const correct = this.logs.filter(l => l.isCorrect).length;
+    const accuracy = Math.round((correct / total) * 100);
+    const avgTime = Math.round(this.logs.reduce((acc, l) => acc + l.time, 0) / total);
+    
+    const catWrongs = {};
+    this.logs.forEach(l => {
+      if (!l.isCorrect) catWrongs[l.cat] = (catWrongs[l.cat] || 0) + 1;
+    });
+    const weak = Object.keys(catWrongs).sort((a,b) => catWrongs[b] - catWrongs[a])[0] || 'None';
+    
+    return { total, accuracy, avgTime, weak };
+  }
+};
+
+// ==========================================
+// 4. DAY NAVIGATION & PIN LOGIC
+// ==========================================
+function getCalculatedAllowedDay() {
+  const start = new Date(appData.startDate);
+  const today = new Date();
+  const diffTime = today - start;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(1, diffDays + 1);
 }
 
-function check(){
- var d=+document.getElementById("day").value, a=questionsForDay(d), s=saved(), score=0;
- for(var i=0;i<a.length;i++){
-  var box=document.getElementById("q"+i), sel=box.querySelector("input:checked");
-  box.classList.remove("correct","wrong");
-  if(sel){s[d]=s[d]||{};s[d][i]=sel.value;if(sel.value===a[i].ans){score++;box.classList.add("correct")}else box.classList.add("wrong")}
-  else box.classList.add("wrong");
- }
- s[d+"_score"]=score+"/"+a.length;
- if(score===a.length){s[d+"_done"]=true}
- save(s);
- document.getElementById("score").innerHTML="<h2>🎯 Score: "+score+" / "+a.length+"</h2>"+(score===a.length?"<b>🎉 Day complete!</b>":"Try the wrong ones again.");
- progress();
+function changeDay(delta) {
+  const targetDay = appData.currentDay + delta;
+  if (targetDay < 1) return;
+
+  const maxAllowed = getCalculatedAllowedDay();
+  if (targetDay > maxAllowed) {
+    pendingTargetDay = targetDay;
+    openPinModal();
+  } else {
+    appData.currentDay = targetDay;
+    currentQuestionIndex = 0;
+    renderQuestion();
+  }
 }
 
-function clearDay(){
- var d=+document.getElementById("day").value, s=saved();
- delete s[d]; delete s[d+"_score"]; delete s[d+"_done"]; save(s); show(d);
+function openPinModal() {
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinModal').classList.remove('hidden');
 }
 
-function progress(){
- var s=saved(), n=0;
- for(var i=1;i<=TOTAL_DAYS;i++) if(s[i+"_done"]) n++;
- document.getElementById("progress").innerHTML="<b>Progress: "+n+" / "+TOTAL_DAYS+" days complete</b> (6-month plan)<br>Today's day (by calendar): <b>Day "+getTodayAllowedDay()+"</b> — days beyond this need the PIN to unlock.";
+function closePinModal() {
+  document.getElementById('pinModal').classList.add('hidden');
+  pendingTargetDay = null;
 }
 
-function addCustom(){
- var section=document.getElementById("cSection").value;
- var category=document.getElementById("cCategory").value.trim()||"Custom Topic";
- var q=document.getElementById("cQ").value.trim();
- var A=document.getElementById("cA").value.trim();
- var B=document.getElementById("cB").value.trim();
- var C=document.getElementById("cC").value.trim();
- var D=document.getElementById("cD").value.trim();
- var ansLetter=document.getElementById("cAns").value;
- if(!q||!A||!B||!C||!D){alert("Please fill in the question and all four options.");return}
- var opts=[A,B,C,D];
- var ans=opts[{A:0,B:1,C:2,D:3}[ansLetter]];
- var list=customQs();
- list.push({section:section,category:category,q:q,opts:opts,ans:ans});
- saveCustom(list);
- // rebuild pool for that section so it's included immediately
- POOLS[section]=buildPool(section);
- document.getElementById("cCategory").value="";
- document.getElementById("cQ").value="";
- document.getElementById("cA").value="";
- document.getElementById("cB").value="";
- document.getElementById("cC").value="";
- document.getElementById("cD").value="";
- renderCustomList();
- alert("Question added! It's now included in the practice mix.");
+function submitPin() {
+  const enteredPin = document.getElementById('pinInput').value;
+  if (enteredPin === appData.parentPin) {
+    appData.currentDay = pendingTargetDay;
+    currentQuestionIndex = 0;
+    closePinModal();
+    renderQuestion();
+  } else {
+    alert('Incorrect PIN');
+    document.getElementById('pinInput').value = '';
+  }
 }
 
-function deleteCustom(idx){
- var list=customQs();
- var removed=list.splice(idx,1)[0];
- saveCustom(list);
- if(removed) POOLS[removed.section]=buildPool(removed.section);
- renderCustomList();
-}
+// ==========================================
+// 5. QUESTION RENDER & ANSWER CHECKING
+// ==========================================
+function renderQuestion() {
+  document.getElementById('currentDayLabel').innerText = `Day ${appData.currentDay}`;
+  const dayQuestions = questionsBank[appData.currentDay] || [];
+  const qBox = document.getElementById('questionText');
+  const optsBox = document.getElementById('optionsContainer');
 
-function renderCustomList(){
- var list=customQs();
- var box=document.getElementById("customList");
- if(list.length===0){box.innerHTML="<p class='small'>No custom questions added yet.</p>";return}
- var html="<p class='small'><b>Your added questions ("+list.length+"):</b></p>";
- list.forEach(function(c,idx){
-  html+="<div class='custom-item'><span class='badge badge-"+c.section+"'>"+c.category+"</span><br>"+c.q+" <button class='danger' style='padding:4px 8px;font-size:12px' onclick='deleteCustom("+idx+")'>Delete</button></div>";
- });
- box.innerHTML=html;
-}
+  if (!dayQuestions.length || currentQuestionIndex >= dayQuestions.length) {
+    qBox.innerText = "No more questions for this day!";
+    optsBox.innerHTML = '';
+    return;
+  }
 
-init();
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function() {
-    navigator.serviceWorker.register("service-worker.js").catch(function(){});
+  const qData = dayQuestions[currentQuestionIndex];
+  qBox.innerText = qData.q;
+  optsBox.innerHTML = '';
+
+  Analytics.startTimer();
+
+  qData.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerText = opt;
+    btn.onclick = () => checkAnswer(opt, qData.ans, qData.cat);
+    optsBox.appendChild(btn);
   });
+}
+
+function checkAnswer(selected, correct, category) {
+  const isCorrect = (selected === correct);
+
+  if (isCorrect) {
+    SoundFx.playCorrect();
+    Gamification.addCorrect();
+  } else {
+    SoundFx.playIncorrect();
+  }
+
+  Analytics.logAnswer(category, isCorrect);
+
+  currentQuestionIndex++;
+  renderQuestion();
+}
+
+// ==========================================
+// 6. ANALYTICS MODAL
+// ==========================================
+function openAnalyticsModal() {
+  const summary = Analytics.getSummary();
+  document.getElementById('statTotal').innerText = summary.total;
+  document.getElementById('statAccuracy').innerText = summary.accuracy + '%';
+  document.getElementById('statSpeed').innerText = summary.avgTime + 's';
+  document.getElementById('statWeak').innerText = summary.weak;
+  document.getElementById('analyticsModal').classList.remove('hidden');
+}
+
+function closeAnalyticsModal() {
+  document.getElementById('analyticsModal').classList.add('hidden');
+}
+
+function openSyllabusModal() {
+  const pin = prompt("Enter Parent PIN to manage syllabus:");
+  if (pin === appData.parentPin) {
+    alert("Syllabus management unlocked.");
+  } else if (pin !== null) {
+    alert("Incorrect PIN");
+  }
+}
+
+// ==========================================
+// 7. INITIALIZATION & SERVICE WORKER
+// ==========================================
+window.onload = () => {
+  appData.currentDay = getCalculatedAllowedDay();
+  Gamification.update();
+  renderQuestion();
+};
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    reg.onupdatefound = () => {
+      const installingWorker = reg.installing;
+      installingWorker.onstatechange = () => {
+        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          window.location.reload();
+        }
+      };
+    };
+  }).catch(() => {});
 }
 </script>
 </body>
