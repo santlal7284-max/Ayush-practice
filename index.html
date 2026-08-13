@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduPortal 2026 - Live Cloud Sync</title>
+  <title>EduPortal 2026 - Kids Adaptive Learning</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
   <!-- Firebase SDKs -->
@@ -52,6 +52,7 @@
 
     .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
     .btn { padding: 12px 18px; border: none; border-radius: 14px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--border) !important; color: var(--text-muted) !important; }
     .btn-secondary { background: var(--card-bg); border: 1.5px solid var(--border); color: var(--text-main); }
     .btn-danger { background: var(--danger); color: white; }
 
@@ -67,7 +68,7 @@
     .progress-fill { height: 100%; background: linear-gradient(90deg, #10B981, #059669); width: 0%; transition: width 0.3s; }
     
     .passage-box { background: var(--input-bg); border-left: 5px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; }
-    .question-box { font-size: 1.25rem; font-weight: 800; margin: 12px 0 16px 0; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+    .question-box { font-size: 1.3rem; font-weight: 800; margin: 12px 0 16px 0; text-align: center; min-height: 60px; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .option-btn { padding: 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--input-bg); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; }
     .option-btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -133,9 +134,9 @@
 
     <div class="card" style="margin-top: 10px;">
       <div class="day-nav">
-        <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev Day</button>
+        <button class="btn btn-secondary" id="btnPrevDay" onclick="changeDay(-1)">← Prev Day</button>
         <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 800;">Day 1</span>
-        <button class="btn btn-secondary" onclick="changeDay(1)">Next Day →</button>
+        <button class="btn btn-secondary" id="btnNextDay" onclick="changeDay(1)">Next Day →</button>
       </div>
 
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
@@ -187,12 +188,15 @@
           <option value="Class 7">Class 7</option>
           <option value="Class 8">Class 8</option>
           <option value="Class 9">Class 9</option>
+          <option value="Class 10">Class 10</option>
+          <option value="Class 11">Class 11</option>
+          <option value="Class 12">Class 12</option>
         </select>
         <button class="btn" onclick="addNewStudent()" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
       </div>
 
       <h4 style="font-size: 0.9rem; margin-bottom: 6px;">📋 Registered Students & Status</h4>
-      <div id="adminUsersList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+      <div id="adminUsersList" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
 
       <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
         <h4 style="font-size: 0.85rem; margin-bottom: 4px;">🔑 Change Master Admin PIN</h4>
@@ -226,6 +230,11 @@ let currentActiveUser = null;
 let currentQIndex = 0;
 let currentDay = 1;
 
+function getTodayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
 function getRandomAvatar(gender, num) {
   let list = gender === "Girl" ? GIRL_AVATARS : BOY_AVATARS;
   return list[(num || 1) % list.length];
@@ -246,7 +255,6 @@ function toggleTheme() {
   }
 }
 
-// REALTIME CLOUD DATABASE SYNC ENGINE
 function initCloudSync() {
   db.ref('users').on('value', (snapshot) => {
     const data = snapshot.val();
@@ -255,10 +263,15 @@ function initCloudSync() {
     } else {
       let defaultUser = { 
         id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy",
-        avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {} 
+        avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" 
       };
       db.ref('users/Ayush_01').set(defaultUser);
       globalUsersList = [defaultUser];
+    }
+
+    if (currentActiveUser) {
+      let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
+      if (updated) currentActiveUser = updated;
     }
     
     if (document.getElementById('adminModal') && !document.getElementById('adminContentBox').classList.contains('hidden')) {
@@ -347,21 +360,34 @@ function refreshStatsUI() {
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
 
-  if (userClass === "LKG" || userClass === "UKG" || userClass === "Class 1") {
-    let alpha = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"];
-    for(let i = 0; i < 20; i++) {
-      if(i % 3 === 0) {
-        questions.push({ q: `What comes after '${alpha[i]}'?`, options: [alpha[i+1], alpha[i+2], alpha[i+3], alpha[i+4]], ans: alpha[i+1] });
-      } else if(i % 3 === 1) {
-        questions.push({ q: `Count: ${i+1} + 1 = ?`, options: [`${i+2}`, `${i+1}`, `${i+3}`, `${i+4}`], ans: `${i+2}` });
-      } else {
-        questions.push({ q: `Identify Color/Shape #${i+1}`, options: ["Red", "Blue", "Circle", "Square"], ans: "Circle" });
-      }
-    }
+  if (userClass === "LKG" || userClass === "UKG") {
+    const visualBank = [
+      { q: "Which color is 🔴?", opts: ["Red", "Blue", "Green", "Yellow"], a: "Red" },
+      { q: "Which color is 🟢?", opts: ["Blue", "Green", "Red", "Yellow"], a: "Green" },
+      { q: "Which color is 🟡?", opts: ["Pink", "Orange", "Yellow", "Purple"], a: "Yellow" },
+      { q: "Identify Shape: ⭕", opts: ["Circle", "Square", "Triangle", "Star"], a: "Circle" },
+      { q: "Identify Shape: ⬛", opts: ["Square", "Circle", "Rectangle", "Oval"], a: "Square" },
+      { q: "Identify Shape: ⭐", opts: ["Star", "Square", "Circle", "Heart"], a: "Star" },
+      { q: "Count Apple: 🍎", opts: ["1", "2", "3", "4"], a: "1" },
+      { q: "Count Apples: 🍎 🍎 🍎", opts: ["2", "3", "4", "5"], a: "3" },
+      { q: "Count Stars: ⭐ ⭐", opts: ["1", "2", "3", "4"], a: "2" },
+      { q: "Find Dog 🐶", opts: ["Dog", "Cat", "Lion", "Tiger"], a: "Dog" },
+      { q: "Find Elephant 🐘", opts: ["Monkey", "Elephant", "Dog", "Bird"], a: "Elephant" },
+      { q: "What comes after 'A'?", opts: ["B", "C", "D", "E"], a: "B" },
+      { q: "What comes after 'C'?", opts: ["D", "E", "F", "G"], a: "D" },
+      { q: "Count: 1 + 1 = ?", opts: ["2", "3", "4", "1"], a: "2" },
+      { q: "Which one is Sun ☀️?", opts: ["Sun", "Moon", "Cloud", "Rain"], a: "Sun" },
+      { q: "Which one is Ice-Cream 🍦?", opts: ["Cake", "Ice-Cream", "Pizza", "Apple"], a: "Ice-Cream" },
+      { q: "Count Balloons: 🎈 🎈 🎈 🎈", opts: ["3", "4", "5", "2"], a: "4" },
+      { q: "Which shape is Triangle 🔺?", opts: ["Triangle", "Circle", "Square", "Star"], a: "Triangle" },
+      { q: "What comes after '1'?", opts: ["2", "3", "4", "5"], a: "2" },
+      { q: "What color is Milk 🥛?", opts: ["White", "Black", "Red", "Green"], a: "White" }
+    ];
+    return visualBank;
   } 
-  else if (userClass === "Class 2" || userClass === "Class 3") {
+  else if (userClass === "Class 1" || userClass === "Class 2" || userClass === "Class 3") {
     for(let i = 1; i <= 20; i++) {
-      let num1 = i * day + 4;
+      let num1 = i * day + 3;
       let num2 = i + 2;
       questions.push({ q: `${num1} + ${num2} = ?`, options: [`${num1+num2}`, `${num1+num2+2}`, `${num1+num2-1}`, `${num1+num2+4}`], ans: `${num1+num2}` });
     }
@@ -400,11 +426,20 @@ function generateAdaptiveQuestions(userClass, day) {
   else {
     for(let i = 1; i <= 20; i++) {
       let val = i * 2 + day;
-      questions.push({ q: `Solve for x: ${i}x + 4 = ${val * 2 + 4}`, options: [`${val}`, `${val+2}`, `${val-1}`, `${val+4}`], ans: `${val}` });
+      questions.push({ q: `Algebra / Logic Q${i}: Solve ${i}x + 4 = ${val * 2 + 4}`, options: [`${val}`, `${val+2}`, `${val-1}`, `${val+4}`], ans: `${val}` });
     }
   }
 
   return questions.slice(0, 20);
+}
+
+function isDayCompleted(day) {
+  if (!currentActiveUser || !currentActiveUser.userAnswers) return false;
+  let count = 0;
+  for (let i = 0; i < 20; i++) {
+    if (currentActiveUser.userAnswers[`D${day}_Q${i}`]) count++;
+  }
+  return count === 20;
 }
 
 function handleOptionClick(selectedOpt, correctAns) {
@@ -421,7 +456,8 @@ function handleOptionClick(selectedOpt, correctAns) {
 
   if (currentQIndex === 19) {
     currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
-    alert("🎉 Day Practice Complete! Streak Updated!");
+    currentActiveUser.lastCompletedDate = getTodayString();
+    alert("🎉 Fantastic! Day " + currentDay + " Complete! Next Day will unlock tomorrow!");
   }
 
   let dbKey = currentActiveUser.id.replace(/\s+/g, '_');
@@ -436,6 +472,20 @@ function renderQuestion() {
   if (!currentActiveUser) return;
   let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
   document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
+
+  // DATE-BASED AND COMPLETION-BASED DAY LOCK CHECK
+  let nextBtn = document.getElementById('btnNextDay');
+  let todayStr = getTodayString();
+  let dayFinished = isDayCompleted(currentDay);
+  let isNewDateAvailable = currentActiveUser.lastCompletedDate !== todayStr;
+
+  if (dayFinished && isNewDateAvailable) {
+    nextBtn.disabled = false;
+    nextBtn.style.opacity = "1";
+  } else {
+    nextBtn.disabled = true;
+    nextBtn.style.opacity = "0.4";
+  }
 
   let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
   let fill = document.getElementById('progressFill');
@@ -487,6 +537,17 @@ function navigateQuestion(delta) {
 }
 
 function changeDay(delta) {
+  if (delta > 0) {
+    if (!isDayCompleted(currentDay)) {
+      alert("🔒 Complete all 20 questions of Day " + currentDay + " first!");
+      return;
+    }
+    let todayStr = getTodayString();
+    if (currentActiveUser.lastCompletedDate === todayStr) {
+      alert("🔒 Day " + (currentDay + 1) + " will unlock tomorrow! Great job for today! 🎉");
+      return;
+    }
+  }
   if (currentDay + delta >= 1) {
     currentDay += delta;
     currentQIndex = 0;
@@ -524,17 +585,39 @@ function renderAdminUsersList() {
         <strong>${u.avatar || '🎓'} ${u.id}</strong> <span class="badge">${u.class}</span><br>
         <small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small>
       </div>
-      <div style="display:flex; align-items:center; gap:6px;">
-        <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">✏️ PIN</button>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:4px 6px; font-size:0.7rem;">🔄 Reset</button>
+        <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:4px 6px; font-size:0.7rem;">✏️ PIN</button>
         <label class="switch">
           <input type="checkbox" ${isChecked} onchange="toggleUserActiveStatus('${u.id}', this.checked)">
           <span class="slider"></span>
         </label>
-        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">Del</button>` : ''}
+        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:4px 8px; font-size:0.7rem;">Del</button>` : ''}
       </div>
     `;
     list.appendChild(row);
   });
+}
+
+function resetUserProgress(id) {
+  let u = globalUsersList.find(x => x.id === id);
+  if (u) {
+    if (confirm(`Reset all practice progress for ${id}? They will start from Day 1 Question 1.`)) {
+      u.points = 0;
+      u.wrong = 0;
+      u.streak = 0;
+      u.userAnswers = {};
+      u.lastCompletedDate = "";
+      let dbKey = id.replace(/\s+/g, '_');
+      db.ref('users/' + dbKey).set(u);
+      alert(`Progress reset for ${id}!`);
+      if (currentActiveUser && currentActiveUser.id === id) {
+        currentDay = 1;
+        currentQIndex = 0;
+        loadUserWorkspace();
+      }
+    }
+  }
 }
 
 function resetStudentPin(id) {
@@ -573,7 +656,7 @@ function addNewStudent() {
 
   let newUser = { 
     id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, gender: gender,
-    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {} 
+    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" 
   };
 
   let dbKey = generatedID.replace(/\s+/g, '_');
