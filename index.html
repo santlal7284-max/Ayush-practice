@@ -94,7 +94,7 @@
 
   <div class="top-header">
     <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal</div>
-    <button class="theme-btn" id="themeIconBtn">🌙</button>
+    <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
   </div>
 
   <div id="loginScreen" class="card login-box">
@@ -103,16 +103,16 @@
     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Tap username box to select your name</p>
 
     <div class="autocomplete-wrapper">
-      <input type="text" id="loginUsername" class="input-field" placeholder="Select or Type Username" autocomplete="off" />
+      <input type="text" id="loginUsername" class="input-field" placeholder="Select or Type Username" autocomplete="off" onclick="showSuggestions(true)" oninput="showSuggestions(false)" onfocus="showSuggestions(true)" />
       <div id="suggestionsBox" class="suggestions-list hidden"></div>
     </div>
 
     <input type="password" id="loginPin" class="input-field" placeholder="4-Digit Student PIN" maxlength="4" style="text-align: center; letter-spacing: 4px;" />
     
-    <button class="btn" id="btnLoginStudent" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
+    <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
     
     <div style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 12px;">
-      <button class="btn btn-secondary" id="btnOpenAdmin" style="font-size: 0.85rem; padding: 8px 14px;">🔑 Admin Portal</button>
+      <button class="btn btn-secondary" onclick="openAdminModal()" style="font-size: 0.85rem; padding: 8px 14px;">🔑 Admin Portal</button>
     </div>
   </div>
 
@@ -122,7 +122,7 @@
         <h1 id="userDisplayName">Ayush 01 🎓</h1>
         <p><span id="userClassBadge" class="badge" style="background:rgba(255,255,255,0.2); color:white;">Class 4</span></p>
       </div>
-      <button class="btn btn-secondary" id="btnLogoutStudent" style="font-size: 0.8rem; padding: 6px 12px;">Logout</button>
+      <button class="btn btn-secondary" onclick="logoutStudent()" style="font-size: 0.8rem; padding: 6px 12px;">Logout</button>
     </div>
 
     <div class="card" style="margin-top: 10px;">
@@ -136,9 +136,9 @@
 
     <div class="card" style="margin-top: 10px;">
       <div class="day-nav">
-        <button class="btn btn-secondary" id="btnPrevDay">← Prev Day</button>
+        <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev Day</button>
         <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 800;">Day 1</span>
-        <button class="btn btn-secondary" id="btnNextDay">Next Day →</button>
+        <button class="btn btn-secondary" onclick="changeDay(1)">Next Day →</button>
       </div>
 
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
@@ -147,8 +147,8 @@
       <div class="options-grid" id="optionsContainer"></div>
 
       <div style="margin-top: 16px; display: flex; justify-content: space-between;">
-        <button class="btn btn-secondary" id="btnPrevQ" style="font-size: 0.85rem; padding: 8px 14px;">← Back Question</button>
-        <button class="btn btn-secondary" id="btnNextQ" style="font-size: 0.85rem; padding: 8px 14px;">Next Question →</button>
+        <button class="btn btn-secondary" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 8px 14px;">← Back Question</button>
+        <button class="btn btn-secondary" onclick="navigateQuestion(1)" style="font-size: 0.85rem; padding: 8px 14px;">Next Question →</button>
       </div>
     </div>
   </div>
@@ -159,13 +159,13 @@
   <div class="modal-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
       <h3>⚙️ Master Admin Control</h3>
-      <button style="background:none; border:none; color:var(--text-main); font-size:1.5rem; cursor:pointer;" id="btnCloseAdmin">&times;</button>
+      <button style="background:none; border:none; color:var(--text-main); font-size:1.5rem; cursor:pointer;" onclick="closeAdminModal()">&times;</button>
     </div>
 
     <div id="adminAuthBox">
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin PIN (Default: 7258)</p>
       <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" style="text-align: center;" />
-      <button class="btn" id="btnVerifyAdminPin" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
+      <button class="btn" onclick="verifyAdminPin()" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
     </div>
 
     <div id="adminContentBox" class="hidden">
@@ -191,7 +191,7 @@
           <option value="Class 8">Class 8</option>
           <option value="Class 9">Class 9</option>
         </select>
-        <button class="btn" id="btnAddStudent" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
+        <button class="btn" onclick="addNewStudent()" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
       </div>
 
       <h4 style="font-size: 0.9rem; margin-bottom: 6px;">📋 Registered Students & Status</h4>
@@ -200,7 +200,7 @@
       <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
         <h4 style="font-size: 0.85rem; margin-bottom: 4px;">🔑 Change Master Admin PIN</h4>
         <input type="password" id="changeAdminPinVal" class="input-field" placeholder="New Master PIN" maxlength="6" />
-        <button class="btn btn-secondary" id="btnUpdateAdminPin" style="width: 100%; font-size: 0.8rem; margin-top: 4px;">Update Master PIN</button>
+        <button class="btn btn-secondary" onclick="updateAdminPin()" style="width: 100%; font-size: 0.8rem; margin-top: 4px;">Update Master PIN</button>
       </div>
     </div>
   </div>
@@ -231,17 +231,23 @@ function toggleTheme() {
 }
 
 function getDBUsers() {
+  let defaultUsers = [{ 
+    id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy",
+    avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {} 
+  }];
   try {
     let u = localStorage.getItem('app_db_users');
-    if (!u) throw new Error("No DB");
+    if (!u) {
+      localStorage.setItem('app_db_users', JSON.stringify(defaultUsers));
+      return defaultUsers;
+    }
     let parsed = JSON.parse(u);
-    if(!Array.isArray(parsed) || parsed.length === 0) throw new Error("Invalid DB");
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      localStorage.setItem('app_db_users', JSON.stringify(defaultUsers));
+      return defaultUsers;
+    }
     return parsed;
   } catch(e) {
-    let defaultUsers = [{ 
-      id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy",
-      avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {} 
-    }];
     localStorage.setItem('app_db_users', JSON.stringify(defaultUsers));
     return defaultUsers;
   }
@@ -270,7 +276,7 @@ function showSuggestions(showAll = false) {
     let item = document.createElement('div');
     item.className = 'suggestion-item';
     item.innerHTML = `<span>${m.avatar || '🎓'} ${m.id}</span> <span class="badge">${m.class}</span>`;
-    item.onclick = (e) => {
+    item.onclick = function(e) {
       e.stopPropagation();
       document.getElementById('loginUsername').value = m.id;
       box.classList.add('hidden');
@@ -460,7 +466,7 @@ function renderQuestion() {
         btn.style.color = opt === q.ans ? 'var(--success)' : 'var(--danger)';
       }
     } else {
-      btn.onclick = () => handleOptionClick(opt, q.ans);
+      btn.onclick = function() { handleOptionClick(opt, q.ans); };
     }
     optsBox.appendChild(btn);
   });
@@ -587,34 +593,18 @@ function updateAdminPin() {
   } else { alert("PIN must be at least 4 digits."); }
 }
 
-window.onload = () => {
+document.addEventListener('click', function(e) {
+  let wrapper = document.querySelector('.autocomplete-wrapper');
+  if (wrapper && !wrapper.contains(e.target)) {
+    let box = document.getElementById('suggestionsBox');
+    if(box) box.classList.add('hidden');
+  }
+});
+
+window.onload = function() {
   let savedTheme = localStorage.getItem('app_theme') || 'dark';
   document.body.setAttribute('data-theme', savedTheme);
   document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
-
-  // Event Listeners Binding
-  document.getElementById('themeIconBtn').onclick = toggleTheme;
-  document.getElementById('loginUsername').onclick = () => showSuggestions(true);
-  document.getElementById('loginUsername').oninput = () => showSuggestions(false);
-  document.getElementById('btnLoginStudent').onclick = handleStudentLogin;
-  document.getElementById('btnOpenAdmin').onclick = openAdminModal;
-  document.getElementById('btnCloseAdmin').onclick = closeAdminModal;
-  document.getElementById('btnVerifyAdminPin').onclick = verifyAdminPin;
-  document.getElementById('btnAddStudent').onclick = addNewStudent;
-  document.getElementById('btnUpdateAdminPin').onclick = updateAdminPin;
-  document.getElementById('btnLogoutStudent').onclick = logoutStudent;
-  document.getElementById('btnPrevDay').onclick = () => changeDay(-1);
-  document.getElementById('btnNextDay').onclick = () => changeDay(1);
-  document.getElementById('btnPrevQ').onclick = () => navigateQuestion(-1);
-  document.getElementById('btnNextQ').onclick = () => navigateQuestion(1);
-
-  document.addEventListener('click', function(e) {
-    let wrapper = document.querySelector('.autocomplete-wrapper');
-    if (wrapper && !wrapper.contains(e.target)) {
-      document.getElementById('suggestionsBox').classList.add('hidden');
-    }
-  });
-
   getDBUsers();
 };
 </script>
