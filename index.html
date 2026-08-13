@@ -45,7 +45,7 @@
     
     .autocomplete-wrapper { position: relative; width: 100%; text-align: left; }
     .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 14px; max-height: 180px; overflow-y: auto; z-index: 100; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
-    .suggestion-item { padding: 12px 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .suggestion-item { padding: 12px 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
     .suggestion-item:hover { background: var(--primary); color: white; }
 
     .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
@@ -94,7 +94,7 @@
 
   <div class="top-header">
     <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal</div>
-    <button class="theme-btn" onclick="toggleTheme()" id="themeIconBtn">🌙</button>
+    <button class="theme-btn" id="themeIconBtn">🌙</button>
   </div>
 
   <div id="loginScreen" class="card login-box">
@@ -103,16 +103,16 @@
     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Tap username box to select your name</p>
 
     <div class="autocomplete-wrapper">
-      <input type="text" id="loginUsername" class="input-field" placeholder="Select or Type Username" autocomplete="off" onclick="showSuggestions(true)" oninput="handleUsernameTyping()" />
+      <input type="text" id="loginUsername" class="input-field" placeholder="Select or Type Username" autocomplete="off" />
       <div id="suggestionsBox" class="suggestions-list hidden"></div>
     </div>
 
     <input type="password" id="loginPin" class="input-field" placeholder="4-Digit Student PIN" maxlength="4" style="text-align: center; letter-spacing: 4px;" />
     
-    <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
+    <button class="btn" id="btnLoginStudent" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
     
     <div style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 12px;">
-      <button class="btn btn-secondary" onclick="openAdminModal()" style="font-size: 0.85rem; padding: 8px 14px;">🔑 Admin Portal</button>
+      <button class="btn btn-secondary" id="btnOpenAdmin" style="font-size: 0.85rem; padding: 8px 14px;">🔑 Admin Portal</button>
     </div>
   </div>
 
@@ -122,7 +122,7 @@
         <h1 id="userDisplayName">Ayush 01 🎓</h1>
         <p><span id="userClassBadge" class="badge" style="background:rgba(255,255,255,0.2); color:white;">Class 4</span></p>
       </div>
-      <button class="btn btn-secondary" onclick="logoutStudent()" style="font-size: 0.8rem; padding: 6px 12px;">Logout</button>
+      <button class="btn btn-secondary" id="btnLogoutStudent" style="font-size: 0.8rem; padding: 6px 12px;">Logout</button>
     </div>
 
     <div class="card" style="margin-top: 10px;">
@@ -136,9 +136,9 @@
 
     <div class="card" style="margin-top: 10px;">
       <div class="day-nav">
-        <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev Day</button>
+        <button class="btn btn-secondary" id="btnPrevDay">← Prev Day</button>
         <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 800;">Day 1</span>
-        <button class="btn btn-secondary" onclick="changeDay(1)">Next Day →</button>
+        <button class="btn btn-secondary" id="btnNextDay">Next Day →</button>
       </div>
 
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
@@ -147,8 +147,8 @@
       <div class="options-grid" id="optionsContainer"></div>
 
       <div style="margin-top: 16px; display: flex; justify-content: space-between;">
-        <button class="btn btn-secondary" id="btnPrevQ" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 8px 14px;">← Back Question</button>
-        <button class="btn btn-secondary" id="btnNextQ" onclick="navigateQuestion(1)" style="font-size: 0.85rem; padding: 8px 14px;">Next Question →</button>
+        <button class="btn btn-secondary" id="btnPrevQ" style="font-size: 0.85rem; padding: 8px 14px;">← Back Question</button>
+        <button class="btn btn-secondary" id="btnNextQ" style="font-size: 0.85rem; padding: 8px 14px;">Next Question →</button>
       </div>
     </div>
   </div>
@@ -159,13 +159,13 @@
   <div class="modal-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
       <h3>⚙️ Master Admin Control</h3>
-      <button style="background:none; border:none; color:var(--text-main); font-size:1.5rem; cursor:pointer;" onclick="closeAdminModal()">&times;</button>
+      <button style="background:none; border:none; color:var(--text-main); font-size:1.5rem; cursor:pointer;" id="btnCloseAdmin">&times;</button>
     </div>
 
     <div id="adminAuthBox">
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin PIN (Default: 7258)</p>
       <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" style="text-align: center;" />
-      <button class="btn" onclick="verifyAdminPin()" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
+      <button class="btn" id="btnVerifyAdminPin" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
     </div>
 
     <div id="adminContentBox" class="hidden">
@@ -191,7 +191,7 @@
           <option value="Class 8">Class 8</option>
           <option value="Class 9">Class 9</option>
         </select>
-        <button class="btn" onclick="addNewStudent()" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
+        <button class="btn" id="btnAddStudent" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
       </div>
 
       <h4 style="font-size: 0.9rem; margin-bottom: 6px;">📋 Registered Students & Status</h4>
@@ -200,7 +200,7 @@
       <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
         <h4 style="font-size: 0.85rem; margin-bottom: 4px;">🔑 Change Master Admin PIN</h4>
         <input type="password" id="changeAdminPinVal" class="input-field" placeholder="New Master PIN" maxlength="6" />
-        <button class="btn btn-secondary" onclick="updateAdminPin()" style="width: 100%; font-size: 0.8rem; margin-top: 4px;">Update Master PIN</button>
+        <button class="btn btn-secondary" id="btnUpdateAdminPin" style="width: 100%; font-size: 0.8rem; margin-top: 4px;">Update Master PIN</button>
       </div>
     </div>
   </div>
@@ -231,8 +231,13 @@ function toggleTheme() {
 }
 
 function getDBUsers() {
-  let u = localStorage.getItem('app_db_users');
-  if (!u) {
+  try {
+    let u = localStorage.getItem('app_db_users');
+    if (!u) throw new Error("No DB");
+    let parsed = JSON.parse(u);
+    if(!Array.isArray(parsed) || parsed.length === 0) throw new Error("Invalid DB");
+    return parsed;
+  } catch(e) {
     let defaultUsers = [{ 
       id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy",
       avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {} 
@@ -240,7 +245,6 @@ function getDBUsers() {
     localStorage.setItem('app_db_users', JSON.stringify(defaultUsers));
     return defaultUsers;
   }
-  return JSON.parse(u);
 }
 
 function saveDBUsers(users) { localStorage.setItem('app_db_users', JSON.stringify(users)); }
@@ -266,7 +270,8 @@ function showSuggestions(showAll = false) {
     let item = document.createElement('div');
     item.className = 'suggestion-item';
     item.innerHTML = `<span>${m.avatar || '🎓'} ${m.id}</span> <span class="badge">${m.class}</span>`;
-    item.onclick = () => {
+    item.onclick = (e) => {
+      e.stopPropagation();
       document.getElementById('loginUsername').value = m.id;
       box.classList.add('hidden');
       document.getElementById('loginPin').focus();
@@ -275,15 +280,6 @@ function showSuggestions(showAll = false) {
   });
   box.classList.remove('hidden');
 }
-
-function handleUsernameTyping() { showSuggestions(false); }
-
-document.addEventListener('click', function(e) {
-  let wrapper = document.querySelector('.autocomplete-wrapper');
-  if (wrapper && !wrapper.contains(e.target)) {
-    document.getElementById('suggestionsBox').classList.add('hidden');
-  }
-});
 
 function handleStudentLogin() {
   let uName = document.getElementById('loginUsername').value.trim();
@@ -362,4 +358,265 @@ function generateAdaptiveQuestions(userClass, day) {
       ? `📖 **अनुच्छेद (Day ${day}):** जवाहर नवोदय विद्यालय में प्रवेश पाने के लिए कड़ी मेहनत और नियमित अभ्यास ज़रूरी है। अनुशासन से छात्र समय पर कार्य करना सीखते हैं।`
       : `📖 **Passage (Day ${day}):** Regular practice brings perfection in Mathematics and Reasoning. Time management is crucial for competitive exams.`;
 
-    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय विद्यालय में सफलता के लिए क्या आवश्यक है?" : "What brings perfection in Mathematics?", options: day % 2 === 1 ? ["कड़ी मेहनत", "आलस्य", "देर तक सोना", "खेलना"] : ["Regular practice", "Sleeping late", "Watching TV", "L
+    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय विद्यालय में सफलता के लिए क्या आवश्यक है?" : "What brings perfection in Mathematics?", options: day % 2 === 1 ? ["कड़ी मेहनत", "आलस्य", "देर तक सोना", "खेलना"] : ["Regular practice", "Sleeping late", "Watching TV", "Luck"], ans: day % 2 === 1 ? "कड़ी मेहनत" : "Regular practice" });
+    questions.push({ passage: pText, q: day % 2 === 1 ? "अनुशासन से छात्र क्या सीखते हैं?" : "What is crucial for competitive exams?", options: day % 2 === 1 ? ["समय पर कार्य करना", "लड़ाई करना", "पढ़ाई छोड़ना", "TV देखना"] : ["Time management", "Fast eating", "Noise", "Sleeping"], ans: day % 2 === 1 ? "समय पर कार्य करना" : "Time management" });
+
+    let mult = (day % 4) + 2;
+    for(let i = 1; i <= 5; i++) {
+      let baseVal = (day * 3) + (i * 4);
+      questions.push({ q: `Series Complete: ${baseVal}, ${baseVal + mult}, ${baseVal + mult*2}, ?`, options: [`${baseVal + mult*3}`, `${baseVal + mult*3 + 2}`, `${baseVal + mult*2 + 1}`, `${baseVal + mult*4}`], ans: `${baseVal + mult*3}` });
+    }
+
+    for(let i = 1; i <= 7; i++) {
+      let a = (day * 3) + (i * 5);
+      let b = (day * 2) + (i * 2);
+      questions.push({ q: `Solve: ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b-2}`, `${a+b+3}`, `${a+b+5}`], ans: `${a+b}` });
+    }
+
+    const staticBank = [
+      { q: "भारत के वर्तमान राष्ट्रपति कौन हैं?", opts: ["द्रौपदी मुर्मू", "रामनाथ कोविंद", "नरेंद्र मोदी", "अमित शाह"], a: "द्रौपदी मुर्मू" },
+      { q: "Opposite of 'ANCIENT' is?", opts: ["Old", "Modern", "Past", "Historic"], a: "Modern" },
+      { q: "100 ka 25% kitna hoga?", opts: ["10", "20", "25", "50"], a: "25" },
+      { q: "L.C.M of 6 and 12 is?", opts: ["6", "12", "18", "24"], a: "12" },
+      { q: "1 kilometer me kitne meter hote hain?", opts: ["100m", "500m", "1000m", "10000m"], a: "1000m" },
+      { q: "Smallest Prime Number (सबसे छोटी अभाज्य संख्या)?", opts: ["0", "1", "2", "3"], a: "2" }
+    ];
+
+    staticBank.forEach(item => { questions.push({ q: item.q, options: item.opts, ans: item.a }); });
+  } 
+  else {
+    for(let i = 1; i <= 20; i++) {
+      let val = i * 2 + day;
+      questions.push({ q: `Solve for x: ${i}x + 4 = ${val * 2 + 4}`, options: [`${val}`, `${val+2}`, `${val-1}`, `${val+4}`], ans: `${val}` });
+    }
+  }
+
+  return questions.slice(0, 20);
+}
+
+function handleOptionClick(selectedOpt, correctAns) {
+  let qKey = `D${currentDay}_Q${currentQIndex}`;
+  if (currentActiveUser.userAnswers[qKey]) return;
+
+  currentActiveUser.userAnswers[qKey] = selectedOpt;
+
+  if (selectedOpt === correctAns) {
+    currentActiveUser.points = (currentActiveUser.points || 0) + 10;
+  } else {
+    currentActiveUser.wrong = (currentActiveUser.wrong || 0) + 1;
+  }
+
+  if (currentQIndex === 19) {
+    currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
+    alert("🎉 Day Practice Complete! Streak Updated!");
+  }
+
+  let users = getDBUsers();
+  let idx = users.findIndex(u => u.id === currentActiveUser.id);
+  if(idx !== -1) { users[idx] = currentActiveUser; saveDBUsers(users); }
+
+  refreshStatsUI();
+  currentQIndex++;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (!currentActiveUser) return;
+  let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
+  document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
+
+  let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
+  let fill = document.getElementById('progressFill');
+
+  if (currentQIndex >= questions.length) {
+    passageBox.classList.add('hidden');
+    qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
+    optsBox.innerHTML = '';
+    fill.style.width = '100%';
+    return;
+  }
+
+  fill.style.width = `${Math.round((currentQIndex / questions.length) * 100)}%`;
+  let q = questions[currentQIndex];
+
+  if (q.passage) { passageBox.innerHTML = q.passage; passageBox.classList.remove('hidden'); }
+  else { passageBox.classList.add('hidden'); }
+
+  qBox.innerText = `Q${currentQIndex + 1}. ${q.q}`;
+  optsBox.innerHTML = '';
+
+  let qKey = `D${currentDay}_Q${currentQIndex}`;
+  let alreadyAnswered = currentActiveUser.userAnswers && currentActiveUser.userAnswers[qKey];
+
+  q.options.forEach(opt => {
+    let btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerText = opt;
+    
+    if (alreadyAnswered) {
+      btn.disabled = true;
+      if (opt === alreadyAnswered) {
+        btn.style.borderColor = opt === q.ans ? 'var(--success)' : 'var(--danger)';
+        btn.style.color = opt === q.ans ? 'var(--success)' : 'var(--danger)';
+      }
+    } else {
+      btn.onclick = () => handleOptionClick(opt, q.ans);
+    }
+    optsBox.appendChild(btn);
+  });
+}
+
+function navigateQuestion(delta) {
+  let target = currentQIndex + delta;
+  if (target >= 0 && target < 20) {
+    currentQIndex = target;
+    renderQuestion();
+  }
+}
+
+function changeDay(delta) {
+  if (currentDay + delta >= 1) {
+    currentDay += delta;
+    currentQIndex = 0;
+    renderQuestion();
+  }
+}
+
+function openAdminModal() {
+  document.getElementById('adminPinInput').value = '';
+  document.getElementById('adminAuthBox').classList.remove('hidden');
+  document.getElementById('adminContentBox').classList.add('hidden');
+  document.getElementById('adminModal').classList.remove('hidden');
+}
+
+function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
+
+function verifyAdminPin() {
+  if (document.getElementById('adminPinInput').value === getAdminPin()) {
+    document.getElementById('adminAuthBox').classList.add('hidden');
+    document.getElementById('adminContentBox').classList.remove('hidden');
+    renderAdminUsersList();
+  } else { alert("Incorrect Master Admin PIN!"); }
+}
+
+function renderAdminUsersList() {
+  let users = getDBUsers();
+  let list = document.getElementById('adminUsersList');
+  list.innerHTML = '';
+  users.forEach((u, idx) => {
+    let row = document.createElement('div');
+    row.style.cssText = 'background:var(--input-bg); padding:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);';
+    let isChecked = u.active !== false ? 'checked' : '';
+
+    row.innerHTML = `
+      <div>
+        <strong>${u.avatar || '🎓'} ${u.id}</strong> <span class="badge">${u.class}</span><br>
+        <small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">✏️ PIN</button>
+        <label class="switch">
+          <input type="checkbox" ${isChecked} onchange="toggleUserActiveStatus(${idx})">
+          <span class="slider"></span>
+        </label>
+        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">Del</button>` : ''}
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function resetStudentPin(id) {
+  let users = getDBUsers();
+  let u = users.find(x => x.id === id);
+  if (u) {
+    let newPin = prompt(`Enter new 4-digit PIN for ${id}:`, u.pin);
+    if (newPin && newPin.length === 4) {
+      u.pin = newPin;
+      saveDBUsers(users);
+      alert(`PIN Updated for ${id}! New PIN: ${newPin}`);
+      renderAdminUsersList();
+    } else if(newPin) { alert("PIN must be 4 digits!"); }
+  }
+}
+
+function toggleUserActiveStatus(index) {
+  let users = getDBUsers();
+  users[index].active = users[index].active === false ? true : false;
+  saveDBUsers(users);
+}
+
+function addNewStudent() {
+  let name = document.getElementById('newStudentName').value.trim();
+  let gender = document.getElementById('newStudentGender').value;
+  let cls = document.getElementById('newStudentClass').value;
+  if (!name) { alert("Enter Student Name!"); return; }
+
+  let users = getDBUsers();
+  let nextNum = users.length + 1;
+  let formattedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
+  let generatedID = `${name} ${formattedNum}`;
+  let randomPin = Math.floor(1000 + Math.random() * 9000).toString();
+  let avatar = getRandomAvatar(gender, nextNum);
+
+  users.push({ 
+    id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, gender: gender,
+    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {} 
+  });
+  saveDBUsers(users);
+
+  alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
+  document.getElementById('newStudentName').value = '';
+  renderAdminUsersList();
+}
+
+function deleteStudent(id) {
+  if (confirm(`Delete student ${id}?`)) {
+    let users = getDBUsers().filter(u => u.id !== id);
+    saveDBUsers(users);
+    renderAdminUsersList();
+  }
+}
+
+function updateAdminPin() {
+  let p = document.getElementById('changeAdminPinVal').value.trim();
+  if (p.length >= 4) {
+    localStorage.setItem('app_master_pin', p);
+    alert("Master Admin PIN Updated!");
+    closeAdminModal();
+  } else { alert("PIN must be at least 4 digits."); }
+}
+
+window.onload = () => {
+  let savedTheme = localStorage.getItem('app_theme') || 'dark';
+  document.body.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
+
+  // Event Listeners Binding
+  document.getElementById('themeIconBtn').onclick = toggleTheme;
+  document.getElementById('loginUsername').onclick = () => showSuggestions(true);
+  document.getElementById('loginUsername').oninput = () => showSuggestions(false);
+  document.getElementById('btnLoginStudent').onclick = handleStudentLogin;
+  document.getElementById('btnOpenAdmin').onclick = openAdminModal;
+  document.getElementById('btnCloseAdmin').onclick = closeAdminModal;
+  document.getElementById('btnVerifyAdminPin').onclick = verifyAdminPin;
+  document.getElementById('btnAddStudent').onclick = addNewStudent;
+  document.getElementById('btnUpdateAdminPin').onclick = updateAdminPin;
+  document.getElementById('btnLogoutStudent').onclick = logoutStudent;
+  document.getElementById('btnPrevDay').onclick = () => changeDay(-1);
+  document.getElementById('btnNextDay').onclick = () => changeDay(1);
+  document.getElementById('btnPrevQ').onclick = () => navigateQuestion(-1);
+  document.getElementById('btnNextQ').onclick = () => navigateQuestion(1);
+
+  document.addEventListener('click', function(e) {
+    let wrapper = document.querySelector('.autocomplete-wrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      document.getElementById('suggestionsBox').classList.add('hidden');
+    }
+  });
+
+  getDBUsers();
+};
+</script>
+</body>
+</html>
