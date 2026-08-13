@@ -36,7 +36,8 @@
     .btn-secondary:hover { background: #D1D5DB; }
 
     /* Question Display */
-    .question-box { font-size: 1.2rem; font-weight: 600; margin: 15px 0; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+    .q-counter { font-size: 0.85rem; color: var(--text-light); text-align: center; margin-top: 10px; font-weight: 600; }
+    .question-box { font-size: 1.15rem; font-weight: 600; margin: 15px 0; text-align: center; min-height: 55px; display: flex; align-items: center; justify-content: center; }
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .option-btn { padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; background: white; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
     .option-btn:hover { border-color: var(--primary); background: #EEF2FF; }
@@ -76,6 +77,7 @@
       <button class="btn btn-secondary" onclick="changeDay(1)">Next →</button>
     </div>
 
+    <div class="q-counter" id="questionCounter">Question 1 of 20</div>
     <div class="question-box" id="questionText">Loading question...</div>
 
     <div class="options-grid" id="optionsContainer">
@@ -137,15 +139,51 @@ if (!localStorage.getItem('app_start_date')) {
   localStorage.setItem('app_start_date', appData.startDate);
 }
 
-// Sample Question Bank (Hindi questions preserved as requested)
+// 20 Questions per day (Maths, GK, English)
 const questionsBank = {
   1: [
     { q: "25 + 15 = ?", options: ["30", "40", "35", "45"], ans: "40", cat: "Math" },
-    { q: "भारत की राजधानी क्या है?", options: ["मुंबई", "दिल्ली", "कोलकाता", "जयपुर"], ans: "दिल्ली", cat: "GK" }
+    { q: "भारत की राजधानी क्या है?", options: ["मुंबई", "दिल्ली", "कोलकाता", "जयपुर"], ans: "दिल्ली", cat: "GK" },
+    { q: "Opposite of 'Hot' is?", options: ["Cold", "Warm", "Ice", "Cool"], ans: "Cold", cat: "English" },
+    { q: "5 × 6 = ?", options: ["25", "35", "30", "40"], ans: "30", cat: "Math" },
+    { q: "हमारा राष्ट्रीय पक्षी कौन सा है?", options: ["कबूतर", "तोता", "मोर", "बाज़"], ans: "मोर", cat: "GK" },
+    { q: "Complete the word: A _ p l e", options: ["p", "b", "t", "d"], ans: "p", cat: "English" },
+    { q: "50 - 18 = ?", options: ["32", "22", "38", "28"], ans: "32", cat: "Math" },
+    { q: "एक सप्ताह में कितने दिन होते हैं?", options: ["5", "6", "7", "8"], ans: "7", cat: "GK" },
+    { q: "Plural of 'Cat' is?", options: ["Cats", "Cates", "Caties", "Kittens"], ans: "Cats", cat: "English" },
+    { q: "100 + 250 = ?", options: ["300", "350", "400", "325"], ans: "350", cat: "Math" },
+    { q: "सौरमंडल में सबसे बड़ा ग्रह कौन सा है?", options: ["पृथ्वी", "मंगल", "बृहस्पति", "शनि"], ans: "बृहस्पति", cat: "GK" },
+    { q: "Which animal is known as the 'Ship of the Desert'?", options: ["Elephant", "Camel", "Horse", "Lion"], ans: "Camel", cat: "GK" },
+    { q: "12 ÷ 3 = ?", options: ["3", "4", "5", "6"], ans: "4", cat: "Math" },
+    { q: "सूरज किस दिशा से उगता है?", options: ["पूर्व", "पश्चिम", "उत्तर", "दक्षिण"], ans: "पूर्व", cat: "GK" },
+    { q: "Select the vowel:", options: ["B", "C", "E", "F"], ans: "E", cat: "English" },
+    { q: "8 × 4 = ?", options: ["24", "28", "32", "36"], ans: "32", cat: "Math" },
+    { q: "हमारे शरीर में कितने फेफड़े होते हैं?", options: ["1", "2", "3", "4"], ans: "2", cat: "GK" },
+    { q: "Past tense of 'Go' is?", options: ["Gone", "Going", "Went", "Goes"], ans: "Went", cat: "English" },
+    { q: "75 + 25 = ?", options: ["90", "100", "110", "105"], ans: "100", cat: "Math" },
+    { q: "भारत का राष्ट्रीय फूल कौन सा है?", options: ["गुलाब", "कमल", "सूरजमुखी", "गेंदा"], ans: "कमल", cat: "GK" }
   ],
   2: [
     { q: "12 × 5 = ?", options: ["50", "55", "60", "65"], ans: "60", cat: "Math" },
-    { q: "सूरज किस दिशा से उगता है?", options: ["पूर्व", "पश्चिम", "उत्तर", "दक्षिण"], ans: "पूर्व", cat: "GK" }
+    { q: "गांधी जी को किस नाम से जाना जाता है?", options: ["नेताजी", "बापू", "सरदार", "चाचा"], ans: "बापू", cat: "GK" },
+    { q: "Synonym of 'Big' is?", options: ["Small", "Large", "Tiny", "Short"], ans: "Large", cat: "English" },
+    { q: "90 - 45 = ?", options: ["40", "45", "50", "35"], ans: "45", cat: "Math" },
+    { q: "भारत का राष्ट्रीय पशु कौन सा है?", options: ["शेर", "बाघ", "हाथी", "चीता"], ans: "बाघ", cat: "GK" },
+    { q: "Which month comes after July?", options: ["June", "August", "September", "May"], ans: "August", cat: "English" },
+    { q: "15 + 15 + 15 = ?", options: ["30", "40", "45", "50"], ans: "45", cat: "Math" },
+    { q: "तिरंगे में कितने रंग होते हैं?", options: ["2", "3", "4", "5"], ans: "3", cat: "GK" },
+    { q: "Opposite of 'Fast' is?", options: ["Quick", "Slow", "Run", "High"], ans: "Slow", cat: "English" },
+    { q: "81 ÷ 9 = ?", options: ["7", "8", "9", "10"], ans: "9", cat: "Math" },
+    { q: "पानी का रासायनिक सूत्र क्या है?", options: ["CO2", "H2O", "O2", "N2"], ans: "H2O", cat: "GK" },
+    { q: "How many hours are there in a day?", options: ["12", "24", "48", "36"], ans: "24", cat: "GK" },
+    { q: "7 × 7 = ?", options: ["42", "48", "49", "56"], ans: "49", cat: "Math" },
+    { q: "स्वतंत्रता दिवस कब मनाया जाता है?", options: ["26 जनवरी", "15 अगस्त", "2 अक्टूबर", "14 नवंबर"], ans: "15 अगस्त", cat: "GK" },
+    { q: "Correct spelling:", options: ["Schoold", "School", "Scool", "Skool"], ans: "School", cat: "English" },
+    { q: "200 - 80 = ?", options: ["110", "120", "130", "140"], ans: "120", cat: "Math" },
+    { q: "मानव शरीर की सबसे बड़ी हड्डी कौन सी है?", options: ["फीमर", "स्टेप्स", "रेडियस", "अल्ना"], ans: "फीमर", cat: "GK" },
+    { q: "Young one of a 'Dog' is called?", options: ["Kitten", "Calf", "Puppy", "Cub"], ans: "Puppy", cat: "English" },
+    { q: "60 ÷ 5 = ?", options: ["10", "11", "12", "15"], ans: "12", cat: "Math" },
+    { q: "हमारे देश के प्रथम प्रधानमंत्री कौन थे?", options: ["मात्मा गांधी", "जवाहरलाल नेहरू", "राजेंद्र प्रसाद", "भगत सिंह"], ans: "जवाहरलाल नेहरू", cat: "GK" }
   ]
 };
 
@@ -304,15 +342,18 @@ function submitPin() {
 function renderQuestion() {
   document.getElementById('currentDayLabel').innerText = `Day ${appData.currentDay}`;
   const dayQuestions = questionsBank[appData.currentDay] || [];
+  const counterBox = document.getElementById('questionCounter');
   const qBox = document.getElementById('questionText');
   const optsBox = document.getElementById('optionsContainer');
 
   if (!dayQuestions.length || currentQuestionIndex >= dayQuestions.length) {
-    qBox.innerText = "No more questions for this day!";
+    counterBox.innerText = `Completed!`;
+    qBox.innerText = "Great job! You have completed all questions for this day.";
     optsBox.innerHTML = '';
     return;
   }
 
+  counterBox.innerText = `Question ${currentQuestionIndex + 1} of ${dayQuestions.length}`;
   const qData = dayQuestions[currentQuestionIndex];
   qBox.innerText = qData.q;
   optsBox.innerHTML = '';
