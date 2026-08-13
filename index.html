@@ -3,376 +3,419 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JNVST Prep - Ayush Raj</title>
+  <title>EduPortal 2026 - Adaptive Practice</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
   <style>
-    :root { --primary: #4F46E5; --primary-hover: #4338CA; --bg: #F8FAFC; --card-bg: #FFFFFF; --text-main: #0F172A; --text-muted: #64748B; --success: #10B981; --danger: #EF4444; --border: #CBD5E1; }
+    :root { --primary: #4F46E5; --primary-hover: #4338CA; --bg: #0F172A; --card-bg: rgba(30, 41, 59, 0.8); --text-main: #F8FAFC; --text-muted: #94A3B8; --success: #10B981; --danger: #EF4444; --border: #334155; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding: 12px; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
-    .app-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 12px; }
-    .card { background: var(--card-bg); border-radius: 16px; padding: 16px; border: 1.5px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    body { background: #090D16; color: var(--text-main); min-height: 100vh; padding: 12px; display: flex; justify-content: center; align-items: flex-start; -webkit-tap-highlight-color: transparent; }
+    .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; }
+    .card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 18px; padding: 18px; border: 1.5px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+    
+    /* Login & Suggestion Dropdown */
+    .login-box { text-align: center; }
+    .autocomplete-wrapper { position: relative; width: 100%; text-align: left; }
+    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: #1E293B; border: 1.5px solid var(--border); border-radius: 10px; max-height: 160px; overflow-y: auto; z-index: 100; margin-top: 4px; box-shadow: 0 10px 15px rgba(0,0,0,0.5); }
+    .suggestion-item { padding: 12px 14px; font-size: 1.1rem; font-weight: 600; cursor: pointer; border-bottom: 1px solid var(--border); color: #F1F5F9; }
+    .suggestion-item:hover { background: var(--primary); }
+
+    /* Forms & Inputs */
+    .input-field { width: 100%; padding: 12px 14px; margin: 6px 0; border: 1.5px solid var(--border); border-radius: 10px; font-size: 1.1rem; background: #0F172A; color: white; outline: none; }
+    .input-field:focus { border-color: var(--primary); }
+    
+    /* Profile Banner */
     .profile-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%); color: white; border: none; padding: 16px; }
     .user-info h1 { font-size: 1.3rem; font-weight: 700; }
-    .user-info p { font-size: 0.82rem; opacity: 0.95; }
-    .manage-btn { background: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.4); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .stat-card { background: #F1F5F9; padding: 8px; border-radius: 10px; text-align: center; }
-    .stat-card .val { font-size: 1.05rem; font-weight: 700; color: var(--primary); }
-    .stat-card .lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
-    .day-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .btn { padding: 9px 15px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
-    .btn-secondary { background: #E2E8F0; color: var(--text-main); }
+    .user-info p { font-size: 0.85rem; opacity: 0.95; }
+    .btn { padding: 10px 16px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.15s; }
+    .btn-secondary { background: #334155; color: var(--text-main); }
     .btn-danger { background: var(--danger); color: white; }
-    .progress-wrapper { margin: 10px 0 14px 0; }
-    .progress-info { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
-    .progress-bar-bg { width: 100%; height: 8px; background: #E2E8F0; border-radius: 10px; overflow: hidden; }
+
+    /* Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-card { background: #0F172A; padding: 8px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+    .stat-card .val { font-size: 1.1rem; font-weight: 700; color: #818CF8; }
+    .stat-card .lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+
+    /* Question & Passage Area */
+    .day-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .progress-bar-bg { width: 100%; height: 8px; background: #334155; border-radius: 10px; overflow: hidden; margin: 6px 0 12px 0; }
     .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.2s; }
     
-    /* PERFECT BALANCED FONT SIZES */
-    .passage-box { background: #F1F5F9; border-left: 4px solid var(--primary); padding: 12px; border-radius: 8px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; color: #1E293B; font-weight: 500; }
-    .question-box { font-size: 1.25rem; font-weight: 700; margin: 12px 0 16px 0; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; color: #0F172A; line-height: 1.35; }
+    .passage-box { background: #0F172A; border-left: 4px solid var(--primary); padding: 12px; border-radius: 8px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 12px; color: #E2E8F0; }
+    .question-box { font-size: 1.25rem; font-weight: 700; margin: 12px 0 16px 0; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; color: #F8FAFC; line-height: 1.35; }
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .option-btn { padding: 14px 10px; border: 2px solid var(--border); border-radius: 12px; background: white; font-size: 1.1rem; font-weight: 600; color: #0F172A; cursor: pointer; transition: all 0.15s; }
-    .option-btn:active { border-color: var(--primary); background: #EEF2FF; transform: scale(0.98); }
+    .option-btn { padding: 14px 10px; border: 2px solid var(--border); border-radius: 12px; background: #0F172A; font-size: 1.1rem; font-weight: 600; color: #F8FAFC; cursor: pointer; }
+    .option-btn:active { border-color: var(--primary); background: var(--primary); }
 
-    .tip-box { background: #FEF3C7; border: 1.5px solid #FCD34D; border-radius: 10px; padding: 10px; font-size: 0.82rem; color: #92400E; display: flex; gap: 8px; }
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-card { background: white; padding: 20px; border-radius: 16px; width: 90%; max-width: 380px; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    .manage-section { background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-    .input-field { width: 100%; padding: 10px; margin: 4px 0; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
+    /* Modals & Badges */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-card { background: #1E293B; padding: 20px; border-radius: 18px; width: 92%; max-width: 400px; border: 1.5px solid var(--border); max-height: 85vh; overflow-y: auto; }
     .hidden { display: none !important; }
-    .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-    .analytics-item { background: #F8FAFC; padding: 10px; border-radius: 8px; border: 1px solid var(--border); text-align: center; }
+    .badge { background: #334155; color: #818CF8; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
   </style>
 </head>
 <body>
 
 <div class="app-container">
-  <div class="card profile-banner">
-    <div class="user-info">
-      <h1>Ayush Raj 🎓</h1>
-      <p>JNVST Target: 90 Days Mastery</p>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="card login-box">
+    <h2 style="font-size: 1.5rem; margin-bottom: 4px;">🎓 Portal Login</h2>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Type first letter to find your name</p>
+
+    <div class="autocomplete-wrapper">
+      <input type="text" id="loginUsername" class="input-field" placeholder="Username (e.g. Ayush)" autocomplete="off" oninput="handleUsernameTyping()" />
+      <div id="suggestionsBox" class="suggestions-list hidden"></div>
     </div>
-    <button class="manage-btn" onclick="openManageModal()">⚙️ Settings</button>
+
+    <input type="password" id="loginPin" class="input-field" placeholder="4-Digit Student PIN" maxlength="4" style="text-align: center; letter-spacing: 4px;" />
+    
+    <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px; padding: 12px;">Login to Practice</button>
+    
+    <div style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 12px;">
+      <button class="btn btn-secondary" onclick="openAdminModal()" style="font-size: 0.85rem; padding: 8px 14px;">🔑 Parent / Admin Portal</button>
+    </div>
   </div>
 
-  <div class="card">
-    <div class="stats-grid">
-      <div class="stat-card"><div class="val">🔥 <span id="streakCount">0</span></div><div class="lbl">Day Streak</div></div>
-      <div class="stat-card"><div class="val">⭐ <span id="totalPoints">0</span></div><div class="lbl">Score Pts</div></div>
-      <div class="stat-card" style="cursor: pointer;" onclick="openAnalyticsModal()"><div class="val">📊</div><div class="lbl">Analytics</div></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="day-nav">
-      <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev</button>
-      <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 800;">Day 1 / 90</span>
-      <button class="btn btn-secondary" onclick="changeDay(1)">Next →</button>
+  <!-- MAIN PRACTICE WORKSPACE (Hidden by default) -->
+  <div id="practiceWorkspace" class="hidden">
+    <div class="card profile-banner">
+      <div class="user-info">
+        <h1 id="userDisplayName">Ayush 01 🎓</h1>
+        <p><span id="userClassBadge" class="badge">Class 4</span> &nbsp; <span id="userSessionBadge" style="font-size:0.75rem;">Active Session</span></p>
+      </div>
+      <button class="btn btn-secondary" onclick="logoutStudent()" style="font-size: 0.8rem; padding: 6px 10px;">Logout</button>
     </div>
 
-    <div class="progress-wrapper">
-      <div class="progress-info"><span id="questionCounter">Question 1 of 20</span><span id="progressPercent">0%</span></div>
+    <div class="card" style="margin-top: 10px;">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="val">🔥 <span id="streakCount">0</span></div><div class="lbl">Streak</div></div>
+        <div class="stat-card"><div class="val">⭐ <span id="totalPoints">0</span></div><div class="lbl">Points</div></div>
+        <div class="stat-card"><div class="val">📊</div><div class="lbl">Report</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 10px;">
+      <div class="day-nav">
+        <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev</button>
+        <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 800;">Day 1</span>
+        <button class="btn btn-secondary" onclick="changeDay(1)">Next →</button>
+      </div>
+
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
-    </div>
-
-    <div id="passageContainer" class="passage-box hidden"></div>
-    <div class="question-box" id="questionText">Loading question...</div>
-    <div class="options-grid" id="optionsContainer"></div>
-  </div>
-
-  <div class="tip-box">
-    <span>💡</span>
-    <div><strong>Exam Tip for Ayush:</strong> Sawaalon ko dhyan se padhein aur rough copy me solve karein.</div>
-  </div>
-</div>
-
-<!-- PIN Lock Modal -->
-<div id="pinModal" class="modal-overlay hidden">
-  <div class="modal-card" style="text-align: center;">
-    <h3>Enter Parent PIN</h3>
-    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Future days locked</p>
-    <input type="password" id="pinInput" class="input-field" maxlength="6" placeholder="••••" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px; margin: 12px 0;" />
-    <div style="display: flex; gap: 8px;">
-      <button class="btn btn-secondary" onclick="closePinModal()" style="width: 50%;">Cancel</button>
-      <button class="btn" onclick="submitPin()" style="width: 50%;">Unlock</button>
+      <div id="passageContainer" class="passage-box hidden"></div>
+      <div class="question-box" id="questionText">Loading...</div>
+      <div class="options-grid" id="optionsContainer"></div>
     </div>
   </div>
+
 </div>
 
-<!-- Settings Modal -->
-<div id="manageModal" class="modal-overlay hidden">
+<!-- ADMIN PORTAL MODAL -->
+<div id="adminModal" class="modal-overlay hidden">
   <div class="modal-card">
-    <div class="modal-header">
-      <h3>⚙️ Parent Settings</h3>
-      <button style="background:none; border:none; font-size:1.3rem; cursor:pointer;" onclick="closeManageModal()">&times;</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+      <h3>⚙️ Master Admin Control</h3>
+      <button style="background:none; border:none; color:white; font-size:1.4rem; cursor:pointer;" onclick="closeAdminModal()">&times;</button>
     </div>
-    <div class="manage-section">
-      <h4 style="font-size: 0.88rem;">🔑 Change Parent PIN</h4>
-      <input type="password" id="currentPinInput" class="input-field" placeholder="Current PIN" maxlength="6" />
-      <input type="password" id="newPinInput" class="input-field" placeholder="New PIN" maxlength="6" />
-      <button class="btn" onclick="handlePinChange()" style="width: 100%; margin-top: 6px; font-size: 0.85rem; padding: 8px;">Update PIN</button>
-    </div>
-    <div class="manage-section" style="background: #FEF2F2; border-color: #FCA5A5;">
-      <h4 style="font-size: 0.88rem; color: var(--danger);">🗑️ Reset All Progress</h4>
-      <input type="password" id="clearDataPinInput" class="input-field" placeholder="Enter PIN to confirm" maxlength="6" />
-      <button class="btn btn-danger" onclick="handleClearData()" style="width: 100%; margin-top: 6px; font-size: 0.85rem; padding: 8px;">Reset Data</button>
-    </div>
-  </div>
-</div>
 
-<!-- Analytics Modal -->
-<div id="analyticsModal" class="modal-overlay hidden">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>📊 Performance Summary</h3>
-      <button style="background:none; border:none; font-size:1.3rem; cursor:pointer;" onclick="closeAnalyticsModal()">&times;</button>
+    <!-- Admin Auth Step -->
+    <div id="adminAuthBox">
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin PIN (Default: 7258)</p>
+      <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" style="text-align: center;" />
+      <button class="btn" onclick="verifyAdminPin()" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
     </div>
-    <div class="analytics-grid">
-      <div class="analytics-item"><span style="font-size: 0.75rem; color: var(--text-muted);">ATTEMPTED</span><h4 id="statTotal" style="font-size: 1.15rem; margin-top:2px;">0</h4></div>
-      <div class="analytics-item"><span style="font-size: 0.75rem; color: var(--text-muted);">ACCURACY</span><h4 id="statAccuracy" style="font-size: 1.15rem; margin-top:2px; color: var(--success);">0%</h4></div>
-      <div class="analytics-item"><span style="font-size: 0.75rem; color: var(--text-muted);">AVG SPEED</span><h4 id="statSpeed" style="font-size: 1.15rem; margin-top:2px;">0s</h4></div>
-      <div class="analytics-item"><span style="font-size: 0.75rem; color: var(--text-muted);">WEAK AREA</span><h4 id="statWeak" style="color: var(--danger); font-size: 0.85rem; margin-top:2px;">None</h4></div>
+
+    <!-- Admin Content Box (Unlocked) -->
+    <div id="adminContentBox" class="hidden">
+      <!-- Add User Section -->
+      <div style="background: #0F172A; padding: 12px; border-radius: 12px; margin-bottom: 14px; border: 1px solid var(--border);">
+        <h4 style="font-size: 0.9rem; color: #818CF8; margin-bottom: 6px;">➕ Add New Student</h4>
+        <input type="text" id="newStudentName" class="input-field" placeholder="Student Name (e.g. Rohan)" />
+        <select id="newStudentClass" class="input-field">
+          <option value="LKG">LKG</option>
+          <option value="UKG">UKG</option>
+          <option value="Class 1">Class 1</option>
+          <option value="Class 2">Class 2</option>
+          <option value="Class 3">Class 3</option>
+          <option value="Class 4" selected>Class 4 (JNVST Prep)</option>
+          <option value="Class 5">Class 5 (JNVST Prep)</option>
+          <option value="Class 6">Class 6</option>
+          <option value="Class 7">Class 7</option>
+          <option value="Class 8">Class 8</option>
+          <option value="Class 9">Class 9</option>
+        </select>
+        <button class="btn" onclick="addNewStudent()" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
+      </div>
+
+      <!-- Users List -->
+      <h4 style="font-size: 0.9rem; margin-bottom: 6px;">📋 Registered Students</h4>
+      <div id="adminUsersList" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;"></div>
+
+      <!-- Change Admin PIN -->
+      <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
+        <h4 style="font-size: 0.85rem; margin-bottom: 4px;">🔑 Change Master Admin PIN</h4>
+        <input type="password" id="changeAdminPinVal" class="input-field" placeholder="New Master PIN" maxlength="6" />
+        <button class="btn btn-secondary" onclick="updateAdminPin()" style="width: 100%; font-size: 0.8rem; margin-top: 4px;">Update Master PIN</button>
+      </div>
     </div>
-    <button class="btn btn-secondary" onclick="closeAnalyticsModal()" style="width: 100%;">Close</button>
   </div>
 </div>
 
 <script>
-let appData = {
-  startDate: localStorage.getItem('app_start_date') || new Date().toISOString().split('T')[0],
-  parentPin: localStorage.getItem('app_parent_pin') || '1234',
-  currentDay: 1
-};
-if (!localStorage.getItem('app_start_date')) localStorage.setItem('app_start_date', appData.startDate);
+// ==========================================
+// DB & INITIALIZATION
+// ==========================================
+function getDBUsers() {
+  let u = localStorage.getItem('app_db_users');
+  if (!u) {
+    let defaultUsers = [{ id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", token: "" }];
+    localStorage.setItem('app_db_users', JSON.stringify(defaultUsers));
+    return defaultUsers;
+  }
+  return JSON.parse(u);
+}
 
-function generateDayQuestions(dayNum) {
+function saveDBUsers(users) { localStorage.setItem('app_db_users', JSON.stringify(users)); }
+
+function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
+
+let currentActiveUser = null;
+
+// ==========================================
+// LOGIN AUTOCOMPLETE & HANDLERS
+// ==========================================
+function handleUsernameTyping() {
+  let val = document.getElementById('loginUsername').value.trim().toLowerCase();
+  let box = document.getElementById('suggestionsBox');
+  if (!val) { box.classList.add('hidden'); return; }
+
+  let users = getDBUsers();
+  let matches = users.filter(u => u.name.toLowerCase().startsWith(val) || u.id.toLowerCase().startsWith(val));
+
+  if (!matches.length) { box.classList.add('hidden'); return; }
+
+  box.innerHTML = '';
+  matches.forEach(m => {
+    let item = document.createElement('div');
+    item.className = 'suggestion-item';
+    item.innerText = `${m.id} (${m.class})`;
+    item.onclick = () => {
+      document.getElementById('loginUsername').value = m.id;
+      box.classList.add('hidden');
+      document.getElementById('loginPin').focus();
+    };
+    box.appendChild(item);
+  });
+  box.classList.remove('hidden');
+}
+
+function handleStudentLogin() {
+  let uName = document.getElementById('loginUsername').value.trim();
+  let uPin = document.getElementById('loginPin').value.trim();
+  let users = getDBUsers();
+
+  let found = users.find(u => u.id.toLowerCase() === uName.toLowerCase() && u.pin === uPin);
+  if (found) {
+    // Session token generation
+    let deviceToken = "TOKEN_" + Math.random().toString(36).substring(2, 9);
+    found.token = deviceToken;
+    saveDBUsers(users);
+
+    currentActiveUser = found;
+    localStorage.setItem('current_logged_user', found.id);
+    localStorage.setItem('current_logged_token', deviceToken);
+
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('practiceWorkspace').classList.remove('hidden');
+    loadUserWorkspace();
+  } else {
+    alert("Invalid Username or PIN!");
+  }
+}
+
+function logoutStudent() {
+  currentActiveUser = null;
+  localStorage.removeItem('current_logged_user');
+  localStorage.removeItem('current_logged_token');
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPin').value = '';
+  document.getElementById('practiceWorkspace').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+function loadUserWorkspace() {
+  document.getElementById('userDisplayName').innerText = `${currentActiveUser.id} 🎓`;
+  document.getElementById('userClassBadge').innerText = currentActiveUser.class;
+  renderQuestion();
+}
+
+// ==========================================
+// ADAPTIVE QUESTION ENGINE (LKG to 9th)
+// ==========================================
+let currentQIndex = 0;
+let currentDay = 1;
+
+function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
-  let pText = dayNum % 2 === 1 
-    ? `📖 **अनुच्छेद (Day ${dayNum}):** अनुशासन जीवन का सबसे महत्वपूर्ण अंग है। अनुशासित व्यक्ति हर कार्य समय पर पूरा करता है। जवाहर नवोदय विद्यालय में छात्रों को समय का सही उपयोग करना सिखाया जाता है।`
-    : `📖 **Passage (Day ${dayNum}):** Time is money. A student who learns to respect time achieves great success in life. Regular practice makes a person perfect in Mathematics and Reasoning.`;
-
-  questions.push({ passage: pText, q: dayNum % 2 === 1 ? "जीवन का सबसे महत्वपूर्ण अंग क्या है?" : "What makes a student successful?", options: dayNum % 2 === 1 ? ["खेल", "अनुशासन", "आलस्य", "पैसा"] : ["Laziness", "Respecting Time", "Sleeping", "Watching TV"], ans: dayNum % 2 === 1 ? "अनुशासन" : "Respecting Time", cat: "Reading" });
-  questions.push({ passage: pText, q: dayNum % 2 === 1 ? "नवोदय विद्यालय में क्या सिखाया जाता है?" : "What makes a person perfect in Math?", options: dayNum % 2 === 1 ? ["समय का उपयोग", "लड़ाई करना", "देर से सोना", "TV देखना"] : ["Reading news", "Regular practice", "Sleeping late", "Eating sweets"], ans: dayNum % 2 === 1 ? "समय का उपयोग" : "Regular practice", cat: "Reading" });
-
-  let mult = (dayNum % 5) + 2;
-  let baseVal = (dayNum * 3);
-  questions.push({ q: `Series Complete Karo: ${baseVal}, ${baseVal + mult}, ${baseVal + mult*2}, ?`, options: [`${baseVal + mult*3}`, `${baseVal + mult*3 + 2}`, `${baseVal + mult*2 + 1}`, `${baseVal + mult*4}`], ans: `${baseVal + mult*3}`, cat: "Reasoning" });
   
-  let odds = [["सेब", "केला", "आलू", "आम"], ["दिल्ली", "जयपुर", "भारत", "मुंबई"], ["Dog", "Cat", "Table", "Cow"], ["2", "4", "6", "9"]];
-  let curOdd = odds[dayNum % odds.length];
-  questions.push({ q: `Inme se alag (Odd one out) chuno: [${curOdd.join(', ')}]`, options: curOdd, ans: curOdd[2], cat: "Reasoning" });
-
-  let a = (dayNum * 5) + 12;
-  let b = (dayNum * 3) + 8;
-  questions.push({ q: `${a} + ${b} = ?`, options: [`${a+b}`, `${a+b-2}`, `${a+b+5}`, `${a+b+10}`], ans: `${a+b}`, cat: "Math" });
-  questions.push({ q: `${a} × ${(dayNum % 6) + 2} = ?`, options: [`${a*((dayNum%6)+2)}`, `${a*((dayNum%6)+2) - 5}`, `${a*2}`, `${a+10}`], ans: `${a*((dayNum%6)+2)}`, cat: "Math" });
-  
-  let fracA = (dayNum % 3) + 1;
-  questions.push({ q: `Solve Fraction: ${fracA}/5 + 1/5 = ?`, options: [`${fracA+1}/5`, `${fracA}/10`, `2/5`, `1/5`], ans: `${fracA+1}/5`, cat: "Math" });
-
-  const topics = [
-    { q: "भारत के वर्तमान राष्ट्रपति कौन हैं?", opts: ["द्रौपदी मुर्मू", "रामनाथ कोविंद", "नरेंद्र मोदी", "अमित शाह"], a: "द्रौपदी मुर्मू", c: "GK" },
-    { q: "Opposite of 'ANCIENT' is?", opts: ["Old", "Modern", "Past", "Historic"], a: "Modern", c: "English" },
-    { q: "100 ka 25% kitna hoga?", opts: ["10", "20", "25", "50"], a: "25", c: "Math" },
-    { q: "L.C.M of 6 and 12 is?", opts: ["6", "12", "18", "24"], a: "12", c: "Math" },
-    { q: "1 kilometer me kitne meter hote hain?", opts: ["100m", "500m", "1000m", "10000m"], a: "1000m", c: "Math" },
-    { q: "हमारे राष्ट्रध्वज में केसरिया रंग किसका प्रतीक है?", opts: ["शांति", "साहस और त्याग", "समृद्धि", "सत्य"], a: "साहस और त्याग", c: "GK" },
-    { q: "Which gas do plants absorb during photosynthesis?", opts: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], a: "Carbon Dioxide", c: "GK" },
-    { q: "Synonym of 'SMART' is?", opts: ["Clever", "Stupid", "Slow", "Dull"], a: "Clever", c: "English" },
-    { q: "Past tense of 'WRITE' is?", opts: ["Written", "Wrote", "Writing", "Writes"], a: "Wrote", c: "English" },
-    { q: "सबसे छोटी अभाज्य संख्या (Smallest Prime Number) कौन सी है?", opts: ["0", "1", "2", "3"], a: "2", c: "Math" },
-    { q: "Rectangle ka Perimeter formula kya hai?", opts: ["2 × (L + B)", "L × B", "Side × Side", "2 × L"], a: "2 × (L + B)", c: "Math" },
-    { q: "एक वर्ग (Square) की कितनी भुजाएँ बराबर होती हैं?", opts: ["2", "3", "4", "None"], a: "4", c: "Math" },
-    { q: "Plural of 'CHILD' is?", opts: ["Childs", "Children", "Childrens", "Childies"], a: "Children", c: "English" }
-  ];
-
-  for (let i = 0; i < 13; i++) {
-    let t = topics[i];
-    questions.push({ q: t.q, options: t.opts, ans: t.a, cat: t.c });
+  if (userClass === "LKG" || userClass === "UKG" || userClass === "Class 1") {
+    questions.push({ q: "What is the capital letter of 'a'?", options: ["A", "B", "C", "D"], ans: "A", cat: "English" });
+    questions.push({ q: "2 + 1 = ?", options: ["2", "3", "4", "5"], ans: "3", cat: "Math" });
+    questions.push({ q: "Which animal says 'Moo'?", options: ["Dog", "Cat", "Cow", "Duck"], ans: "Cow", cat: "GK" });
+    questions.push({ q: "Count: 🍎 🍎 🍎", options: ["2", "3", "4", "5"], ans: "3", cat: "Math" });
+  } 
+  else if (userClass === "Class 2" || userClass === "Class 3") {
+    questions.push({ q: "15 + 25 = ?", options: ["35", "40", "45", "30"], ans: "40", cat: "Math" });
+    questions.push({ q: "Opposite of 'UP' is?", options: ["Down", "High", "Sky", "Left"], ans: "Down", cat: "English" });
+    questions.push({ q: "How many days in a week?", options: ["5", "6", "7", "8"], ans: "7", cat: "GK" });
+  } 
+  else if (userClass === "Class 4" || userClass === "Class 5") { // JNVST Prep Pattern
+    let pText = `📖 **Passage (Day ${day}):** Regular practice leads to success in Jawahar Navodaya exams. Always calculate math steps on rough paper carefully.`;
+    questions.push({ passage: pText, q: "What leads to success in Navodaya exam?", options: ["Luck", "Regular practice", "Sleeping", "TV"], ans: "Regular practice", cat: "Reading" });
+    questions.push({ q: `Series Complete: ${day*2}, ${day*2+4}, ${day*2+8}, ?`, options: [`${day*2+12}`, `${day*2+10}`, `${day*2+14}`, `${day*2+16}`], ans: `${day*2+12}`, cat: "Reasoning" });
+    questions.push({ q: "1/4 + 2/4 = ?", options: ["3/4", "1/2", "3/8", "1"], ans: "3/4", cat: "Math" });
+  } 
+  else { // Class 6 to 9th
+    questions.push({ q: "Solve for x: 2x + 4 = 12", options: ["2", "4", "6", "8"], ans: "4", cat: "Math" });
+    questions.push({ q: "Powerhouse of the Cell is?", options: ["Nucleus", "Mitochondria", "Ribosome", "Cell Wall"], ans: "Mitochondria", cat: "Science" });
+    questions.push({ q: "Synonym of 'METICULOUS' is?", options: ["Careful", "Careless", "Lazy", "Rapid"], ans: "Careful", cat: "English" });
   }
 
+  // Common filler logic
+  while(questions.length < 20) {
+    questions.push({ q: `Practice Question #${questions.length + 1} (${userClass})`, options: ["Opt A", "Opt B", "Opt C", "Opt D"], ans: "Opt A", cat: "General" });
+  }
   return questions;
 }
 
-let currentQuestionIndex = 0;
-let pendingTargetDay = null;
-
-const SoundFx = {
-  ctx: null,
-  init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-  playCorrect() {
-    this.init();
-    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-    osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.15);
-    gain.gain.setValueAtTime(0.2, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.3);
-    if (navigator.vibrate) navigator.vibrate(40);
-  },
-  playIncorrect() {
-    this.init();
-    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, this.ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(130.81, this.ctx.currentTime + 0.2);
-    gain.gain.setValueAtTime(0.2, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.3);
-    if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
-  }
-};
-
-const Gamification = {
-  pts: parseInt(localStorage.getItem('app_points') || '0'),
-  streak: parseInt(localStorage.getItem('app_streak') || '0'),
-  lastActive: localStorage.getItem('app_last_active'),
-  update() {
-    document.getElementById('streakCount').innerText = this.streak;
-    document.getElementById('totalPoints').innerText = this.pts;
-  },
-  addCorrect() {
-    this.pts += 10;
-    let today = new Date().toISOString().split('T')[0];
-    if (this.lastActive !== today) {
-      this.streak += 1;
-      this.lastActive = today;
-      localStorage.setItem('app_last_active', today);
-      localStorage.setItem('app_streak', this.streak);
-    }
-    localStorage.setItem('app_points', this.pts);
-    this.update();
-  }
-};
-
-const Analytics = {
-  startTime: null,
-  logs: JSON.parse(localStorage.getItem('app_analytics_logs') || '[]'),
-  startTimer() { this.startTime = Date.now(); },
-  logAnswer(cat, isCorrect) {
-    let elapsed = Math.round((Date.now() - (this.startTime || Date.now())) / 1000);
-    this.logs.push({ cat: cat || 'General', isCorrect, time: elapsed });
-    localStorage.setItem('app_analytics_logs', JSON.stringify(this.logs));
-  },
-  getSummary() {
-    if (!this.logs.length) return { total: 0, accuracy: 0, avgTime: 0, weak: 'None' };
-    let total = this.logs.length, correct = this.logs.filter(l => l.isCorrect).length;
-    let accuracy = Math.round((correct / total) * 100);
-    let avgTime = Math.round(this.logs.reduce((acc, l) => acc + l.time, 0) / total);
-    let catWrongs = {};
-    this.logs.forEach(l => { if (!l.isCorrect) catWrongs[l.cat] = (catWrongs[l.cat] || 0) + 1; });
-    let weak = Object.keys(catWrongs).sort((a,b) => catWrongs[b] - catWrongs[a])[0] || 'None';
-    return { total, accuracy, avgTime, weak };
-  }
-};
-
-function getCalculatedAllowedDay() {
-  let start = new Date(appData.startDate), today = new Date();
-  let diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
-  return Math.min(90, Math.max(1, diffDays + 1));
-}
-
-function changeDay(delta) {
-  let targetDay = appData.currentDay + delta;
-  if (targetDay < 1 || targetDay > 90) return;
-  let maxAllowed = getCalculatedAllowedDay();
-  if (targetDay > maxAllowed) {
-    pendingTargetDay = targetDay;
-    openPinModal();
-  } else {
-    appData.currentDay = targetDay;
-    currentQuestionIndex = 0;
-    renderQuestion();
-  }
-}
-
-function openPinModal() { document.getElementById('pinInput').value = ''; document.getElementById('pinModal').classList.remove('hidden'); }
-function closePinModal() { document.getElementById('pinModal').classList.add('hidden'); pendingTargetDay = null; }
-function submitPin() {
-  if (document.getElementById('pinInput').value === appData.parentPin) {
-    appData.currentDay = pendingTargetDay;
-    currentQuestionIndex = 0;
-    closePinModal();
-    renderQuestion();
-  } else { alert('Incorrect PIN'); document.getElementById('pinInput').value = ''; }
-}
-
 function renderQuestion() {
-  document.getElementById('currentDayLabel').innerText = `Day ${appData.currentDay} / 90`;
-  let dayQuestions = generateDayQuestions(appData.currentDay);
-  let counterBox = document.getElementById('questionCounter'), qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
-  let progressFill = document.getElementById('progressFill'), progressPercent = document.getElementById('progressPercent');
+  if (!currentActiveUser) return;
+  let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
+  document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
 
-  if (currentQuestionIndex >= dayQuestions.length) {
-    counterBox.innerText = `Day Completed!`;
-    progressFill.style.width = `100%`; progressPercent.innerText = `100%`;
+  let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
+  let fill = document.getElementById('progressFill');
+
+  if (currentQIndex >= questions.length) {
     passageBox.classList.add('hidden');
-    qBox.innerText = `🎉 Outstanding Ayush! Day ${appData.currentDay} practice complete!`;
+    qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Practice Complete!`;
     optsBox.innerHTML = '';
+    fill.style.width = '100%';
     return;
   }
 
-  let totalQ = dayQuestions.length, percent = Math.round((currentQuestionIndex / totalQ) * 100);
-  counterBox.innerText = `Question ${currentQuestionIndex + 1} of ${totalQ}`;
-  progressFill.style.width = `${percent}%`; progressPercent.innerText = `${percent}%`;
+  fill.style.width = `${Math.round((currentQIndex / questions.length) * 100)}%`;
+  let q = questions[currentQIndex];
 
-  let qData = dayQuestions[currentQuestionIndex];
-  if (qData.passage) { passageBox.innerHTML = qData.passage; passageBox.classList.remove('hidden'); } 
+  if (q.passage) { passageBox.innerHTML = q.passage; passageBox.classList.remove('hidden'); }
   else { passageBox.classList.add('hidden'); }
 
-  qBox.innerText = qData.q;
+  qBox.innerText = q.q;
   optsBox.innerHTML = '';
-  Analytics.startTimer();
 
-  qData.options.forEach(opt => {
+  q.options.forEach(opt => {
     let btn = document.createElement('button');
     btn.className = 'option-btn';
     btn.innerText = opt;
-    btn.onclick = () => checkAnswer(opt, qData.ans, qData.cat);
+    btn.onclick = () => {
+      currentQIndex++;
+      renderQuestion();
+    };
     optsBox.appendChild(btn);
   });
 }
 
-function checkAnswer(selected, correct, category) {
-  let isCorrect = (selected === correct);
-  if (isCorrect) { SoundFx.playCorrect(); Gamification.addCorrect(); } 
-  else { SoundFx.playIncorrect(); }
-  Analytics.logAnswer(category, isCorrect);
-  currentQuestionIndex++;
-  renderQuestion();
+function changeDay(delta) {
+  if (currentDay + delta >= 1) {
+    currentDay += delta;
+    currentQIndex = 0;
+    renderQuestion();
+  }
 }
 
-function openManageModal() { document.getElementById('manageModal').classList.remove('hidden'); }
-function closeManageModal() { document.getElementById('manageModal').classList.add('hidden'); }
-function handlePinChange() {
-  let curr = document.getElementById('currentPinInput').value, nxt = document.getElementById('newPinInput').value;
-  if (curr !== appData.parentPin) { alert("Incorrect Current PIN!"); return; }
-  if (!nxt || nxt.length < 4) { alert("PIN must be at least 4 digits."); return; }
-  appData.parentPin = nxt; localStorage.setItem('app_parent_pin', nxt);
-  alert("PIN Updated!"); closeManageModal();
+// ==========================================
+// ADMIN PORTAL HANDLERS
+// ==========================================
+function openAdminModal() {
+  document.getElementById('adminPinInput').value = '';
+  document.getElementById('adminAuthBox').classList.remove('hidden');
+  document.getElementById('adminContentBox').classList.add('hidden');
+  document.getElementById('adminModal').classList.remove('hidden');
 }
-function handleClearData() {
-  if (document.getElementById('clearDataPinInput').value !== appData.parentPin) { alert("Incorrect PIN!"); return; }
-  if (confirm("Reset all practice progress?")) { localStorage.clear(); alert("Reset successful."); window.location.reload(); }
-}
-function openAnalyticsModal() {
-  let summary = Analytics.getSummary();
-  document.getElementById('statTotal').innerText = summary.total;
-  document.getElementById('statAccuracy').innerText = summary.accuracy + '%';
-  document.getElementById('statSpeed').innerText = summary.avgTime + 's';
-  document.getElementById('statWeak').innerText = summary.weak;
-  document.getElementById('analyticsModal').classList.remove('hidden');
-}
-function closeAnalyticsModal() { document.getElementById('analyticsModal').classList.add('hidden'); }
 
+function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
+
+function verifyAdminPin() {
+  if (document.getElementById('adminPinInput').value === getAdminPin()) {
+    document.getElementById('adminAuthBox').classList.add('hidden');
+    document.getElementById('adminContentBox').classList.remove('hidden');
+    renderAdminUsersList();
+  } else { alert("Incorrect Master Admin PIN!"); }
+}
+
+function renderAdminUsersList() {
+  let users = getDBUsers();
+  let list = document.getElementById('adminUsersList');
+  list.innerHTML = '';
+  users.forEach(u => {
+    let row = document.createElement('div');
+    row.style.cssText = 'background:#0F172A; padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);';
+    row.innerHTML = `<div><strong>${u.id}</strong> <span class="badge">${u.class}</span><br><small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small></div>`;
+    
+    if (u.id !== "Ayush 01") {
+      let delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-danger';
+      delBtn.innerText = 'Delete';
+      delBtn.style.padding = '4px 8px'; delBtn.style.fontSize = '0.75rem';
+      delBtn.onclick = () => deleteStudent(u.id);
+      row.appendChild(delBtn);
+    }
+    list.appendChild(row);
+  });
+}
+
+function addNewStudent() {
+  let name = document.getElementById('newStudentName').value.trim();
+  let cls = document.getElementById('newStudentClass').value;
+  if (!name) { alert("Enter Student Name!"); return; }
+
+  let users = getDBUsers();
+  let nextNum = users.length + 1;
+  let formattedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
+  let generatedID = `${name} ${formattedNum}`;
+  let randomPin = Math.floor(1000 + Math.random() * 9000).toString();
+
+  users.push({ id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, token: "" });
+  saveDBUsers(users);
+
+  alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
+  document.getElementById('newStudentName').value = '';
+  renderAdminUsersList();
+}
+
+function deleteStudent(id) {
+  if (confirm(`Delete student ${id}?`)) {
+    let users = getDBUsers().filter(u => u.id !== id);
+    saveDBUsers(users);
+    renderAdminUsersList();
+  }
+}
+
+function updateAdminPin() {
+  let p = document.getElementById('changeAdminPinVal').value.trim();
+  if (p.length >= 4) {
+    localStorage.setItem('app_master_pin', p);
+    alert("Master Admin PIN Updated!");
+    closeAdminModal();
+  } else { alert("PIN must be at least 4 digits."); }
+}
+
+// Auto-check session on load
 window.onload = () => {
-  appData.currentDay = getCalculatedAllowedDay();
-  Gamification.update();
-  renderQuestion();
+  getDBUsers(); // Ensures default Ayush 01 user exists
 };
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
 </script>
 </body>
 </html>
