@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JNVST Practice Portal - Ayush</title>
+  <title>JNVST Prep - Ayush Raj</title>
+  
+  <!-- Fast Instant Loading Inline App Icon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+  
   <style>
     :root {
       --primary: #4F46E5;
@@ -18,7 +22,7 @@
       --border: #E2E8F0;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
     body { 
       background-color: var(--bg); 
@@ -28,6 +32,7 @@
       display: flex; 
       justify-content: center; 
       align-items: flex-start;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .app-container { 
@@ -35,19 +40,20 @@
       max-width: 520px; 
       display: flex; 
       flex-direction: column; 
-      gap: 16px; 
+      gap: 14px; 
+      will-change: transform;
     }
 
-    /* Cards & Layout */
+    /* Cards Layout */
     .card { 
       background: var(--card-bg); 
       border-radius: 16px; 
-      padding: 18px; 
+      padding: 16px; 
       border: 1px solid var(--border);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
     }
 
-    /* Top Banner */
+    /* Top Banner - Modern Profile */
     .profile-banner {
       display: flex;
       justify-content: space-between;
@@ -55,24 +61,25 @@
       background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
       color: white;
       border: none;
+      padding: 18px;
     }
 
-    .user-info h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 2px; }
-    .user-info p { font-size: 0.8rem; opacity: 0.85; }
+    .user-info h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 2px; }
+    .user-info p { font-size: 0.8rem; opacity: 0.9; display: flex; align-items: center; gap: 4px; }
 
     .manage-btn {
       background: rgba(255, 255, 255, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: white;
       padding: 8px 14px;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: 600;
       font-size: 0.85rem;
       cursor: pointer;
       backdrop-filter: blur(4px);
-      transition: all 0.2s;
+      transition: background 0.15s;
     }
-    .manage-btn:hover { background: rgba(255, 255, 255, 0.3); }
+    .manage-btn:active { background: rgba(255, 255, 255, 0.35); }
 
     /* Stats Grid */
     .stats-grid { 
@@ -89,7 +96,7 @@
     }
 
     .stat-card .val { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
-    .stat-card .lbl { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+    .stat-card .lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
 
     /* Day Navigation */
     .day-nav { 
@@ -107,13 +114,13 @@
       color: white; 
       font-weight: 600; 
       cursor: pointer; 
-      transition: all 0.2s; 
+      transition: opacity 0.15s, transform 0.1s; 
     }
 
     .btn:active { transform: scale(0.97); }
     .btn-secondary { background: #E2E8F0; color: var(--text-main); }
     .btn-danger { background: var(--danger); color: white; }
-    .btn-danger:hover { background: var(--danger-hover); }
+    .btn-danger:active { background: var(--danger-hover); }
 
     /* Progress Bar */
     .progress-wrapper { margin: 12px 0 16px 0; }
@@ -138,17 +145,30 @@
       height: 100%;
       background: var(--primary);
       width: 0%;
-      transition: width 0.3s ease;
+      transition: width 0.2s ease-out;
       border-radius: 10px;
+    }
+
+    /* Passage Box Container */
+    .passage-box {
+      background: #F1F5F9;
+      border-left: 4px solid var(--primary);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 14px;
+      color: #334155;
+      text-align: left;
     }
 
     /* Question & Options */
     .question-box { 
-      font-size: 1.15rem; 
+      font-size: 1.1rem; 
       font-weight: 600; 
-      margin: 16px 0 20px 0; 
+      margin: 12px 0 18px 0; 
       text-align: center; 
-      min-height: 60px; 
+      min-height: 50px; 
       display: flex; 
       align-items: center; 
       justify-content: center;
@@ -156,7 +176,7 @@
       padding: 0 8px;
     }
 
-    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     .option-btn { 
       padding: 14px 10px; 
@@ -167,12 +187,12 @@
       font-weight: 600;
       color: var(--text-main);
       cursor: pointer; 
-      transition: all 0.2s; 
+      transition: border-color 0.15s, background 0.15s; 
     }
 
-    .option-btn:hover { border-color: var(--primary); background: #EEF2FF; }
+    .option-btn:active { border-color: var(--primary); background: #EEF2FF; }
 
-    /* Navodaya Tip Widget */
+    /* Tip Box */
     .tip-box {
       background: #FEF3C7;
       border: 1px solid #FCD34D;
@@ -185,13 +205,13 @@
       gap: 10px;
     }
 
-    /* Modal Overlay & Modern UI */
+    /* Modals */
     .modal-overlay { 
       position: fixed; 
       top: 0; left: 0; 
       width: 100vw; height: 100vh; 
       background: rgba(15, 23, 42, 0.6); 
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(4px);
       display: flex; 
       align-items: center; 
       justify-content: center; 
@@ -204,16 +224,16 @@
       border-radius: 20px; 
       width: 90%; 
       max-width: 400px; 
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
     }
 
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
+      padding-bottom: 10px;
     }
 
     .modal-header h3 { font-size: 1.15rem; color: var(--text-main); }
@@ -224,11 +244,11 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 14px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       text-align: left;
     }
 
-    .manage-section h4 { font-size: 0.9rem; margin-bottom: 8px; color: var(--text-main); }
+    .manage-section h4 { font-size: 0.88rem; margin-bottom: 8px; color: var(--text-main); }
 
     .input-field {
       width: 100%;
@@ -252,16 +272,16 @@
 
 <div class="app-container">
 
-  <!-- Profile Banner -->
+  <!-- Profile Banner for Ayush Raj -->
   <div class="card profile-banner">
     <div class="user-info">
-      <h1>JNVST Prep 🎓</h1>
-      <p>Target: Navodaya Class 6th Entrance</p>
+      <h1>Ayush Raj 🎓</h1>
+      <p>JNVST Target: Class 6th Entrance</p>
     </div>
-    <button class="manage-btn" onclick="openManageModal()">⚙️ Manage</button>
+    <button class="manage-btn" onclick="openManageModal()">⚙️ Settings</button>
   </div>
 
-  <!-- Performance Overview Stats -->
+  <!-- Performance Stats Bar -->
   <div class="card">
     <div class="stats-grid">
       <div class="stat-card">
@@ -279,7 +299,7 @@
     </div>
   </div>
 
-  <!-- Question & Quiz Workspace -->
+  <!-- Main Question Card -->
   <div class="card">
     <div class="day-nav">
       <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev</button>
@@ -287,7 +307,7 @@
       <button class="btn btn-secondary" onclick="changeDay(1)">Next →</button>
     </div>
 
-    <!-- Live Progress Bar -->
+    <!-- Dynamic Progress Bar -->
     <div class="progress-wrapper">
       <div class="progress-info">
         <span id="questionCounter">Question 1 of 20</span>
@@ -298,6 +318,9 @@
       </div>
     </div>
 
+    <!-- Passage Section (Only shown if question contains passage) -->
+    <div id="passageContainer" class="passage-box hidden"></div>
+
     <div class="question-box" id="questionText">Loading question...</div>
 
     <div class="options-grid" id="optionsContainer">
@@ -305,11 +328,11 @@
     </div>
   </div>
 
-  <!-- Daily Exam Tip Box -->
+  <!-- Daily Tip Widget -->
   <div class="tip-box">
     <span style="font-size: 1.2rem;">💡</span>
     <div>
-      <strong>Navodaya Tip:</strong> Har sawaal dhyan se padhein. Maths me rough paper par calculate zaroor karein!
+      <strong>Exam Tip for Ayush:</strong> Passage ko pehle dhyan se padhein, phir sawaalon ka sahi uttar chunein!
     </div>
   </div>
 
@@ -319,7 +342,7 @@
 <div id="pinModal" class="modal-overlay hidden">
   <div class="modal-card" style="text-align: center;">
     <h3 style="font-size: 1.2rem; color: var(--text-main);">Enter Parent PIN</h3>
-    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Locked area access</p>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Locked day access</p>
     <input type="password" id="pinInput" class="input-field" maxlength="6" placeholder="••••" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px; margin: 15px 0;" />
     <div style="display: flex; gap: 10px; justify-content: center;">
       <button class="btn btn-secondary" onclick="closePinModal()" style="width: 50%;">Cancel</button>
@@ -328,15 +351,15 @@
   </div>
 </div>
 
-<!-- Modern Parent Manage Portal Modal -->
+<!-- Modern Manage Settings Modal -->
 <div id="manageModal" class="modal-overlay hidden">
   <div class="modal-card">
     <div class="modal-header">
-      <h3>⚙️ Manage Settings</h3>
+      <h3>⚙️ Parent Portal</h3>
       <button class="close-btn" onclick="closeManageModal()">&times;</button>
     </div>
 
-    <!-- Option 1: Change Parent PIN -->
+    <!-- Change PIN Section -->
     <div class="manage-section">
       <h4>🔑 Change Parent PIN</h4>
       <input type="password" id="currentPinInput" class="input-field" placeholder="Current PIN" maxlength="6" />
@@ -344,21 +367,21 @@
       <button class="btn" onclick="handlePinChange()" style="width: 100%; margin-top: 8px; font-size: 0.85rem; padding: 8px;">Update PIN</button>
     </div>
 
-    <!-- Option 2: Clear Progress Data -->
+    <!-- Clear App Data Section -->
     <div class="manage-section" style="background: #FEF2F2; border-color: #FCA5A5;">
-      <h4 style="color: var(--danger);">🗑️ Clear App Progress</h4>
-      <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">Resets points, streaks, and analytics for testing.</p>
+      <h4 style="color: var(--danger);">🗑️ Clear Practice Progress</h4>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">Resets score, streak, and analytics for fresh testing.</p>
       <input type="password" id="clearDataPinInput" class="input-field" placeholder="Enter PIN to confirm" maxlength="6" />
-      <button class="btn btn-danger" onclick="handleClearData()" style="width: 100%; margin-top: 8px; font-size: 0.85rem; padding: 8px;">Reset Data</button>
+      <button class="btn btn-danger" onclick="handleClearData()" style="width: 100%; margin-top: 8px; font-size: 0.85rem; padding: 8px;">Reset App Data</button>
     </div>
   </div>
 </div>
 
-<!-- Analytics Dashboard Modal -->
+<!-- Analytics Modal -->
 <div id="analyticsModal" class="modal-overlay hidden">
   <div class="modal-card">
     <div class="modal-header">
-      <h3>📊 Analytics Dashboard</h3>
+      <h3>📊 Ayush's Performance</h3>
       <button class="close-btn" onclick="closeAnalyticsModal()">&times;</button>
     </div>
     
@@ -398,7 +421,11 @@ if (!localStorage.getItem('app_start_date')) {
   localStorage.setItem('app_start_date', appData.startDate);
 }
 
-// 20 Questions per day (Navodaya Exam Focused)
+// Passages for Day 3
+const passageHindi1 = "📖 **अनुच्छेद:** नीम का पेड़ भारत में बहुत उपयोगी माना जाता है। नीम की पत्तियाँ कड़वी होती हैं, लेकिन ये बीमारियों से बचाती हैं। नीम की लकड़ी में कीड़े नहीं लगते। नीम की दातून से दाँत साफ करने पर दाँत मजबूत होते हैं।";
+const passageEnglish1 = "📖 **Passage:** The Ant and the Dove were good friends. One day, an ant fell into a river. A dove sitting on a tree saw it and dropped a leaf into the water. The ant climbed on the leaf and was saved.";
+
+// 20 Questions per day (JNVST Focused)
 const questionsBank = {
   1: [
     { q: "25 + 15 = ?", options: ["30", "40", "35", "45"], ans: "40", cat: "Math" },
@@ -443,6 +470,35 @@ const questionsBank = {
     { q: "Young one of a 'Dog' is called?", options: ["Kitten", "Calf", "Puppy", "Cub"], ans: "Puppy", cat: "English" },
     { q: "60 ÷ 5 = ?", options: ["10", "11", "12", "15"], ans: "12", cat: "Math" },
     { q: "हमारे देश के प्रथम प्रधानमंत्री कौन थे?", options: ["महात्मा गांधी", "जवाहरलाल नेहरू", "राजेंद्र प्रसाद", "भगत सिंह"], ans: "जवाहरलाल नेहरू", cat: "GK" }
+  ],
+  3: [
+    // Passage Questions (Hindi)
+    { passage: passageHindi1, q: "नीम की पत्तियाँ कैसी होती हैं?", options: ["मीठी", "कड़वी", "खट्टी", "नमकीन"], ans: "कड़वी", cat: "Reading" },
+    { passage: passageHindi1, q: "दाँत मजबूत करने के लिए किसकी दातून अच्छी होती है?", options: ["आम", "बरगद", "नीम", "पीपल"], ans: "नीम", cat: "Reading" },
+    { passage: passageHindi1, q: "किसकी लकड़ी में कीड़े नहीं लगते?", options: ["नीम", "गुलाब", "केला", "तुलसी"], ans: "नीम", cat: "Reading" },
+    
+    // Passage Questions (English)
+    { passage: passageEnglish1, q: "Who fell into the river?", options: ["Dove", "Ant", "Fish", "Bird"], ans: "Ant", cat: "Reading" },
+    { passage: passageEnglish1, q: "What did the Dove drop into the water?", options: ["A Stone", "A Leaf", "A Fruit", "A Branch"], ans: "A Leaf", cat: "Reading" },
+
+    // Pattern & Mental Reasoning
+    { q: "Complete the pattern: 2, 4, 8, 16, ?", options: ["20", "24", "32", "30"], ans: "32", cat: "Reasoning" },
+    { q: "Find the odd one out: [Apple, Mango, Carrot, Banana]", options: ["Apple", "Mango", "Carrot", "Banana"], ans: "Carrot", cat: "Reasoning" },
+    { q: "Complete the series: 5, 10, 15, 20, ?", options: ["22", "25", "30", "35"], ans: "25", cat: "Reasoning" },
+    { q: "If CAT = 3, DOG = 3, then ELEPHANT = ?", options: ["6", "7", "8", "9"], ans: "8", cat: "Reasoning" },
+    { q: "Find the odd pair:", options: ["Sun - Day", "Moon - Night", "Fire - Cold", "Ice - Cold"], ans: "Fire - Cold", cat: "Reasoning" },
+
+    // Navodaya Standard Math & General Knowledge
+    { q: "0.5 + 0.25 = ?", options: ["0.70", "0.75", "0.80", "1.0"], ans: "0.75", cat: "Math" },
+    { q: "Find the LCM of 4 and 6:", options: ["10", "12", "24", "18"], ans: "12", cat: "Math" },
+    { q: "What is 20% of 100?", options: ["10", "15", "20", "25"], ans: "20", cat: "Math" },
+    { q: "1/2 + 1/2 = ?", options: ["1/4", "1", "2", "1/2"], ans: "1", cat: "Math" },
+    { q: "36 ÷ 6 × 2 = ?", options: ["3", "6", "12", "18"], ans: "12", cat: "Math" },
+    { q: "क्षेत्रफल (Area) मापने की इकाई क्या है?", options: ["मीटर", "वर्ग मीटर", "लीटर", "ग्राम"], ans: "वर्ग मीटर", cat: "Math" },
+    { q: "हमारे राष्ट्रीय ध्वज के चक्र में कितनी तीलियाँ होती हैं?", options: ["12", "20", "24", "30"], ans: "24", cat: "GK" },
+    { q: "संसार का सबसे बड़ा महाद्वीप कौन सा है?", options: ["एशिया", "अफ्रीका", "यूरोप", "अमेरिका"], ans: "एशिया", cat: "GK" },
+    { q: "Opposite of 'BRAVE' is?", options: ["Strong", "Coward", "Smart", "Bold"], ans: "Coward", cat: "English" },
+    { q: "A person who teaches is called a?", options: ["Doctor", "Teacher", "Driver", "Farmer"], ans: "Teacher", cat: "English" }
   ]
 };
 
@@ -604,6 +660,7 @@ function renderQuestion() {
   const counterBox = document.getElementById('questionCounter');
   const qBox = document.getElementById('questionText');
   const optsBox = document.getElementById('optionsContainer');
+  const passageBox = document.getElementById('passageContainer');
   const progressFill = document.getElementById('progressFill');
   const progressPercent = document.getElementById('progressPercent');
 
@@ -611,7 +668,8 @@ function renderQuestion() {
     counterBox.innerText = `Completed!`;
     progressFill.style.width = `100%`;
     progressPercent.innerText = `100%`;
-    qBox.innerText = "🎉 Excellent! You completed all questions for today.";
+    passageBox.classList.add('hidden');
+    qBox.innerText = "🎉 Excellent job Ayush! You completed today's practice.";
     optsBox.innerHTML = '';
     return;
   }
@@ -625,6 +683,15 @@ function renderQuestion() {
   progressPercent.innerText = `${percent}%`;
 
   const qData = dayQuestions[currentQuestionIndex];
+
+  // Render passage if present
+  if (qData.passage) {
+    passageBox.innerHTML = qData.passage;
+    passageBox.classList.remove('hidden');
+  } else {
+    passageBox.classList.add('hidden');
+  }
+
   qBox.innerText = qData.q;
   optsBox.innerHTML = '';
 
@@ -656,7 +723,7 @@ function checkAnswer(selected, correct, category) {
 }
 
 // ==========================================
-// 6. MANAGE MODAL (PIN & CLEAR DATA LOGIC)
+// 6. MANAGE MODAL (PIN & CLEAR LOGIC)
 // ==========================================
 function openManageModal() {
   document.getElementById('currentPinInput').value = '';
@@ -695,9 +762,9 @@ function handleClearData() {
     return;
   }
 
-  if (confirm("Are you sure you want to clear all app progress data?")) {
+  if (confirm("Reset all practice progress data for Ayush?")) {
     localStorage.clear();
-    alert("All data cleared successfully.");
+    alert("App data reset successfully.");
     window.location.reload();
   }
 }
