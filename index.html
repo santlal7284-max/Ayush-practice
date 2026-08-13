@@ -98,6 +98,13 @@ th{background:#eef3f8}
 </select>
 <button onclick="addCustom()">➕ Sawaal Add Karein</button>
 <div id="customList" style="margin-top:10px"></div>
+
+<div style="margin-top:16px;border-top:1px solid #eee;padding-top:10px">
+<p class="small"><b>🔒 Parent PIN</b> — aage wale (abhi tak na aaye) din kholne ke liye ye PIN chahiye hota hai. Default PIN hai <b>1234</b>. Naya PIN set karne ke liye:</p>
+<input id="pinOld" type="password" placeholder="Purana PIN">
+<input id="pinNew" type="password" placeholder="Naya PIN (kam se kam 4 digit)">
+<button onclick="changePin()">🔒 PIN Badlein</button>
+</div>
 </div>
 </details>
 
@@ -351,11 +358,49 @@ var TOTAL_DAYS = 180; // 6 months
 var PER_DAY = {MAT:6, ARITH:3, LANG:3};
 var storeKey = "ayush_jnv_practice_v2";
 var customKey = "ayush_jnv_custom_v2";
+var startDateKey = "ayush_jnv_startdate_v2";
+var pinKey = "ayush_jnv_pin_v2";
+var lastValidDay = 1;
 
 function saved(){try{return JSON.parse(localStorage.getItem(storeKey)||"{}")}catch(e){return {}}}
 function save(x){try{localStorage.setItem(storeKey,JSON.stringify(x))}catch(e){}}
 function customQs(){try{return JSON.parse(localStorage.getItem(customKey)||"[]")}catch(e){return []}}
 function saveCustom(x){try{localStorage.setItem(customKey,JSON.stringify(x))}catch(e){}}
+
+// ---- Date-based day locking ----
+function getStartDate(){
+ var s=localStorage.getItem(startDateKey);
+ if(!s){ s=new Date().toISOString().slice(0,10); try{localStorage.setItem(startDateKey,s)}catch(e){} }
+ return s;
+}
+function getTodayAllowedDay(){
+ var start=new Date(getStartDate()+"T00:00:00");
+ var today=new Date(); today.setHours(0,0,0,0);
+ var diff=Math.floor((today-start)/86400000);
+ var d=diff+1;
+ if(d<1) d=1;
+ if(d>TOTAL_DAYS) d=TOTAL_DAYS;
+ return d;
+}
+function getPin(){ return localStorage.getItem(pinKey)||"1234"; }
+function setPin(p){ try{localStorage.setItem(pinKey,p)}catch(e){} }
+function requestUnlock(){
+ var entered=prompt("Ye din abhi unlock nahi hua hai. Aage badhne ke liye Parent PIN daalein:");
+ if(entered===null) return false;
+ if(entered===getPin()) return true;
+ alert("Galat PIN.");
+ return false;
+}
+function changePin(){
+ var oldP=document.getElementById("pinOld").value;
+ var newP=document.getElementById("pinNew").value.trim();
+ if(oldP!==getPin()){alert("Purana PIN galat hai.");return}
+ if(!newP||newP.length<4){alert("Naya PIN kam se kam 4 digit ka hona chahiye.");return}
+ setPin(newP);
+ document.getElementById("pinOld").value="";
+ document.getElementById("pinNew").value="";
+ alert("PIN update ho gaya!");
+}
 
 // Simple deterministic shuffle (mulberry32) so the same day always shows the same set
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -392,21 +437,44 @@ function questionsForDay(d){
  return out;
 }
 
+function fillDaysForMonth(mo){
+ var dsel=document.getElementById("day");
+ dsel.innerHTML="";
+ var startDay=(mo-1)*30+1;
+ for(var i=0;i<30;i++){
+  var dayNum=startDay+i;
+  var o=document.createElement("option");o.value=dayNum;o.textContent="Day "+dayNum;dsel.appendChild(o);
+ }
+}
+function syncSelectorsToDay(d){
+ var mo=Math.ceil(d/30);
+ document.getElementById("month").value=mo;
+ fillDaysForMonth(mo);
+ document.getElementById("day").value=d;
+}
+function tryGoToDay(newDay){
+ var allowed=getTodayAllowedDay();
+ if(newDay>allowed){
+  if(!requestUnlock()){
+   syncSelectorsToDay(lastValidDay);
+   return;
+  }
+ }
+ lastValidDay=newDay;
+ syncSelectorsToDay(newDay);
+ show(newDay);
+}
+
 function init(){
  var m=document.getElementById("month"), dsel=document.getElementById("day");
  for(var mo=1;mo<=6;mo++){var o=document.createElement("option");o.value=mo;o.textContent="Month "+mo;m.appendChild(o)}
- function fillDays(){
-  dsel.innerHTML="";
-  var mo=+m.value, startDay=(mo-1)*30+1;
-  for(var i=0;i<30;i++){
-   var dayNum=startDay+i;
-   var o=document.createElement("option");o.value=dayNum;o.textContent="Day "+dayNum;dsel.appendChild(o);
-  }
- }
- m.value=1; fillDays();
- m.onchange=function(){fillDays(); show(+dsel.value)};
- dsel.onchange=function(){show(+dsel.value)};
- show(1);
+ m.onchange=function(){ fillDaysForMonth(+m.value); tryGoToDay(+document.getElementById("day").value); };
+ dsel.onchange=function(){ tryGoToDay(+dsel.value); };
+
+ var todayDay=getTodayAllowedDay();
+ lastValidDay=todayDay;
+ syncSelectorsToDay(todayDay);
+ show(todayDay);
  renderCustomList();
 }
 
@@ -450,7 +518,7 @@ function clearDay(){
 function progress(){
  var s=saved(), n=0;
  for(var i=1;i<=TOTAL_DAYS;i++) if(s[i+"_done"]) n++;
- document.getElementById("progress").innerHTML="<b>Progress: "+n+" / "+TOTAL_DAYS+" din complete</b> (6 mahine ka plan)";
+ document.getElementById("progress").innerHTML="<b>Progress: "+n+" / "+TOTAL_DAYS+" din complete</b> (6 mahine ka plan)<br>Aaj ka din (calendar ke hisaab se): <b>Day "+getTodayAllowedDay()+"</b> — isse aage ke din PIN se hi khulenge.";
 }
 
 function addCustom(){
