@@ -35,13 +35,11 @@
     body { background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; padding: 12px; display: flex; justify-content: center; align-items: flex-start; -webkit-tap-highlight-color: transparent; }
     .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; position: relative; }
     
-    /* Top Header Bar */
     .top-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; }
     .theme-btn { background: var(--card-bg); border: 1.5px solid var(--border); padding: 8px 12px; border-radius: 20px; font-size: 1.1rem; cursor: pointer; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     
     .card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 22px; padding: 20px; border: 2px solid var(--border); box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.3); }
     
-    /* Colorful Playful Login */
     .login-box { text-align: center; }
     .kids-badge { display: inline-block; background: linear-gradient(90deg, #F59E0B, #EC4899); color: white; padding: 4px 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
     
@@ -58,16 +56,14 @@
     .btn-secondary { background: var(--card-bg); border: 1.5px solid var(--border); color: var(--text-main); box-shadow: none; }
     .btn-danger { background: var(--danger); color: white; box-shadow: none; }
 
-    /* User Profile & Workspace */
     .profile-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; border: none; padding: 18px; }
     .user-info h1 { font-size: 1.35rem; font-weight: 800; }
     
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .stat-card { background: var(--input-bg); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
-    .stat-card .val { font-size: 1.2rem; font-weight: 800; color: var(--accent-gold); }
-    .stat-card .lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .stat-card { background: var(--input-bg); padding: 8px 4px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+    .stat-card .val { font-size: 1.1rem; font-weight: 800; color: var(--accent-gold); }
+    .stat-card .lbl { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
 
-    /* Question & Passage Area */
     .day-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .progress-bar-bg { width: 100%; height: 10px; background: var(--border); border-radius: 10px; overflow: hidden; margin: 8px 0 14px 0; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, #10B981, #059669); width: 0%; transition: width 0.3s; }
@@ -77,8 +73,8 @@
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .option-btn { padding: 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--input-bg); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; }
     .option-btn:active { border-color: var(--primary); background: var(--primary); color: white; }
+    .option-btn:disabled { opacity: 0.6; cursor: not-allowed; border-color: var(--border) !important; background: var(--input-bg) !important; color: var(--text-muted) !important; }
 
-    /* Toggle Switch (Admin Active/Deactivate) */
     .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--danger); transition: .3s; border-radius: 24px; }
@@ -86,7 +82,6 @@
     input:checked + .slider { background-color: var(--success); }
     input:checked + .slider:before { transform: translateX(20px); }
 
-    /* Modals & Badges */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .modal-card { background: var(--card-bg); padding: 22px; border-radius: 22px; width: 92%; max-width: 420px; border: 2px solid var(--border); max-height: 85vh; overflow-y: auto; }
     .hidden { display: none !important; }
@@ -97,13 +92,11 @@
 
 <div class="app-container">
 
-  <!-- TOP BAR (Theme Toggle) -->
   <div class="top-header">
     <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal</div>
     <button class="theme-btn" onclick="toggleTheme()" id="themeIconBtn">🌙</button>
   </div>
 
-  <!-- PLAYFUL LOGIN SCREEN -->
   <div id="loginScreen" class="card login-box">
     <span class="kids-badge">🌟 Learn & Play</span>
     <h2 style="font-size: 1.6rem; margin-bottom: 4px;">Welcome Champ! 🎓</h2>
@@ -119,11 +112,10 @@
     <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
     
     <div style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 12px;">
-      <button class="btn btn-secondary" onclick="openAdminModal()" style="font-size: 0.85rem; padding: 8px 14px;">🔑 Parent / Admin Portal</button>
+      <button class="btn btn-secondary" onclick="openAdminModal()" style="font-size: 0.85rem; padding: 8px 14px;">🔑 Admin Portal</button>
     </div>
   </div>
 
-  <!-- MAIN PRACTICE WORKSPACE -->
   <div id="practiceWorkspace" class="hidden">
     <div class="card profile-banner">
       <div class="user-info">
@@ -137,27 +129,32 @@
       <div class="stats-grid">
         <div class="stat-card"><div class="val">🔥 <span id="streakCount">0</span></div><div class="lbl">Streak</div></div>
         <div class="stat-card"><div class="val">⭐ <span id="totalPoints">0</span></div><div class="lbl">Points</div></div>
-        <div class="stat-card"><div class="val">📊</div><div class="lbl">Report</div></div>
+        <div class="stat-card"><div class="val">❌ <span id="wrongCount">0</span></div><div class="lbl">Wrong</div></div>
+        <div class="stat-card"><div class="val">📊 <span id="reportPercent">0%</span></div><div class="lbl">Accuracy</div></div>
       </div>
     </div>
 
     <div class="card" style="margin-top: 10px;">
       <div class="day-nav">
-        <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev</button>
+        <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev Day</button>
         <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 800;">Day 1</span>
-        <button class="btn btn-secondary" onclick="changeDay(1)">Next →</button>
+        <button class="btn btn-secondary" onclick="changeDay(1)">Next Day →</button>
       </div>
 
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
       <div id="passageContainer" class="passage-box hidden"></div>
       <div class="question-box" id="questionText">Loading...</div>
       <div class="options-grid" id="optionsContainer"></div>
+
+      <div style="margin-top: 16px; display: flex; justify-content: space-between;">
+        <button class="btn btn-secondary" id="btnPrevQ" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 8px 14px;">← Back Question</button>
+        <button class="btn btn-secondary" id="btnNextQ" onclick="navigateQuestion(1)" style="font-size: 0.85rem; padding: 8px 14px;">Next Question →</button>
+      </div>
     </div>
   </div>
 
 </div>
 
-<!-- ADMIN PORTAL MODAL -->
 <div id="adminModal" class="modal-overlay hidden">
   <div class="modal-card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
@@ -175,6 +172,12 @@
       <div style="background: var(--input-bg); padding: 12px; border-radius: 14px; margin-bottom: 14px; border: 1px solid var(--border);">
         <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 6px;">➕ Add New Student</h4>
         <input type="text" id="newStudentName" class="input-field" placeholder="Student Name (e.g. Rohan)" />
+        
+        <select id="newStudentGender" class="input-field">
+          <option value="Boy">👦 Boy</option>
+          <option value="Girl">👧 Girl</option>
+        </select>
+
         <select id="newStudentClass" class="input-field">
           <option value="LKG">LKG</option>
           <option value="UKG">UKG</option>
@@ -204,7 +207,14 @@
 </div>
 
 <script>
-// THEME SWITCHER LOGIC
+const BOY_AVATARS = ["👦", "🧑‍🚀", "🦸‍♂️", "🦁", "🐯", "🤖"];
+const GIRL_AVATARS = ["👧", "👩‍🚀", "🦸‍♀️", "🦄", "🦊", "🐼"];
+
+function getRandomAvatar(gender, num) {
+  let list = gender === "Girl" ? GIRL_AVATARS : BOY_AVATARS;
+  return list[(num || 1) % list.length];
+}
+
 function toggleTheme() {
   let body = document.body;
   let current = body.getAttribute('data-theme');
@@ -220,11 +230,13 @@ function toggleTheme() {
   }
 }
 
-// DB INITIALIZATION
 function getDBUsers() {
   let u = localStorage.getItem('app_db_users');
   if (!u) {
-    let defaultUsers = [{ id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", active: true }];
+    let defaultUsers = [{ 
+      id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy",
+      avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {} 
+    }];
     localStorage.setItem('app_db_users', JSON.stringify(defaultUsers));
     return defaultUsers;
   }
@@ -235,8 +247,9 @@ function saveDBUsers(users) { localStorage.setItem('app_db_users', JSON.stringif
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
 let currentActiveUser = null;
+let currentQIndex = 0;
+let currentDay = 1;
 
-// AUTOCOMPLETE & ON-CLICK DROPDOWN
 function showSuggestions(showAll = false) {
   let val = document.getElementById('loginUsername').value.trim().toLowerCase();
   let box = document.getElementById('suggestionsBox');
@@ -252,7 +265,7 @@ function showSuggestions(showAll = false) {
   matches.forEach(m => {
     let item = document.createElement('div');
     item.className = 'suggestion-item';
-    item.innerHTML = `<span>🎓 ${m.id}</span> <span class="badge">${m.class}</span>`;
+    item.innerHTML = `<span>${m.avatar || '🎓'} ${m.id}</span> <span class="badge">${m.class}</span>`;
     item.onclick = () => {
       document.getElementById('loginUsername').value = m.id;
       box.classList.add('hidden');
@@ -265,7 +278,6 @@ function showSuggestions(showAll = false) {
 
 function handleUsernameTyping() { showSuggestions(false); }
 
-// Close dropdown on outside click
 document.addEventListener('click', function(e) {
   let wrapper = document.querySelector('.autocomplete-wrapper');
   if (wrapper && !wrapper.contains(e.target)) {
@@ -273,7 +285,6 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// LOGIN WITH ACTIVE / DEACTIVE CHECK
 function handleStudentLogin() {
   let uName = document.getElementById('loginUsername').value.trim();
   let uPin = document.getElementById('loginPin').value.trim();
@@ -283,10 +294,12 @@ function handleStudentLogin() {
   
   if (found) {
     if (found.active === false) {
-      alert("❌ Account Deactivated! Contact Admin/Parent to activate.");
+      alert("❌ Account Deactivated! Contact Admin.");
       return;
     }
     currentActiveUser = found;
+    if (!currentActiveUser.userAnswers) currentActiveUser.userAnswers = {};
+    
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('practiceWorkspace').classList.remove('hidden');
     loadUserWorkspace();
@@ -304,15 +317,23 @@ function logoutStudent() {
 }
 
 function loadUserWorkspace() {
-  document.getElementById('userDisplayName').innerText = `${currentActiveUser.id} 🎓`;
+  document.getElementById('userDisplayName').innerText = `${currentActiveUser.avatar || '🎓'} ${currentActiveUser.id}`;
   document.getElementById('userClassBadge').innerText = currentActiveUser.class;
   currentQIndex = 0;
+  refreshStatsUI();
   renderQuestion();
 }
 
-// 20 REAL QUESTIONS ENGINE
-let currentQIndex = 0;
-let currentDay = 1;
+function refreshStatsUI() {
+  if(!currentActiveUser) return;
+  document.getElementById('streakCount').innerText = currentActiveUser.streak || 0;
+  document.getElementById('totalPoints').innerText = currentActiveUser.points || 0;
+  document.getElementById('wrongCount').innerText = currentActiveUser.wrong || 0;
+  
+  let totalAttempted = (currentActiveUser.points / 10) + currentActiveUser.wrong;
+  let accuracy = totalAttempted > 0 ? Math.round(((currentActiveUser.points / 10) / totalAttempted) * 100) : 0;
+  document.getElementById('reportPercent').innerText = `${accuracy}%`;
+}
 
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
@@ -336,185 +357,9 @@ function generateAdaptiveQuestions(userClass, day) {
       questions.push({ q: `${num1} + ${num2} = ?`, options: [`${num1+num2}`, `${num1+num2+2}`, `${num1+num2-1}`, `${num1+num2+4}`], ans: `${num1+num2}` });
     }
   } 
-  else if (userClass === "Class 4" || userClass === "Class 5") { // JNVST PREP PATTERN
+  else if (userClass === "Class 4" || userClass === "Class 5") {
     let pText = day % 2 === 1 
       ? `📖 **अनुच्छेद (Day ${day}):** जवाहर नवोदय विद्यालय में प्रवेश पाने के लिए कड़ी मेहनत और नियमित अभ्यास ज़रूरी है। अनुशासन से छात्र समय पर कार्य करना सीखते हैं।`
       : `📖 **Passage (Day ${day}):** Regular practice brings perfection in Mathematics and Reasoning. Time management is crucial for competitive exams.`;
 
-    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय विद्यालय में सफलता के लिए क्या आवश्यक है?" : "What brings perfection in Mathematics?", options: day % 2 === 1 ? ["कड़ी मेहनत", "आलस्य", "देर तक सोना", "खेलना"] : ["Regular practice", "Sleeping late", "Watching TV", "Luck"], ans: day % 2 === 1 ? "कड़ी मेहनत" : "Regular practice" });
-    questions.push({ passage: pText, q: day % 2 === 1 ? "अनुशासन से छात्र क्या सीखते हैं?" : "What is crucial for competitive exams?", options: day % 2 === 1 ? ["समय पर कार्य करना", "लड़ाई करना", "पढ़ाई छोड़ना", "TV देखना"] : ["Time management", "Fast eating", "Noise", "Sleeping"], ans: day % 2 === 1 ? "समय पर कार्य करना" : "Time management" });
-
-    let mult = (day % 4) + 2;
-    for(let i = 1; i <= 5; i++) {
-      let baseVal = (day * 3) + (i * 4);
-      questions.push({ q: `Series Complete: ${baseVal}, ${baseVal + mult}, ${baseVal + mult*2}, ?`, options: [`${baseVal + mult*3}`, `${baseVal + mult*3 + 2}`, `${baseVal + mult*2 + 1}`, `${baseVal + mult*4}`], ans: `${baseVal + mult*3}` });
-    }
-
-    for(let i = 1; i <= 7; i++) {
-      let a = (day * 3) + (i * 5);
-      let b = (day * 2) + (i * 2);
-      questions.push({ q: `Solve: ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b-2}`, `${a+b+3}`, `${a+b+5}`], ans: `${a+b}` });
-    }
-
-    const staticBank = [
-      { q: "भारत के वर्तमान राष्ट्रपति कौन हैं?", opts: ["द्रौपदी मुर्मू", "रामनाथ कोविंद", "नरेंद्र मोदी", "अमित शाह"], a: "द्रौपदी मुर्मू" },
-      { q: "Opposite of 'ANCIENT' is?", opts: ["Old", "Modern", "Past", "Historic"], a: "Modern" },
-      { q: "100 ka 25% kitna hoga?", opts: ["10", "20", "25", "50"], a: "25" },
-      { q: "L.C.M of 6 and 12 is?", opts: ["6", "12", "18", "24"], a: "12" },
-      { q: "1 kilometer me kitne meter hote hain?", opts: ["100m", "500m", "1000m", "10000m"], a: "1000m" },
-      { q: "Smallest Prime Number (सबसे छोटी अभाज्य संख्या)?", opts: ["0", "1", "2", "3"], a: "2" }
-    ];
-
-    staticBank.forEach(item => { questions.push({ q: item.q, options: item.opts, ans: item.a }); });
-  } 
-  else { // Class 6 to 9th
-    for(let i = 1; i <= 20; i++) {
-      let val = i * 2 + day;
-      questions.push({ q: `Solve for x: ${i}x + 4 = ${val * 2 + 4}`, options: [`${val}`, `${val+2}`, `${val-1}`, `${val+4}`], ans: `${val}` });
-    }
-  }
-
-  return questions.slice(0, 20);
-}
-
-function renderQuestion() {
-  if (!currentActiveUser) return;
-  let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
-  document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
-
-  let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
-  let fill = document.getElementById('progressFill');
-
-  if (currentQIndex >= questions.length) {
-    passageBox.classList.add('hidden');
-    qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
-    optsBox.innerHTML = '';
-    fill.style.width = '100%';
-    return;
-  }
-
-  fill.style.width = `${Math.round((currentQIndex / questions.length) * 100)}%`;
-  let q = questions[currentQIndex];
-
-  if (q.passage) { passageBox.innerHTML = q.passage; passageBox.classList.remove('hidden'); }
-  else { passageBox.classList.add('hidden'); }
-
-  qBox.innerText = `Q${currentQIndex + 1}. ${q.q}`;
-  optsBox.innerHTML = '';
-
-  q.options.forEach(opt => {
-    let btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.innerText = opt;
-    btn.onclick = () => {
-      currentQIndex++;
-      renderQuestion();
-    };
-    optsBox.appendChild(btn);
-  });
-}
-
-function changeDay(delta) {
-  if (currentDay + delta >= 1) {
-    currentDay += delta;
-    currentQIndex = 0;
-    renderQuestion();
-  }
-}
-
-// ADMIN CONTROL & ACTIVE/DEACTIVATE TOGGLE
-function openAdminModal() {
-  document.getElementById('adminPinInput').value = '';
-  document.getElementById('adminAuthBox').classList.remove('hidden');
-  document.getElementById('adminContentBox').classList.add('hidden');
-  document.getElementById('adminModal').classList.remove('hidden');
-}
-
-function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
-
-function verifyAdminPin() {
-  if (document.getElementById('adminPinInput').value === getAdminPin()) {
-    document.getElementById('adminAuthBox').classList.add('hidden');
-    document.getElementById('adminContentBox').classList.remove('hidden');
-    renderAdminUsersList();
-  } else { alert("Incorrect Master Admin PIN!"); }
-}
-
-function renderAdminUsersList() {
-  let users = getDBUsers();
-  let list = document.getElementById('adminUsersList');
-  list.innerHTML = '';
-  users.forEach((u, idx) => {
-    let row = document.createElement('div');
-    row.style.cssText = 'background:var(--input-bg); padding:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);';
-    
-    let isChecked = u.active !== false ? 'checked' : '';
-
-    row.innerHTML = `
-      <div>
-        <strong>${u.id}</strong> <span class="badge">${u.class}</span><br>
-        <small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <label class="switch">
-          <input type="checkbox" ${isChecked} onchange="toggleUserActiveStatus(${idx})">
-          <span class="slider"></span>
-        </label>
-        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">Del</button>` : ''}
-      </div>
-    `;
-    list.appendChild(row);
-  });
-}
-
-function toggleUserActiveStatus(index) {
-  let users = getDBUsers();
-  users[index].active = users[index].active === false ? true : false;
-  saveDBUsers(users);
-}
-
-function addNewStudent() {
-  let name = document.getElementById('newStudentName').value.trim();
-  let cls = document.getElementById('newStudentClass').value;
-  if (!name) { alert("Enter Student Name!"); return; }
-
-  let users = getDBUsers();
-  let nextNum = users.length + 1;
-  let formattedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
-  let generatedID = `${name} ${formattedNum}`;
-  let randomPin = Math.floor(1000 + Math.random() * 9000).toString();
-
-  users.push({ id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, active: true });
-  saveDBUsers(users);
-
-  alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
-  document.getElementById('newStudentName').value = '';
-  renderAdminUsersList();
-}
-
-function deleteStudent(id) {
-  if (confirm(`Delete student ${id}?`)) {
-    let users = getDBUsers().filter(u => u.id !== id);
-    saveDBUsers(users);
-    renderAdminUsersList();
-  }
-}
-
-function updateAdminPin() {
-  let p = document.getElementById('changeAdminPinVal').value.trim();
-  if (p.length >= 4) {
-    localStorage.setItem('app_master_pin', p);
-    alert("Master Admin PIN Updated!");
-    closeAdminModal();
-  } else { alert("PIN must be at least 4 digits."); }
-}
-
-window.onload = () => {
-  let savedTheme = localStorage.getItem('app_theme') || 'dark';
-  document.body.setAttribute('data-theme', savedTheme);
-  document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
-  getDBUsers();
-};
-</script>
-</body>
-</html>
+    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय विद्यालय में सफलता के लिए क्या आवश्यक है?" : "What brings perfection in Mathematics?", options: day % 2 === 1 ? ["कड़ी मेहनत", "आलस्य", "देर तक सोना", "खेलना"] : ["Regular practice", "Sleeping late", "Watching TV", "L
