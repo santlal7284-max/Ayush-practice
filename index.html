@@ -84,6 +84,8 @@
     .modal-card { background: var(--card-bg); padding: 22px; border-radius: 22px; width: 92%; max-width: 420px; border: 2px solid var(--border); max-height: 85vh; overflow-y: auto; }
     .hidden { display: none !important; }
     .badge { background: rgba(99, 102, 241, 0.2); color: var(--primary); padding: 3px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; }
+
+    .toast-msg { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: #1E293B; color: #FFF; padding: 10px 20px; border-radius: 25px; font-size: 0.85rem; font-weight: 700; border: 1.5px solid var(--primary); z-index: 9999; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
   </style>
 </head>
 <body>
@@ -229,6 +231,17 @@ let globalUsersList = [];
 let currentActiveUser = null;
 let currentQIndex = 0;
 let currentDay = 1;
+let backPressTime = 0;
+
+function showToast(msg) {
+  let existing = document.querySelector('.toast-msg');
+  if (existing) existing.remove();
+  let toast = document.createElement('div');
+  toast.className = 'toast-msg';
+  toast.innerText = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast) toast.remove(); }, 2000);
+}
 
 function getTodayString() {
   const d = new Date();
@@ -324,6 +337,7 @@ function handleStudentLogin() {
     
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('practiceWorkspace').classList.remove('hidden');
+    history.pushState({ page: 'workspace' }, '');
     loadUserWorkspace();
   } else {
     alert("Invalid Username or PIN!");
@@ -362,26 +376,26 @@ function generateAdaptiveQuestions(userClass, day) {
 
   if (userClass === "LKG" || userClass === "UKG") {
     const visualBank = [
-      { q: "Which color is 🔴?", opts: ["Red", "Blue", "Green", "Yellow"], a: "Red" },
-      { q: "Which color is 🟢?", opts: ["Blue", "Green", "Red", "Yellow"], a: "Green" },
-      { q: "Which color is 🟡?", opts: ["Pink", "Orange", "Yellow", "Purple"], a: "Yellow" },
-      { q: "Identify Shape: ⭕", opts: ["Circle", "Square", "Triangle", "Star"], a: "Circle" },
-      { q: "Identify Shape: ⬛", opts: ["Square", "Circle", "Rectangle", "Oval"], a: "Square" },
-      { q: "Identify Shape: ⭐", opts: ["Star", "Square", "Circle", "Heart"], a: "Star" },
-      { q: "Count Apple: 🍎", opts: ["1", "2", "3", "4"], a: "1" },
-      { q: "Count Apples: 🍎 🍎 🍎", opts: ["2", "3", "4", "5"], a: "3" },
-      { q: "Count Stars: ⭐ ⭐", opts: ["1", "2", "3", "4"], a: "2" },
-      { q: "Find Dog 🐶", opts: ["Dog", "Cat", "Lion", "Tiger"], a: "Dog" },
-      { q: "Find Elephant 🐘", opts: ["Monkey", "Elephant", "Dog", "Bird"], a: "Elephant" },
-      { q: "What comes after 'A'?", opts: ["B", "C", "D", "E"], a: "B" },
-      { q: "What comes after 'C'?", opts: ["D", "E", "F", "G"], a: "D" },
-      { q: "Count: 1 + 1 = ?", opts: ["2", "3", "4", "1"], a: "2" },
-      { q: "Which one is Sun ☀️?", opts: ["Sun", "Moon", "Cloud", "Rain"], a: "Sun" },
-      { q: "Which one is Ice-Cream 🍦?", opts: ["Cake", "Ice-Cream", "Pizza", "Apple"], a: "Ice-Cream" },
-      { q: "Count Balloons: 🎈 🎈 🎈 🎈", opts: ["3", "4", "5", "2"], a: "4" },
-      { q: "Which shape is Triangle 🔺?", opts: ["Triangle", "Circle", "Square", "Star"], a: "Triangle" },
-      { q: "What comes after '1'?", opts: ["2", "3", "4", "5"], a: "2" },
-      { q: "What color is Milk 🥛?", opts: ["White", "Black", "Red", "Green"], a: "White" }
+      { q: "Which color is 🔴?", options: ["Red", "Blue", "Green", "Yellow"], ans: "Red" },
+      { q: "Which color is 🟢?", options: ["Blue", "Green", "Red", "Yellow"], ans: "Green" },
+      { q: "Which color is 🟡?", options: ["Pink", "Orange", "Yellow", "Purple"], ans: "Yellow" },
+      { q: "Identify Shape: ⭕", options: ["Circle", "Square", "Triangle", "Star"], ans: "Circle" },
+      { q: "Identify Shape: ⬛", options: ["Square", "Circle", "Rectangle", "Oval"], ans: "Square" },
+      { q: "Identify Shape: ⭐", options: ["Star", "Square", "Circle", "Heart"], ans: "Star" },
+      { q: "Count Apple: 🍎", options: ["1", "2", "3", "4"], ans: "1" },
+      { q: "Count Apples: 🍎 🍎 🍎", options: ["2", "3", "4", "5"], ans: "3" },
+      { q: "Count Stars: ⭐ ⭐", options: ["1", "2", "3", "4"], ans: "2" },
+      { q: "Find Dog 🐶", options: ["Dog", "Cat", "Lion", "Tiger"], ans: "Dog" },
+      { q: "Find Elephant 🐘", options: ["Monkey", "Elephant", "Dog", "Bird"], ans: "Elephant" },
+      { q: "What comes after 'A'?", options: ["B", "C", "D", "E"], ans: "B" },
+      { q: "What comes after 'C'?", options: ["D", "E", "F", "G"], ans: "D" },
+      { q: "Count: 1 + 1 = ?", options: ["2", "3", "4", "1"], ans: "2" },
+      { q: "Which one is Sun ☀️?", options: ["Sun", "Moon", "Cloud", "Rain"], ans: "Sun" },
+      { q: "Which one is Ice-Cream 🍦?", options: ["Cake", "Ice-Cream", "Pizza", "Apple"], ans: "Ice-Cream" },
+      { q: "Count Balloons: 🎈 🎈 🎈 🎈", options: ["3", "4", "5", "2"], ans: "4" },
+      { q: "Which shape is Triangle 🔺?", options: ["Triangle", "Circle", "Square", "Star"], ans: "Triangle" },
+      { q: "What comes after '1'?", options: ["2", "3", "4", "5"], ans: "2" },
+      { q: "What color is Milk 🥛?", options: ["White", "Black", "Red", "Green"], ans: "White" }
     ];
     return visualBank;
   } 
@@ -413,15 +427,15 @@ function generateAdaptiveQuestions(userClass, day) {
     }
 
     const staticBank = [
-      { q: "भारत के वर्तमान राष्ट्रपति कौन हैं?", opts: ["द्रौपदी मुर्मू", "रामनाथ कोविंद", "नरेंद्र मोदी", "अमित शाह"], a: "द्रौपदी मुर्मू" },
-      { q: "Opposite of 'ANCIENT' is?", opts: ["Old", "Modern", "Past", "Historic"], a: "Modern" },
-      { q: "100 ka 25% kitna hoga?", opts: ["10", "20", "25", "50"], a: "25" },
-      { q: "L.C.M of 6 and 12 is?", opts: ["6", "12", "18", "24"], a: "12" },
-      { q: "1 kilometer me kitne meter hote hain?", opts: ["100m", "500m", "1000m", "10000m"], a: "1000m" },
-      { q: "Smallest Prime Number (सबसे छोटी अभाज्य संख्या)?", opts: ["0", "1", "2", "3"], a: "2" }
+      { q: "भारत के वर्तमान राष्ट्रपति कौन हैं?", options: ["द्रौपदी मुर्मू", "रामनाथ कोविंद", "नरेंद्र मोदी", "अमित शाह"], ans: "द्रौपदी मुर्मू" },
+      { q: "Opposite of 'ANCIENT' is?", options: ["Old", "Modern", "Past", "Historic"], ans: "Modern" },
+      { q: "100 ka 25% kitna hoga?", options: ["10", "20", "25", "50"], ans: "25" },
+      { q: "L.C.M of 6 and 12 is?", options: ["6", "12", "18", "24"], ans: "12" },
+      { q: "1 kilometer me kitne meter hote hain?", options: ["100m", "500m", "1000m", "10000m"], ans: "1000m" },
+      { q: "Smallest Prime Number (सबसे छोटी अभाज्य संख्या)?", options: ["0", "1", "2", "3"], ans: "2" }
     ];
 
-    staticBank.forEach(item => { questions.push({ q: item.q, options: item.opts, ans: item.a }); });
+    staticBank.forEach(item => { questions.push({ q: item.q, options: item.options, ans: item.ans }); });
   } 
   else {
     for(let i = 1; i <= 20; i++) {
@@ -473,7 +487,6 @@ function renderQuestion() {
   let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
   document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
 
-  // DATE-BASED AND COMPLETION-BASED DAY LOCK CHECK
   let nextBtn = document.getElementById('btnNextDay');
   let todayStr = getTodayString();
   let dayFinished = isDayCompleted(currentDay);
@@ -484,7 +497,7 @@ function renderQuestion() {
     nextBtn.style.opacity = "1";
   } else {
     nextBtn.disabled = true;
-    nextBtn.style.opacity = "0.4";
+    nextBtn.style.opacity = "0.5";
   }
 
   let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
@@ -544,8 +557,13 @@ function changeDay(delta) {
     }
     let todayStr = getTodayString();
     if (currentActiveUser.lastCompletedDate === todayStr) {
-      alert("🔒 Day " + (currentDay + 1) + " will unlock tomorrow! Great job for today! 🎉");
-      return;
+      let overridePin = prompt("🔒 Day " + (currentDay + 1) + " unlocks tomorrow!\n\nEnter Admin PIN to unlock early:");
+      if (overridePin === getAdminPin()) {
+        alert("🔓 Day Unlocked by Admin!");
+      } else {
+        if(overridePin) alert("Incorrect Admin PIN!");
+        return;
+      }
     }
   }
   if (currentDay + delta >= 1) {
@@ -560,9 +578,12 @@ function openAdminModal() {
   document.getElementById('adminAuthBox').classList.remove('hidden');
   document.getElementById('adminContentBox').classList.add('hidden');
   document.getElementById('adminModal').classList.remove('hidden');
+  history.pushState({ page: 'admin' }, '');
 }
 
-function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
+function closeAdminModal() { 
+  document.getElementById('adminModal').classList.add('hidden'); 
+}
 
 function verifyAdminPin() {
   if (document.getElementById('adminPinInput').value === getAdminPin()) {
@@ -592,7 +613,7 @@ function renderAdminUsersList() {
           <input type="checkbox" ${isChecked} onchange="toggleUserActiveStatus('${u.id}', this.checked)">
           <span class="slider"></span>
         </label>
-        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:4px 8px; font-size:0.7rem;">Del</button>` : ''}
+        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:4px 6px; font-size:0.7rem;">Del</button>` : ''}
       </div>
     `;
     list.appendChild(row);
@@ -682,6 +703,36 @@ function updateAdminPin() {
   } else { alert("PIN must be at least 4 digits."); }
 }
 
+// PHONE BACK BUTTON NAVIGATION CONTROL
+window.onpopstate = function(e) {
+  let adminModal = document.getElementById('adminModal');
+  if (adminModal && !adminModal.classList.contains('hidden')) {
+    adminModal.classList.add('hidden');
+    return;
+  }
+
+  let practiceWorkspace = document.getElementById('practiceWorkspace');
+  if (practiceWorkspace && !practiceWorkspace.classList.contains('hidden')) {
+    if (confirm("Logout current student?")) {
+      logoutStudent();
+    } else {
+      history.pushState({ page: 'workspace' }, '');
+    }
+    return;
+  }
+
+  // ON LOGIN SCREEN: PRESS BACK AGAIN TO EXIT
+  let now = new Date().getTime();
+  if (now - backPressTime < 2000) {
+    // Allows exiting app/page on second press
+    return;
+  } else {
+    backPressTime = now;
+    showToast("Press back again to exit");
+    history.pushState({ page: 'login' }, '');
+  }
+};
+
 document.addEventListener('click', function(e) {
   let wrapper = document.querySelector('.autocomplete-wrapper');
   if (wrapper && !wrapper.contains(e.target)) {
@@ -694,6 +745,7 @@ window.onload = function() {
   let savedTheme = localStorage.getItem('app_theme') || 'dark';
   document.body.setAttribute('data-theme', savedTheme);
   document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
+  history.pushState({ page: 'login' }, '');
   initCloudSync();
 };
 </script>
