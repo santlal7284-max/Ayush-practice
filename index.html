@@ -39,6 +39,13 @@ summary{font-weight:bold;color:#174a7e;cursor:pointer}
 table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
 td,th{border:1px solid #ddd;padding:6px;text-align:center}
 th{background:#eef3f8}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center}
+.modal-box{background:#fff;border-radius:16px;padding:24px 20px;max-width:300px;width:85%;text-align:center;box-shadow:0 8px 30px #0004}
+.modal-box h3{margin:0 0 14px;color:#174a7e;font-size:20px}
+.pin-input{width:100%;text-align:center;font-size:26px;letter-spacing:10px;padding:12px 8px}
+.modal-error{color:#c0392b;font-size:13px;min-height:18px;margin-top:8px}
+.modal-actions{margin-top:14px;display:flex;gap:8px}
+.modal-actions button{flex:1;margin:0}
 </style>
 </head>
 <body>
@@ -60,7 +67,7 @@ th{background:#eef3f8}
 <tr><td>Arithmetic</td><td>20</td><td>25</td><td>07</td></tr>
 <tr><td>Language</td><td>20</td><td>25</td><td>07</td></tr>
 </table>
-<p class="small">Total: 80 questions, 100 marks, 2 ghante. Koi negative marking nahi hai, lekin teeno section mein alag-alag minimum marks laana zaroori hai — isliye is app mein teeno section har din practice karwaye jaate hain.</p>
+<p class="small">Total: 80 questions, 100 marks, 2 hours. There's no negative marking, but each section needs its own minimum qualifying marks — that's why this app gives you practice in all three sections every day.</p>
 </details>
 
 <div class="panel">
@@ -76,44 +83,56 @@ th{background:#eef3f8}
 <div id="app"></div>
 
 <details id="manageBox">
-<summary>⚙️ Syllabus Manage Karein (naye sawaal / topic add karein)</summary>
+<summary>⚙️ Manage Syllabus (add new questions / topics)</summary>
 <div style="margin-top:10px">
-<p class="small">Yahan se aap khud naye sawaal add kar sakte hain — bina app dobara banaye. Naye sawaal turant next din ke practice mix mein shamil ho jaayenge.</p>
+<p class="small">Add new questions here yourself — no need to rebuild the app. New questions are included in the practice mix from the next day onward.</p>
 <select id="cSection">
 <option value="MAT">Mental Ability</option>
 <option value="ARITH">Arithmetic</option>
 <option value="LANG">Language</option>
 </select>
-<input id="cCategory" placeholder="Topic ka naam (jaise: Series, Fractions, Grammar)">
-<input id="cQ" placeholder="Sawaal likhein">
+<input id="cCategory" placeholder="Topic name (e.g. Series, Fractions, Grammar)">
+<input id="cQ" placeholder="Enter the question">
 <input id="cA" placeholder="Option A">
 <input id="cB" placeholder="Option B">
 <input id="cC" placeholder="Option C">
 <input id="cD" placeholder="Option D">
 <select id="cAns">
-<option value="A">Sahi jawab: A</option>
-<option value="B">Sahi jawab: B</option>
-<option value="C">Sahi jawab: C</option>
-<option value="D">Sahi jawab: D</option>
+<option value="A">Correct answer: A</option>
+<option value="B">Correct answer: B</option>
+<option value="C">Correct answer: C</option>
+<option value="D">Correct answer: D</option>
 </select>
-<button onclick="addCustom()">➕ Sawaal Add Karein</button>
+<button onclick="addCustom()">➕ Add Question</button>
 <div id="customList" style="margin-top:10px"></div>
 
 <div style="margin-top:16px;border-top:1px solid #eee;padding-top:10px">
-<p class="small"><b>🔒 Parent PIN</b> — aage wale (abhi tak na aaye) din kholne ke liye ye PIN chahiye hota hai. Default PIN hai <b>1234</b>. Naya PIN set karne ke liye:</p>
-<input id="pinOld" type="password" placeholder="Purana PIN">
-<input id="pinNew" type="password" placeholder="Naya PIN (kam se kam 4 digit)">
-<button onclick="changePin()">🔒 PIN Badlein</button>
+<p class="small"><b>🔒 Parent PIN</b> — this PIN is required to open days that haven't arrived yet. Default PIN is <b>1234</b>. To set a new PIN:</p>
+<input id="pinOld" type="password" placeholder="Current PIN">
+<input id="pinNew" type="password" placeholder="New PIN (at least 4 digits)">
+<button onclick="changePin()">🔒 Change PIN</button>
 </div>
 </div>
 </details>
+
+<div class="modal-overlay" id="pinModal">
+<div class="modal-box">
+<h3>Enter PIN</h3>
+<input class="pin-input" id="pinModalInput" type="password" inputmode="numeric" maxlength="8" onkeydown="if(event.key==='Enter')pinModalSubmit()">
+<div class="modal-error" id="pinModalError"></div>
+<div class="modal-actions">
+<button class="secondary" onclick="pinModalCancel()">Cancel</button>
+<button onclick="pinModalSubmit()">Unlock</button>
+</div>
+</div>
+</div>
 
 </div>
 <script>
 // =====================================================================
 // SYLLABUS / QUESTION BANK — organized by JNVST section & topic.
-// Yahan se koi bhi naya topic ya sawaal add kiya ja sakta hai. Har item
-// format: ["Sawaal", "OptionA|OptionB|OptionC|OptionD", "SahiJawab"]
+// You can add any new topic or question here. Each item's
+// format: ["Question", "OptionA|OptionB|OptionC|OptionD", "CorrectAnswer"]
 // =====================================================================
 var BANK = {
  MAT: {
@@ -384,22 +403,47 @@ function getTodayAllowedDay(){
 }
 function getPin(){ return localStorage.getItem(pinKey)||"1234"; }
 function setPin(p){ try{localStorage.setItem(pinKey,p)}catch(e){} }
-function requestUnlock(){
- var entered=prompt("Ye din abhi unlock nahi hua hai. Aage badhne ke liye Parent PIN daalein:");
- if(entered===null) return false;
- if(entered===getPin()) return true;
- alert("Galat PIN.");
- return false;
+
+var pinModalCallback=null;
+function showPinModal(callback){
+ pinModalCallback=callback;
+ document.getElementById("pinModalInput").value="";
+ document.getElementById("pinModalError").textContent="";
+ var modal=document.getElementById("pinModal");
+ modal.style.display="flex";
+ setTimeout(function(){document.getElementById("pinModalInput").focus()},50);
 }
+function hidePinModal(){
+ document.getElementById("pinModal").style.display="none";
+ pinModalCallback=null;
+}
+function pinModalSubmit(){
+ var entered=document.getElementById("pinModalInput").value;
+ var cb=pinModalCallback;
+ if(entered===getPin()){
+  hidePinModal();
+  if(cb) cb(true);
+ } else {
+  document.getElementById("pinModalError").textContent="Incorrect PIN, try again";
+  document.getElementById("pinModalInput").value="";
+  document.getElementById("pinModalInput").focus();
+ }
+}
+function pinModalCancel(){
+ var cb=pinModalCallback;
+ hidePinModal();
+ if(cb) cb(false);
+}
+
 function changePin(){
  var oldP=document.getElementById("pinOld").value;
  var newP=document.getElementById("pinNew").value.trim();
- if(oldP!==getPin()){alert("Purana PIN galat hai.");return}
- if(!newP||newP.length<4){alert("Naya PIN kam se kam 4 digit ka hona chahiye.");return}
+ if(oldP!==getPin()){alert("Current PIN is incorrect.");return}
+ if(!newP||newP.length<4){alert("New PIN must be at least 4 digits.");return}
  setPin(newP);
  document.getElementById("pinOld").value="";
  document.getElementById("pinNew").value="";
- alert("PIN update ho gaya!");
+ alert("PIN updated successfully!");
 }
 
 // Simple deterministic shuffle (mulberry32) so the same day always shows the same set
@@ -455,10 +499,16 @@ function syncSelectorsToDay(d){
 function tryGoToDay(newDay){
  var allowed=getTodayAllowedDay();
  if(newDay>allowed){
-  if(!requestUnlock()){
-   syncSelectorsToDay(lastValidDay);
-   return;
-  }
+  showPinModal(function(ok){
+   if(ok){
+    lastValidDay=newDay;
+    syncSelectorsToDay(newDay);
+    show(newDay);
+   } else {
+    syncSelectorsToDay(lastValidDay);
+   }
+  });
+  return;
  }
  lastValidDay=newDay;
  syncSelectorsToDay(newDay);
@@ -480,7 +530,7 @@ function init(){
 
 function show(d){
  var a=questionsForDay(d), old=saved(), ans=old[d]||{};
- var out="<div class='panel'><h2>Day "+d+" / "+TOTAL_DAYS+"</h2><p class='small'>Pehle sawaal hal karein, phir Check dabayein.</p></div>";
+ var out="<div class='panel'><h2>Day "+d+" / "+TOTAL_DAYS+"</h2><p class='small'>Answer the questions first, then tap Check.</p></div>";
  for(var i=0;i<a.length;i++){
   var x=a[i];
   out+="<div class='q' id='q"+i+"'><span class='badge badge-"+x.section+"'>"+x.cat+"</span><br><b>"+(i+1)+". "+x.q+"</b>";
@@ -506,7 +556,7 @@ function check(){
  s[d+"_score"]=score+"/"+a.length;
  if(score===a.length){s[d+"_done"]=true}
  save(s);
- document.getElementById("score").innerHTML="<h2>🎯 Score: "+score+" / "+a.length+"</h2>"+(score===a.length?"<b>🎉 Din complete!</b>":"Galat sawaal dobara koshish karein.");
+ document.getElementById("score").innerHTML="<h2>🎯 Score: "+score+" / "+a.length+"</h2>"+(score===a.length?"<b>🎉 Day complete!</b>":"Try the wrong ones again.");
  progress();
 }
 
@@ -518,7 +568,7 @@ function clearDay(){
 function progress(){
  var s=saved(), n=0;
  for(var i=1;i<=TOTAL_DAYS;i++) if(s[i+"_done"]) n++;
- document.getElementById("progress").innerHTML="<b>Progress: "+n+" / "+TOTAL_DAYS+" din complete</b> (6 mahine ka plan)<br>Aaj ka din (calendar ke hisaab se): <b>Day "+getTodayAllowedDay()+"</b> — isse aage ke din PIN se hi khulenge.";
+ document.getElementById("progress").innerHTML="<b>Progress: "+n+" / "+TOTAL_DAYS+" days complete</b> (6-month plan)<br>Today's day (by calendar): <b>Day "+getTodayAllowedDay()+"</b> — days beyond this need the PIN to unlock.";
 }
 
 function addCustom(){
@@ -530,7 +580,7 @@ function addCustom(){
  var C=document.getElementById("cC").value.trim();
  var D=document.getElementById("cD").value.trim();
  var ansLetter=document.getElementById("cAns").value;
- if(!q||!A||!B||!C||!D){alert("Kripya sawaal aur chaaron options bharein.");return}
+ if(!q||!A||!B||!C||!D){alert("Please fill in the question and all four options.");return}
  var opts=[A,B,C,D];
  var ans=opts[{A:0,B:1,C:2,D:3}[ansLetter]];
  var list=customQs();
@@ -545,7 +595,7 @@ function addCustom(){
  document.getElementById("cC").value="";
  document.getElementById("cD").value="";
  renderCustomList();
- alert("Sawaal add ho gaya! Ab ye practice mix mein shamil hai.");
+ alert("Question added! It's now included in the practice mix.");
 }
 
 function deleteCustom(idx){
@@ -559,8 +609,8 @@ function deleteCustom(idx){
 function renderCustomList(){
  var list=customQs();
  var box=document.getElementById("customList");
- if(list.length===0){box.innerHTML="<p class='small'>Abhi koi custom sawaal add nahi kiya gaya.</p>";return}
- var html="<p class='small'><b>Aapke add kiye gaye sawaal ("+list.length+"):</b></p>";
+ if(list.length===0){box.innerHTML="<p class='small'>No custom questions added yet.</p>";return}
+ var html="<p class='small'><b>Your added questions ("+list.length+"):</b></p>";
  list.forEach(function(c,idx){
   html+="<div class='custom-item'><span class='badge badge-"+c.section+"'>"+c.category+"</span><br>"+c.q+" <button class='danger' style='padding:4px 8px;font-size:12px' onclick='deleteCustom("+idx+")'>Delete</button></div>";
  });
