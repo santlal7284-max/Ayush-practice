@@ -4,375 +4,116 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JNVST Prep - Ayush Raj</title>
-  
-  <!-- Fast Instant Loading Inline App Icon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
-  
   <style>
-    :root {
-      --primary: #4F46E5;
-      --primary-hover: #4338CA;
-      --bg: #F8FAFC;
-      --card-bg: #FFFFFF;
-      --text-main: #0F172A;
-      --text-muted: #64748B;
-      --success: #10B981;
-      --danger: #EF4444;
-      --danger-hover: #DC2626;
-      --border: #E2E8F0;
-    }
-
+    :root { --primary: #4F46E5; --primary-hover: #4338CA; --bg: #F8FAFC; --card-bg: #FFFFFF; --text-main: #0F172A; --text-muted: #64748B; --success: #10B981; --danger: #EF4444; --border: #E2E8F0; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    
-    body { 
-      background-color: var(--bg); 
-      color: var(--text-main); 
-      min-height: 100vh;
-      padding: 16px; 
-      display: flex; 
-      justify-content: center; 
-      align-items: flex-start;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .app-container { 
-      width: 100%; 
-      max-width: 520px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 14px; 
-      will-change: transform;
-    }
-
-    /* Cards Layout */
-    .card { 
-      background: var(--card-bg); 
-      border-radius: 16px; 
-      padding: 16px; 
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
-    }
-
-    /* Top Banner - Modern Profile */
-    .profile-banner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
-      color: white;
-      border: none;
-      padding: 18px;
-    }
-
-    .user-info h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 2px; }
-    .user-info p { font-size: 0.8rem; opacity: 0.9; display: flex; align-items: center; gap: 4px; }
-
-    .manage-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      backdrop-filter: blur(4px);
-      transition: background 0.15s;
-    }
-    .manage-btn:active { background: rgba(255, 255, 255, 0.35); }
-
-    /* Stats Grid */
-    .stats-grid { 
-      display: grid; 
-      grid-template-columns: repeat(3, 1fr); 
-      gap: 10px; 
-    }
-
-    .stat-card { 
-      background: #F1F5F9; 
-      padding: 10px 8px; 
-      border-radius: 12px; 
-      text-align: center;
-    }
-
-    .stat-card .val { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
-    .stat-card .lbl { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
-
-    /* Day Navigation */
-    .day-nav { 
-      display: flex; 
-      align-items: center; 
-      justify-content: space-between; 
-      margin-bottom: 12px;
-    }
-
-    .btn { 
-      padding: 10px 18px; 
-      border: none; 
-      border-radius: 10px; 
-      background: var(--primary); 
-      color: white; 
-      font-weight: 600; 
-      cursor: pointer; 
-      transition: opacity 0.15s, transform 0.1s; 
-    }
-
-    .btn:active { transform: scale(0.97); }
+    body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding: 14px; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
+    .app-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 12px; }
+    .card { background: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); }
+    .profile-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%); color: white; border: none; padding: 16px; }
+    .user-info h1 { font-size: 1.25rem; font-weight: 700; }
+    .user-info p { font-size: 0.78rem; opacity: 0.9; }
+    .manage-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-card { background: #F1F5F9; padding: 8px; border-radius: 10px; text-align: center; }
+    .stat-card .val { font-size: 1rem; font-weight: 700; color: var(--primary); }
+    .stat-card .lbl { font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .day-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .btn { padding: 8px 14px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: 600; cursor: pointer; }
     .btn-secondary { background: #E2E8F0; color: var(--text-main); }
     .btn-danger { background: var(--danger); color: white; }
-    .btn-danger:active { background: var(--danger-hover); }
-
-    /* Progress Bar */
-    .progress-wrapper { margin: 12px 0 16px 0; }
-    .progress-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .progress-bar-bg {
-      width: 100%;
-      height: 8px;
-      background: #E2E8F0;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--primary);
-      width: 0%;
-      transition: width 0.2s ease-out;
-      border-radius: 10px;
-    }
-
-    /* Passage Box Container */
-    .passage-box {
-      background: #F1F5F9;
-      border-left: 4px solid var(--primary);
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      margin-bottom: 14px;
-      color: #334155;
-      text-align: left;
-    }
-
-    /* Question & Options */
-    .question-box { 
-      font-size: 1.1rem; 
-      font-weight: 600; 
-      margin: 12px 0 18px 0; 
-      text-align: center; 
-      min-height: 50px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      line-height: 1.4;
-      padding: 0 8px;
-    }
-
-    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .option-btn { 
-      padding: 14px 10px; 
-      border: 2px solid var(--border); 
-      border-radius: 12px; 
-      background: white; 
-      font-size: 0.95rem; 
-      font-weight: 600;
-      color: var(--text-main);
-      cursor: pointer; 
-      transition: border-color 0.15s, background 0.15s; 
-    }
-
-    .option-btn:active { border-color: var(--primary); background: #EEF2FF; }
-
-    /* Tip Box */
-    .tip-box {
-      background: #FEF3C7;
-      border: 1px solid #FCD34D;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 0.82rem;
-      color: #92400E;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    /* Modals */
-    .modal-overlay { 
-      position: fixed; 
-      top: 0; left: 0; 
-      width: 100vw; height: 100vh; 
-      background: rgba(15, 23, 42, 0.6); 
-      backdrop-filter: blur(4px);
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      z-index: 1000; 
-    }
-
-    .modal-card { 
-      background: white; 
-      padding: 24px; 
-      border-radius: 20px; 
-      width: 90%; 
-      max-width: 400px; 
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-    }
-
-    .modal-header h3 { font-size: 1.15rem; color: var(--text-main); }
-    .close-btn { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted); }
-
-    .manage-section {
-      background: #F8FAFC;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
-      text-align: left;
-    }
-
-    .manage-section h4 { font-size: 0.88rem; margin-bottom: 8px; color: var(--text-main); }
-
-    .input-field {
-      width: 100%;
-      padding: 10px 12px;
-      margin: 6px 0;
-      border: 1.5px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    .input-field:focus { border-color: var(--primary); }
-
+    .progress-wrapper { margin: 10px 0 14px 0; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    .progress-bar-bg { width: 100%; height: 7px; background: #E2E8F0; border-radius: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.2s; }
+    .passage-box { background: #F1F5F9; border-left: 4px solid var(--primary); padding: 10px; border-radius: 6px; font-size: 0.85rem; line-height: 1.4; margin-bottom: 12px; color: #334155; }
+    .question-box { font-size: 1.05rem; font-weight: 600; margin: 10px 0 14px 0; text-align: center; min-height: 48px; display: flex; align-items: center; justify-content: center; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .option-btn { padding: 12px 8px; border: 1.5px solid var(--border); border-radius: 10px; background: white; font-size: 0.9rem; font-weight: 600; color: var(--text-main); cursor: pointer; }
+    .tip-box { background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 10px; padding: 10px; font-size: 0.8rem; color: #92400E; display: flex; gap: 8px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-card { background: white; padding: 20px; border-radius: 16px; width: 90%; max-width: 380px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .manage-section { background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .input-field { width: 100%; padding: 8px 10px; margin: 4px 0; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.9rem; }
     .hidden { display: none !important; }
-
-    .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
-    .analytics-item { background: #F8FAFC; padding: 12px; border-radius: 10px; border: 1px solid var(--border); text-align: center; }
+    .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .analytics-item { background: #F8FAFC; padding: 10px; border-radius: 8px; border: 1px solid var(--border); text-align: center; }
   </style>
 </head>
 <body>
 
 <div class="app-container">
-
-  <!-- Profile Banner for Ayush Raj -->
   <div class="card profile-banner">
     <div class="user-info">
       <h1>Ayush Raj 🎓</h1>
-      <p>JNVST Target: Class 6th Entrance</p>
+      <p>JNVST Target: 90 Days Mastery</p>
     </div>
     <button class="manage-btn" onclick="openManageModal()">⚙️ Settings</button>
   </div>
 
-  <!-- Performance Stats Bar -->
   <div class="card">
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="val">🔥 <span id="streakCount">0</span></div>
-        <div class="lbl">Day Streak</div>
-      </div>
-      <div class="stat-card">
-        <div class="val">⭐ <span id="totalPoints">0</span></div>
-        <div class="lbl">Score Pts</div>
-      </div>
-      <div class="stat-card" style="cursor: pointer;" onclick="openAnalyticsModal()">
-        <div class="val">📊</div>
-        <div class="lbl">Analytics</div>
-      </div>
+      <div class="stat-card"><div class="val">🔥 <span id="streakCount">0</span></div><div class="lbl">Day Streak</div></div>
+      <div class="stat-card"><div class="val">⭐ <span id="totalPoints">0</span></div><div class="lbl">Score Pts</div></div>
+      <div class="stat-card" style="cursor: pointer;" onclick="openAnalyticsModal()"><div class="val">📊</div><div class="lbl">Analytics</div></div>
     </div>
   </div>
 
-  <!-- Main Question Card -->
   <div class="card">
     <div class="day-nav">
       <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev</button>
-      <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 700;">Day 1</span>
+      <span id="currentDayLabel" style="font-size: 1rem; font-weight: 700;">Day 1 / 90</span>
       <button class="btn btn-secondary" onclick="changeDay(1)">Next →</button>
     </div>
 
-    <!-- Dynamic Progress Bar -->
     <div class="progress-wrapper">
-      <div class="progress-info">
-        <span id="questionCounter">Question 1 of 20</span>
-        <span id="progressPercent">0%</span>
-      </div>
-      <div class="progress-bar-bg">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
+      <div class="progress-info"><span id="questionCounter">Question 1 of 20</span><span id="progressPercent">0%</span></div>
+      <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
     </div>
 
-    <!-- Passage Section (Only shown if question contains passage) -->
     <div id="passageContainer" class="passage-box hidden"></div>
-
     <div class="question-box" id="questionText">Loading question...</div>
-
-    <div class="options-grid" id="optionsContainer">
-      <!-- Options rendered dynamically -->
-    </div>
+    <div class="options-grid" id="optionsContainer"></div>
   </div>
 
-  <!-- Daily Tip Widget -->
   <div class="tip-box">
-    <span style="font-size: 1.2rem;">💡</span>
-    <div>
-      <strong>Exam Tip for Ayush:</strong> Passage ko pehle dhyan se padhein, phir sawaalon ka sahi uttar chunein!
-    </div>
+    <span>💡</span>
+    <div><strong>Exam Tip for Ayush:</strong> Daily practice se speed aur accuracy dono badhti hai. Keep going!</div>
   </div>
-
 </div>
 
-<!-- Custom PIN Lock Modal -->
+<!-- PIN Lock Modal -->
 <div id="pinModal" class="modal-overlay hidden">
   <div class="modal-card" style="text-align: center;">
-    <h3 style="font-size: 1.2rem; color: var(--text-main);">Enter Parent PIN</h3>
-    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Locked day access</p>
-    <input type="password" id="pinInput" class="input-field" maxlength="6" placeholder="••••" style="text-align: center; font-size: 1.2rem; letter-spacing: 4px; margin: 15px 0;" />
-    <div style="display: flex; gap: 10px; justify-content: center;">
+    <h3>Enter Parent PIN</h3>
+    <p style="font-size: 0.75rem; color: var(--text-muted);">Future days locked for discipline</p>
+    <input type="password" id="pinInput" class="input-field" maxlength="6" placeholder="••••" style="text-align: center; font-size: 1.1rem; letter-spacing: 4px; margin: 12px 0;" />
+    <div style="display: flex; gap: 8px;">
       <button class="btn btn-secondary" onclick="closePinModal()" style="width: 50%;">Cancel</button>
       <button class="btn" onclick="submitPin()" style="width: 50%;">Unlock</button>
     </div>
   </div>
 </div>
 
-<!-- Modern Manage Settings Modal -->
+<!-- Settings Modal -->
 <div id="manageModal" class="modal-overlay hidden">
   <div class="modal-card">
     <div class="modal-header">
-      <h3>⚙️ Parent Portal</h3>
-      <button class="close-btn" onclick="closeManageModal()">&times;</button>
+      <h3>⚙️ Parent Settings</h3>
+      <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeManageModal()">&times;</button>
     </div>
-
-    <!-- Change PIN Section -->
     <div class="manage-section">
-      <h4>🔑 Change Parent PIN</h4>
+      <h4 style="font-size: 0.85rem;">🔑 Change Parent PIN</h4>
       <input type="password" id="currentPinInput" class="input-field" placeholder="Current PIN" maxlength="6" />
       <input type="password" id="newPinInput" class="input-field" placeholder="New PIN" maxlength="6" />
-      <button class="btn" onclick="handlePinChange()" style="width: 100%; margin-top: 8px; font-size: 0.85rem; padding: 8px;">Update PIN</button>
+      <button class="btn" onclick="handlePinChange()" style="width: 100%; margin-top: 6px; font-size: 0.8rem; padding: 6px;">Update PIN</button>
     </div>
-
-    <!-- Clear App Data Section -->
     <div class="manage-section" style="background: #FEF2F2; border-color: #FCA5A5;">
-      <h4 style="color: var(--danger);">🗑️ Clear Practice Progress</h4>
-      <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">Resets score, streak, and analytics for fresh testing.</p>
+      <h4 style="font-size: 0.85rem; color: var(--danger);">🗑️ Reset All Progress</h4>
       <input type="password" id="clearDataPinInput" class="input-field" placeholder="Enter PIN to confirm" maxlength="6" />
-      <button class="btn btn-danger" onclick="handleClearData()" style="width: 100%; margin-top: 8px; font-size: 0.85rem; padding: 8px;">Reset App Data</button>
+      <button class="btn btn-danger" onclick="handleClearData()" style="width: 100%; margin-top: 6px; font-size: 0.8rem; padding: 6px;">Reset Data</button>
     </div>
   </div>
 </div>
@@ -381,189 +122,121 @@
 <div id="analyticsModal" class="modal-overlay hidden">
   <div class="modal-card">
     <div class="modal-header">
-      <h3>📊 Ayush's Performance</h3>
-      <button class="close-btn" onclick="closeAnalyticsModal()">&times;</button>
+      <h3>📊 Performance Summary</h3>
+      <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeAnalyticsModal()">&times;</button>
     </div>
-    
     <div class="analytics-grid">
-      <div class="analytics-item">
-        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">ATTEMPTED</span>
-        <h4 id="statTotal" style="font-size: 1.2rem; margin-top: 4px;">0</h4>
-      </div>
-      <div class="analytics-item">
-        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">ACCURACY</span>
-        <h4 id="statAccuracy" style="font-size: 1.2rem; margin-top: 4px; color: var(--success);">0%</h4>
-      </div>
-      <div class="analytics-item">
-        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">AVG SPEED</span>
-        <h4 id="statSpeed" style="font-size: 1.2rem; margin-top: 4px;">0s</h4>
-      </div>
-      <div class="analytics-item">
-        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">WEAK AREA</span>
-        <h4 id="statWeak" style="color: var(--danger); font-size: 0.9rem; margin-top: 6px;">None</h4>
-      </div>
+      <div class="analytics-item"><span style="font-size: 0.7rem; color: var(--text-muted);">ATTEMPTED</span><h4 id="statTotal" style="font-size: 1.1rem; margin-top:2px;">0</h4></div>
+      <div class="analytics-item"><span style="font-size: 0.7rem; color: var(--text-muted);">ACCURACY</span><h4 id="statAccuracy" style="font-size: 1.1rem; margin-top:2px; color: var(--success);">0%</h4></div>
+      <div class="analytics-item"><span style="font-size: 0.7rem; color: var(--text-muted);">AVG SPEED</span><h4 id="statSpeed" style="font-size: 1.1rem; margin-top:2px;">0s</h4></div>
+      <div class="analytics-item"><span style="font-size: 0.7rem; color: var(--text-muted);">WEAK AREA</span><h4 id="statWeak" style="color: var(--danger); font-size: 0.85rem; margin-top:2px;">None</h4></div>
     </div>
     <button class="btn btn-secondary" onclick="closeAnalyticsModal()" style="width: 100%;">Close</button>
   </div>
 </div>
 
 <script>
-// ==========================================
-// 1. DATA & APP STATE
-// ==========================================
 let appData = {
   startDate: localStorage.getItem('app_start_date') || new Date().toISOString().split('T')[0],
   parentPin: localStorage.getItem('app_parent_pin') || '1234',
   currentDay: 1
 };
+if (!localStorage.getItem('app_start_date')) localStorage.setItem('app_start_date', appData.startDate);
 
-if (!localStorage.getItem('app_start_date')) {
-  localStorage.setItem('app_start_date', appData.startDate);
+// 90-DAY DYNAMIC QUESTION GENERATOR ENGINE FOR JNVST
+function generateDayQuestions(dayNum) {
+  let questions = [];
+  let seed = dayNum * 7; // Seed for deterministic variation per day
+  
+  // 1. Passage Questions (Reading Comprehension)
+  let pText = dayNum % 2 === 1 
+    ? `📖 **अनुच्छेद (Day ${dayNum}):** अनुशासन जीवन का सबसे महत्वपूर्ण अंग है। अनुशासित व्यक्ति हर कार्य समय पर पूरा करता है। जवाहर नवोदय विद्यालय में छात्रों को समय का सही उपयोग करना सिखाया जाता है।`
+    : `📖 **Passage (Day ${dayNum}):** Time is money. A student who learns to respect time achieves great success in life. Regular practice makes a person perfect in Mathematics and Reasoning.`;
+
+  questions.push({ passage: pText, q: dayNum % 2 === 1 ? "जीवन का सबसे महत्वपूर्ण अंग क्या है?" : "What makes a student successful?", options: dayNum % 2 === 1 ? ["खेल", "अनुशासन", "आलस्य", "पैसा"] : ["Laziness", "Respecting Time", "Sleeping", "Watching TV"], ans: dayNum % 2 === 1 ? "अनुशासन" : "Respecting Time", cat: "Reading" });
+  questions.push({ passage: pText, q: dayNum % 2 === 1 ? "नवोदय विद्यालय में क्या सिखाया जाता है?" : "What makes a person perfect in Math?", options: dayNum % 2 === 1 ? ["समय का उपयोग", "लड़ाई करना", "देर से सोना", "TV देखना"] : ["Reading news", "Regular practice", "Sleeping late", "Eating sweets"], ans: dayNum % 2 === 1 ? "समय का उपयोग" : "Regular practice", cat: "Reading" });
+
+  // 2. Pattern & Mental Ability Reasoning
+  let mult = (dayNum % 5) + 2;
+  let baseVal = (dayNum * 3);
+  questions.push({ q: `Series Complete Karo: ${baseVal}, ${baseVal + mult}, ${baseVal + mult*2}, ?`, options: [`${baseVal + mult*3}`, `${baseVal + mult*3 + 2}`, `${baseVal + mult*2 + 1}`, `${baseVal + mult*4}`], ans: `${baseVal + mult*3}`, cat: "Reasoning" });
+  
+  let odds = [["सेब", "केला", "आलू", "आम"], ["दिल्ली", "जयपुर", "भारत", "मुंबई"], ["Dog", "Cat", "Table", "Cow"], ["2", "4", "6", "9"]];
+  let curOdd = odds[dayNum % odds.length];
+  questions.push({ q: `Inme se alag (Odd one out) chuno: [${curOdd.join(', ')}]`, options: curOdd, ans: curOdd[2], cat: "Reasoning" });
+
+  // 3. Mathematics (Dynamic Equations according to JNVST level)
+  let a = (dayNum * 5) + 12;
+  let b = (dayNum * 3) + 8;
+  questions.push({ q: `${a} + ${b} = ?`, options: [`${a+b}`, `${a+b-2}`, `${a+b+5}`, `${a+b+10}`], ans: `${a+b}`, cat: "Math" });
+  questions.push({ q: `${a} × ${(dayNum % 6) + 2} = ?`, options: [`${a*((dayNum%6)+2)}`, `${a*((dayNum%6)+2) - 5}`, `${a*2}`, `${a+10}`], ans: `${a*((dayNum%6)+2)}`, cat: "Math" });
+  
+  let fracA = (dayNum % 3) + 1;
+  questions.push({ q: `Solve Fraction: ${fracA}/5 + 1/5 = ?`, options: [`${fracA+1}/5`, `${fracA}/10`, `2/5`, `1/5`], ans: `${fracA+1}/5`, cat: "Math" });
+
+  // 4. Fill remaining to make 20 Questions
+  const topics = [
+    { q: "भारत के वर्तमान राष्ट्रपति कौन हैं?", opts: ["द्रौपदी मुर्मू", "रामनाथ कोविंद", "नरेंद्र मोदी", "अमित शाह"], a: "द्रौपदी मुर्मू", c: "GK" },
+    { q: "Opposite of 'ANCIENT' is?", opts: ["Old", "Modern", "Past", "Historic"], a: "Modern", c: "English" },
+    { q: "100 ka 25% kitna hoga?", opts: ["10", "20", "25", "50"], a: "25", c: "Math" },
+    { q: "L.C.M of 6 and 12 is?", opts: ["6", "12", "18", "24"], a: "12", c: "Math" },
+    { q: "1 kilometer me kitne meter hote hain?", opts: ["100m", "500m", "1000m", "10000m"], a: "1000m", c: "Math" },
+    { q: "हमारे राष्ट्रध्वज में केसरिया रंग किसका प्रतीक है?", opts: ["शांति", "साहस और त्याग", "समृद्धि", "सत्य"], a: "साहस और त्याग", c: "GK" },
+    { q: "Which gas do plants absorb during photosynthesis?", opts: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], a: "Carbon Dioxide", c: "GK" },
+    { q: "Synonym of 'SMART' is?", opts: ["Clever", "Stupid", "Slow", "Dull"], a: "Clever", c: "English" },
+    { q: "Past tense of 'WRITE' is?", opts: ["Written", "Wrote", "Writing", "Writes"], a: "Wrote", c: "English" },
+    { q: "सबसे छोटी अभाज्य संख्या (Smallest Prime Number) कौन सी है?", opts: ["0", "1", "2", "3"], a: "2", c: "Math" },
+    { q: "Rectangle ka Perimeter formula kya hai?", opts: ["2 × (L + B)", "L × B", "Side × Side", "2 × L"], a: "2 × (L + B)", c: "Math" },
+    { q: "एक वर्ग (Square) की कितनी भुजाएँ बराबर होती हैं?", opts: ["2", "3", "4", "None"], a: "4", c: "Math" },
+    { q: "Plural of 'CHILD' is?", opts: ["Childs", "Children", "Childrens", "Childies"], a: "Children", c: "English" }
+  ];
+
+  for (let i = 0; i < 13; i++) {
+    let t = topics[i];
+    questions.push({ q: t.q, options: t.opts, ans: t.a, cat: t.c });
+  }
+
+  return questions;
 }
-
-// Passages for Day 3
-const passageHindi1 = "📖 **अनुच्छेद:** नीम का पेड़ भारत में बहुत उपयोगी माना जाता है। नीम की पत्तियाँ कड़वी होती हैं, लेकिन ये बीमारियों से बचाती हैं। नीम की लकड़ी में कीड़े नहीं लगते। नीम की दातून से दाँत साफ करने पर दाँत मजबूत होते हैं।";
-const passageEnglish1 = "📖 **Passage:** The Ant and the Dove were good friends. One day, an ant fell into a river. A dove sitting on a tree saw it and dropped a leaf into the water. The ant climbed on the leaf and was saved.";
-
-// 20 Questions per day (JNVST Focused)
-const questionsBank = {
-  1: [
-    { q: "25 + 15 = ?", options: ["30", "40", "35", "45"], ans: "40", cat: "Math" },
-    { q: "भारत की राजधानी क्या है?", options: ["मुंबई", "दिल्ली", "कोलकाता", "जयपुर"], ans: "दिल्ली", cat: "GK" },
-    { q: "Opposite of 'Hot' is?", options: ["Cold", "Warm", "Ice", "Cool"], ans: "Cold", cat: "English" },
-    { q: "5 × 6 = ?", options: ["25", "35", "30", "40"], ans: "30", cat: "Math" },
-    { q: "हमारा राष्ट्रीय पक्षी कौन सा है?", options: ["कबूतर", "तोता", "मोर", "बाज़"], ans: "मोर", cat: "GK" },
-    { q: "Complete the word: A _ p l e", options: ["p", "b", "t", "d"], ans: "p", cat: "English" },
-    { q: "50 - 18 = ?", options: ["32", "22", "38", "28"], ans: "32", cat: "Math" },
-    { q: "एक सप्ताह में कितने दिन होते हैं?", options: ["5", "6", "7", "8"], ans: "7", cat: "GK" },
-    { q: "Plural of 'Cat' is?", options: ["Cats", "Cates", "Caties", "Kittens"], ans: "Cats", cat: "English" },
-    { q: "100 + 250 = ?", options: ["300", "350", "400", "325"], ans: "350", cat: "Math" },
-    { q: "सौरमंडल में सबसे बड़ा ग्रह कौन सा है?", options: ["पृथ्वी", "मंगल", "बृहस्पति", "शनि"], ans: "बृहस्पति", cat: "GK" },
-    { q: "Which animal is known as the 'Ship of the Desert'?", options: ["Elephant", "Camel", "Horse", "Lion"], ans: "Camel", cat: "GK" },
-    { q: "12 ÷ 3 = ?", options: ["3", "4", "5", "6"], ans: "4", cat: "Math" },
-    { q: "सूरज किस दिशा से उगता है?", options: ["पूर्व", "पश्चिम", "उत्तर", "दक्षिण"], ans: "पूर्व", cat: "GK" },
-    { q: "Select the vowel:", options: ["B", "C", "E", "F"], ans: "E", cat: "English" },
-    { q: "8 × 4 = ?", options: ["24", "28", "32", "36"], ans: "32", cat: "Math" },
-    { q: "हमारे शरीर में कितने फेफड़े होते हैं?", options: ["1", "2", "3", "4"], ans: "2", cat: "GK" },
-    { q: "Past tense of 'Go' is?", options: ["Gone", "Going", "Went", "Goes"], ans: "Went", cat: "English" },
-    { q: "75 + 25 = ?", options: ["90", "100", "110", "105"], ans: "100", cat: "Math" },
-    { q: "भारत का राष्ट्रीय फूल कौन सा है?", options: ["गुलाब", "कमल", "सूरजमुखी", "गेंदा"], ans: "कमल", cat: "GK" }
-  ],
-  2: [
-    { q: "12 × 5 = ?", options: ["50", "55", "60", "65"], ans: "60", cat: "Math" },
-    { q: "गांधी जी को किस नाम से जाना जाता है?", options: ["नेताजी", "बापू", "सरदार", "चाचा"], ans: "बापू", cat: "GK" },
-    { q: "Synonym of 'Big' is?", options: ["Small", "Large", "Tiny", "Short"], ans: "Large", cat: "English" },
-    { q: "90 - 45 = ?", options: ["40", "45", "50", "35"], ans: "45", cat: "Math" },
-    { q: "भारत का राष्ट्रीय पशु कौन सा है?", options: ["शेर", "बाघ", "हाथी", "चीता"], ans: "बाघ", cat: "GK" },
-    { q: "Which month comes after July?", options: ["June", "August", "September", "May"], ans: "August", cat: "English" },
-    { q: "15 + 15 + 15 = ?", options: ["30", "40", "45", "50"], ans: "45", cat: "Math" },
-    { q: "तिरंगे में कितने रंग होते हैं?", options: ["2", "3", "4", "5"], ans: "3", cat: "GK" },
-    { q: "Opposite of 'Fast' is?", options: ["Quick", "Slow", "Run", "High"], ans: "Slow", cat: "English" },
-    { q: "81 ÷ 9 = ?", options: ["7", "8", "9", "10"], ans: "9", cat: "Math" },
-    { q: "पानी का रासायनिक सूत्र क्या है?", options: ["CO2", "H2O", "O2", "N2"], ans: "H2O", cat: "GK" },
-    { q: "How many hours are there in a day?", options: ["12", "24", "48", "36"], ans: "24", cat: "GK" },
-    { q: "7 × 7 = ?", options: ["42", "48", "49", "56"], ans: "49", cat: "Math" },
-    { q: "स्वतंत्रता दिवस कब मनाया जाता है?", options: ["26 जनवरी", "15 अगस्त", "2 अक्टूबर", "14 नवंबर"], ans: "15 अगस्त", cat: "GK" },
-    { q: "Correct spelling:", options: ["Schoold", "School", "Scool", "Skool"], ans: "School", cat: "English" },
-    { q: "200 - 80 = ?", options: ["110", "120", "130", "140"], ans: "120", cat: "Math" },
-    { q: "मानव शरीर की सबसे बड़ी हड्डी कौन सी है?", options: ["फीमर", "स्टेप्स", "रेडियस", "अल्ना"], ans: "फीमर", cat: "GK" },
-    { q: "Young one of a 'Dog' is called?", options: ["Kitten", "Calf", "Puppy", "Cub"], ans: "Puppy", cat: "English" },
-    { q: "60 ÷ 5 = ?", options: ["10", "11", "12", "15"], ans: "12", cat: "Math" },
-    { q: "हमारे देश के प्रथम प्रधानमंत्री कौन थे?", options: ["महात्मा गांधी", "जवाहरलाल नेहरू", "राजेंद्र प्रसाद", "भगत सिंह"], ans: "जवाहरलाल नेहरू", cat: "GK" }
-  ],
-  3: [
-    // Passage Questions (Hindi)
-    { passage: passageHindi1, q: "नीम की पत्तियाँ कैसी होती हैं?", options: ["मीठी", "कड़वी", "खट्टी", "नमकीन"], ans: "कड़वी", cat: "Reading" },
-    { passage: passageHindi1, q: "दाँत मजबूत करने के लिए किसकी दातून अच्छी होती है?", options: ["आम", "बरगद", "नीम", "पीपल"], ans: "नीम", cat: "Reading" },
-    { passage: passageHindi1, q: "किसकी लकड़ी में कीड़े नहीं लगते?", options: ["नीम", "गुलाब", "केला", "तुलसी"], ans: "नीम", cat: "Reading" },
-    
-    // Passage Questions (English)
-    { passage: passageEnglish1, q: "Who fell into the river?", options: ["Dove", "Ant", "Fish", "Bird"], ans: "Ant", cat: "Reading" },
-    { passage: passageEnglish1, q: "What did the Dove drop into the water?", options: ["A Stone", "A Leaf", "A Fruit", "A Branch"], ans: "A Leaf", cat: "Reading" },
-
-    // Pattern & Mental Reasoning
-    { q: "Complete the pattern: 2, 4, 8, 16, ?", options: ["20", "24", "32", "30"], ans: "32", cat: "Reasoning" },
-    { q: "Find the odd one out: [Apple, Mango, Carrot, Banana]", options: ["Apple", "Mango", "Carrot", "Banana"], ans: "Carrot", cat: "Reasoning" },
-    { q: "Complete the series: 5, 10, 15, 20, ?", options: ["22", "25", "30", "35"], ans: "25", cat: "Reasoning" },
-    { q: "If CAT = 3, DOG = 3, then ELEPHANT = ?", options: ["6", "7", "8", "9"], ans: "8", cat: "Reasoning" },
-    { q: "Find the odd pair:", options: ["Sun - Day", "Moon - Night", "Fire - Cold", "Ice - Cold"], ans: "Fire - Cold", cat: "Reasoning" },
-
-    // Navodaya Standard Math & General Knowledge
-    { q: "0.5 + 0.25 = ?", options: ["0.70", "0.75", "0.80", "1.0"], ans: "0.75", cat: "Math" },
-    { q: "Find the LCM of 4 and 6:", options: ["10", "12", "24", "18"], ans: "12", cat: "Math" },
-    { q: "What is 20% of 100?", options: ["10", "15", "20", "25"], ans: "20", cat: "Math" },
-    { q: "1/2 + 1/2 = ?", options: ["1/4", "1", "2", "1/2"], ans: "1", cat: "Math" },
-    { q: "36 ÷ 6 × 2 = ?", options: ["3", "6", "12", "18"], ans: "12", cat: "Math" },
-    { q: "क्षेत्रफल (Area) मापने की इकाई क्या है?", options: ["मीटर", "वर्ग मीटर", "लीटर", "ग्राम"], ans: "वर्ग मीटर", cat: "Math" },
-    { q: "हमारे राष्ट्रीय ध्वज के चक्र में कितनी तीलियाँ होती हैं?", options: ["12", "20", "24", "30"], ans: "24", cat: "GK" },
-    { q: "संसार का सबसे बड़ा महाद्वीप कौन सा है?", options: ["एशिया", "अफ्रीका", "यूरोप", "अमेरिका"], ans: "एशिया", cat: "GK" },
-    { q: "Opposite of 'BRAVE' is?", options: ["Strong", "Coward", "Smart", "Bold"], ans: "Coward", cat: "English" },
-    { q: "A person who teaches is called a?", options: ["Doctor", "Teacher", "Driver", "Farmer"], ans: "Teacher", cat: "English" }
-  ]
-};
 
 let currentQuestionIndex = 0;
 let pendingTargetDay = null;
 
-// ==========================================
-// 2. AUDIO & HAPTIC SYSTEM
-// ==========================================
+// Audio Controller
 const SoundFx = {
   ctx: null,
-  init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-  },
+  init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
   playCorrect() {
     this.init();
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(523.25, this.ctx.currentTime);
+    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, this.ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.15);
-    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.3);
-
-    if (navigator.vibrate) navigator.vibrate(50);
+    gain.gain.setValueAtTime(0.2, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+    if (navigator.vibrate) navigator.vibrate(40);
   },
   playIncorrect() {
     this.init();
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+    let osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(220, this.ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(130.81, this.ctx.currentTime + 0.2);
-    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start();
-    osc.stop(this.ctx.currentTime + 0.3);
-
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    gain.gain.setValueAtTime(0.2, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+    osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+    if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
   }
 };
 
-// ==========================================
-// 3. GAMIFICATION & ANALYTICS
-// ==========================================
 const Gamification = {
   pts: parseInt(localStorage.getItem('app_points') || '0'),
   streak: parseInt(localStorage.getItem('app_streak') || '0'),
   lastActive: localStorage.getItem('app_last_active'),
-
   update() {
     document.getElementById('streakCount').innerText = this.streak;
     document.getElementById('totalPoints').innerText = this.pts;
   },
   addCorrect() {
     this.pts += 10;
-    const today = new Date().toISOString().split('T')[0];
+    let today = new Date().toISOString().split('T')[0];
     if (this.lastActive !== today) {
       this.streak += 1;
       this.lastActive = today;
@@ -578,46 +251,34 @@ const Gamification = {
 const Analytics = {
   startTime: null,
   logs: JSON.parse(localStorage.getItem('app_analytics_logs') || '[]'),
-
   startTimer() { this.startTime = Date.now(); },
   logAnswer(cat, isCorrect) {
-    const elapsed = Math.round((Date.now() - (this.startTime || Date.now())) / 1000);
+    let elapsed = Math.round((Date.now() - (this.startTime || Date.now())) / 1000);
     this.logs.push({ cat: cat || 'General', isCorrect, time: elapsed });
     localStorage.setItem('app_analytics_logs', JSON.stringify(this.logs));
   },
   getSummary() {
     if (!this.logs.length) return { total: 0, accuracy: 0, avgTime: 0, weak: 'None' };
-    const total = this.logs.length;
-    const correct = this.logs.filter(l => l.isCorrect).length;
-    const accuracy = Math.round((correct / total) * 100);
-    const avgTime = Math.round(this.logs.reduce((acc, l) => acc + l.time, 0) / total);
-    
-    const catWrongs = {};
-    this.logs.forEach(l => {
-      if (!l.isCorrect) catWrongs[l.cat] = (catWrongs[l.cat] || 0) + 1;
-    });
-    const weak = Object.keys(catWrongs).sort((a,b) => catWrongs[b] - catWrongs[a])[0] || 'None';
-    
+    let total = this.logs.length, correct = this.logs.filter(l => l.isCorrect).length;
+    let accuracy = Math.round((correct / total) * 100);
+    let avgTime = Math.round(this.logs.reduce((acc, l) => acc + l.time, 0) / total);
+    let catWrongs = {};
+    this.logs.forEach(l => { if (!l.isCorrect) catWrongs[l.cat] = (catWrongs[l.cat] || 0) + 1; });
+    let weak = Object.keys(catWrongs).sort((a,b) => catWrongs[b] - catWrongs[a])[0] || 'None';
     return { total, accuracy, avgTime, weak };
   }
 };
 
-// ==========================================
-// 4. DAY NAVIGATION & PIN LOGIC
-// ==========================================
 function getCalculatedAllowedDay() {
-  const start = new Date(appData.startDate);
-  const today = new Date();
-  const diffTime = today - start;
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  return Math.max(1, diffDays + 1);
+  let start = new Date(appData.startDate), today = new Date();
+  let diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  return Math.min(90, Math.max(1, diffDays + 1));
 }
 
 function changeDay(delta) {
-  const targetDay = appData.currentDay + delta;
-  if (targetDay < 1) return;
-
-  const maxAllowed = getCalculatedAllowedDay();
+  let targetDay = appData.currentDay + delta;
+  if (targetDay < 1 || targetDay > 90) return;
+  let maxAllowed = getCalculatedAllowedDay();
   if (targetDay > maxAllowed) {
     pendingTargetDay = targetDay;
     openPinModal();
@@ -628,77 +289,46 @@ function changeDay(delta) {
   }
 }
 
-function openPinModal() {
-  document.getElementById('pinInput').value = '';
-  document.getElementById('pinModal').classList.remove('hidden');
-}
-
-function closePinModal() {
-  document.getElementById('pinModal').classList.add('hidden');
-  pendingTargetDay = null;
-}
-
+function openPinModal() { document.getElementById('pinInput').value = ''; document.getElementById('pinModal').classList.remove('hidden'); }
+function closePinModal() { document.getElementById('pinModal').classList.add('hidden'); pendingTargetDay = null; }
 function submitPin() {
-  const enteredPin = document.getElementById('pinInput').value;
-  if (enteredPin === appData.parentPin) {
+  if (document.getElementById('pinInput').value === appData.parentPin) {
     appData.currentDay = pendingTargetDay;
     currentQuestionIndex = 0;
     closePinModal();
     renderQuestion();
-  } else {
-    alert('Incorrect PIN');
-    document.getElementById('pinInput').value = '';
-  }
+  } else { alert('Incorrect PIN'); document.getElementById('pinInput').value = ''; }
 }
 
-// ==========================================
-// 5. QUESTION RENDER & ANSWER CHECKING
-// ==========================================
 function renderQuestion() {
-  document.getElementById('currentDayLabel').innerText = `Day ${appData.currentDay}`;
-  const dayQuestions = questionsBank[appData.currentDay] || [];
-  const counterBox = document.getElementById('questionCounter');
-  const qBox = document.getElementById('questionText');
-  const optsBox = document.getElementById('optionsContainer');
-  const passageBox = document.getElementById('passageContainer');
-  const progressFill = document.getElementById('progressFill');
-  const progressPercent = document.getElementById('progressPercent');
+  document.getElementById('currentDayLabel').innerText = `Day ${appData.currentDay} / 90`;
+  let dayQuestions = generateDayQuestions(appData.currentDay);
+  let counterBox = document.getElementById('questionCounter'), qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
+  let progressFill = document.getElementById('progressFill'), progressPercent = document.getElementById('progressPercent');
 
-  if (!dayQuestions.length || currentQuestionIndex >= dayQuestions.length) {
-    counterBox.innerText = `Completed!`;
-    progressFill.style.width = `100%`;
-    progressPercent.innerText = `100%`;
+  if (currentQuestionIndex >= dayQuestions.length) {
+    counterBox.innerText = `Day Completed!`;
+    progressFill.style.width = `100%`; progressPercent.innerText = `100%`;
     passageBox.classList.add('hidden');
-    qBox.innerText = "🎉 Excellent job Ayush! You completed today's practice.";
+    qBox.innerText = `🎉 Outstanding Ayush! Day ${appData.currentDay} practice complete!`;
     optsBox.innerHTML = '';
     return;
   }
 
-  const totalQ = dayQuestions.length;
-  const currQNum = currentQuestionIndex + 1;
-  const percent = Math.round((currentQuestionIndex / totalQ) * 100);
+  let totalQ = dayQuestions.length, percent = Math.round((currentQuestionIndex / totalQ) * 100);
+  counterBox.innerText = `Question ${currentQuestionIndex + 1} of ${totalQ}`;
+  progressFill.style.width = `${percent}%`; progressPercent.innerText = `${percent}%`;
 
-  counterBox.innerText = `Question ${currQNum} of ${totalQ}`;
-  progressFill.style.width = `${percent}%`;
-  progressPercent.innerText = `${percent}%`;
-
-  const qData = dayQuestions[currentQuestionIndex];
-
-  // Render passage if present
-  if (qData.passage) {
-    passageBox.innerHTML = qData.passage;
-    passageBox.classList.remove('hidden');
-  } else {
-    passageBox.classList.add('hidden');
-  }
+  let qData = dayQuestions[currentQuestionIndex];
+  if (qData.passage) { passageBox.innerHTML = qData.passage; passageBox.classList.remove('hidden'); } 
+  else { passageBox.classList.add('hidden'); }
 
   qBox.innerText = qData.q;
   optsBox.innerHTML = '';
-
   Analytics.startTimer();
 
   qData.options.forEach(opt => {
-    const btn = document.createElement('button');
+    let btn = document.createElement('button');
     btn.className = 'option-btn';
     btn.innerText = opt;
     btn.onclick = () => checkAnswer(opt, qData.ans, qData.cat);
@@ -707,84 +337,37 @@ function renderQuestion() {
 }
 
 function checkAnswer(selected, correct, category) {
-  const isCorrect = (selected === correct);
-
-  if (isCorrect) {
-    SoundFx.playCorrect();
-    Gamification.addCorrect();
-  } else {
-    SoundFx.playIncorrect();
-  }
-
+  let isCorrect = (selected === correct);
+  if (isCorrect) { SoundFx.playCorrect(); Gamification.addCorrect(); } 
+  else { SoundFx.playIncorrect(); }
   Analytics.logAnswer(category, isCorrect);
-
   currentQuestionIndex++;
   renderQuestion();
 }
 
-// ==========================================
-// 6. MANAGE MODAL (PIN & CLEAR LOGIC)
-// ==========================================
-function openManageModal() {
-  document.getElementById('currentPinInput').value = '';
-  document.getElementById('newPinInput').value = '';
-  document.getElementById('clearDataPinInput').value = '';
-  document.getElementById('manageModal').classList.remove('hidden');
-}
-
-function closeManageModal() {
-  document.getElementById('manageModal').classList.add('hidden');
-}
-
+function openManageModal() { document.getElementById('manageModal').classList.remove('hidden'); }
+function closeManageModal() { document.getElementById('manageModal').classList.add('hidden'); }
 function handlePinChange() {
-  const currentPin = document.getElementById('currentPinInput').value;
-  const newPin = document.getElementById('newPinInput').value;
-
-  if (currentPin !== appData.parentPin) {
-    alert("Incorrect Current PIN!");
-    return;
-  }
-  if (!newPin || newPin.length < 4) {
-    alert("New PIN must be at least 4 digits.");
-    return;
-  }
-
-  appData.parentPin = newPin;
-  localStorage.setItem('app_parent_pin', newPin);
-  alert("Parent PIN updated successfully!");
-  closeManageModal();
+  let curr = document.getElementById('currentPinInput').value, nxt = document.getElementById('newPinInput').value;
+  if (curr !== appData.parentPin) { alert("Incorrect Current PIN!"); return; }
+  if (!nxt || nxt.length < 4) { alert("PIN must be at least 4 digits."); return; }
+  appData.parentPin = nxt; localStorage.setItem('app_parent_pin', nxt);
+  alert("PIN Updated!"); closeManageModal();
 }
-
 function handleClearData() {
-  const pin = document.getElementById('clearDataPinInput').value;
-  if (pin !== appData.parentPin) {
-    alert("Incorrect PIN!");
-    return;
-  }
-
-  if (confirm("Reset all practice progress data for Ayush?")) {
-    localStorage.clear();
-    alert("App data reset successfully.");
-    window.location.reload();
-  }
+  if (document.getElementById('clearDataPinInput').value !== appData.parentPin) { alert("Incorrect PIN!"); return; }
+  if (confirm("Reset all practice progress?")) { localStorage.clear(); alert("Reset successful."); window.location.reload(); }
 }
-
 function openAnalyticsModal() {
-  const summary = Analytics.getSummary();
+  let summary = Analytics.getSummary();
   document.getElementById('statTotal').innerText = summary.total;
   document.getElementById('statAccuracy').innerText = summary.accuracy + '%';
   document.getElementById('statSpeed').innerText = summary.avgTime + 's';
   document.getElementById('statWeak').innerText = summary.weak;
   document.getElementById('analyticsModal').classList.remove('hidden');
 }
+function closeAnalyticsModal() { document.getElementById('analyticsModal').classList.add('hidden'); }
 
-function closeAnalyticsModal() {
-  document.getElementById('analyticsModal').classList.add('hidden');
-}
-
-// ==========================================
-// 7. INITIALIZATION & SERVICE WORKER
-// ==========================================
 window.onload = () => {
   appData.currentDay = getCalculatedAllowedDay();
   Gamification.update();
@@ -792,16 +375,7 @@ window.onload = () => {
 };
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(reg => {
-    reg.onupdatefound = () => {
-      const installingWorker = reg.installing;
-      installingWorker.onstatechange = () => {
-        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          window.location.reload();
-        }
-      };
-    };
-  }).catch(() => {});
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 </script>
 </body>
