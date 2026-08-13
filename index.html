@@ -9,6 +9,7 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
     :root {
@@ -70,8 +71,9 @@
     .passage-box { background: var(--input-bg); border-left: 5px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; }
     .question-box { font-size: 1.3rem; font-weight: 800; margin: 12px 0 16px 0; text-align: center; min-height: 60px; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .option-btn { padding: 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--input-bg); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; }
-    .option-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .option-btn { padding: 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--input-bg); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; transition: transform 0.1s, border-color 0.2s; }
+    .option-btn:active { transform: scale(0.96); }
+    .option-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
     .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
@@ -224,6 +226,58 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// --- AUDIO SYNTHESIZER FOR SOUND EFFECTS ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+  if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  if (type === 'correct') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.25); // A5
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+  } else {
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+    osc.frequency.exponentialRampToValueAtTime(130, audioCtx.currentTime + 0.25); // C3
+    gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+  }
+}
+
+function triggerCelebration() {
+  if (typeof confetti === 'function') {
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.7 }
+    });
+  }
+}
+
+// UTILITY SHUFFLE FUNCTION
+function shuffleArray(arr, seed) {
+  let array = [...arr];
+  let m = array.length, t, i;
+  while (m) {
+    i = Math.floor(Math.abs(Math.sin(seed++)) * m--);
+    t = array[m];
+    array[m] = array[i];
+    array[i] = t;
+  }
+  return array;
+}
+
 const BOY_AVATARS = ["👦", "🧑‍🚀", "🦸‍♂️", "🦁", "🐯", "🤖"];
 const GIRL_AVATARS = ["👧", "👩‍🚀", "🦸‍♀️", "🦄", "🦊", "🐼"];
 
@@ -335,419 +389,4 @@ function handleStudentLogin() {
     currentActiveUser = found;
     if (!currentActiveUser.userAnswers) currentActiveUser.userAnswers = {};
     
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('practiceWorkspace').classList.remove('hidden');
-    history.pushState({ page: 'workspace' }, '');
-    loadUserWorkspace();
-  } else {
-    alert("Invalid Username or PIN!");
-  }
-}
-
-function logoutStudent() {
-  currentActiveUser = null;
-  document.getElementById('loginUsername').value = '';
-  document.getElementById('loginPin').value = '';
-  document.getElementById('practiceWorkspace').classList.add('hidden');
-  document.getElementById('loginScreen').classList.remove('hidden');
-}
-
-function loadUserWorkspace() {
-  document.getElementById('userDisplayName').innerText = `${currentActiveUser.avatar || '🎓'} ${currentActiveUser.id}`;
-  document.getElementById('userClassBadge').innerText = currentActiveUser.class;
-  currentQIndex = 0;
-  refreshStatsUI();
-  renderQuestion();
-}
-
-function refreshStatsUI() {
-  if(!currentActiveUser) return;
-  document.getElementById('streakCount').innerText = currentActiveUser.streak || 0;
-  document.getElementById('totalPoints').innerText = currentActiveUser.points || 0;
-  document.getElementById('wrongCount').innerText = currentActiveUser.wrong || 0;
-  
-  let totalAttempted = (currentActiveUser.points / 10) + currentActiveUser.wrong;
-  let accuracy = totalAttempted > 0 ? Math.round(((currentActiveUser.points / 10) / totalAttempted) * 100) : 0;
-  document.getElementById('reportPercent').innerText = `${accuracy}%`;
-}
-
-function generateAdaptiveQuestions(userClass, day) {
-  let questions = [];
-
-  if (userClass === "LKG" || userClass === "UKG") {
-    const visualBank = [
-      { q: "Which color is 🔴?", options: ["Red", "Blue", "Green", "Yellow"], ans: "Red" },
-      { q: "Which color is 🟢?", options: ["Blue", "Green", "Red", "Yellow"], ans: "Green" },
-      { q: "Which color is 🟡?", options: ["Pink", "Orange", "Yellow", "Purple"], ans: "Yellow" },
-      { q: "Identify Shape: ⭕", options: ["Circle", "Square", "Triangle", "Star"], ans: "Circle" },
-      { q: "Identify Shape: ⬛", options: ["Square", "Circle", "Rectangle", "Oval"], ans: "Square" },
-      { q: "Identify Shape: ⭐", options: ["Star", "Square", "Circle", "Heart"], ans: "Star" },
-      { q: "Count Apple: 🍎", options: ["1", "2", "3", "4"], ans: "1" },
-      { q: "Count Apples: 🍎 🍎 🍎", options: ["2", "3", "4", "5"], ans: "3" },
-      { q: "Count Stars: ⭐ ⭐", options: ["1", "2", "3", "4"], ans: "2" },
-      { q: "Find Dog 🐶", options: ["Dog", "Cat", "Lion", "Tiger"], ans: "Dog" },
-      { q: "Find Elephant 🐘", options: ["Monkey", "Elephant", "Dog", "Bird"], ans: "Elephant" },
-      { q: "What comes after 'A'?", options: ["B", "C", "D", "E"], ans: "B" },
-      { q: "What comes after 'C'?", options: ["D", "E", "F", "G"], ans: "D" },
-      { q: "Count: 1 + 1 = ?", options: ["2", "3", "4", "1"], ans: "2" },
-      { q: "Which one is Sun ☀️?", options: ["Sun", "Moon", "Cloud", "Rain"], ans: "Sun" },
-      { q: "Which one is Ice-Cream 🍦?", options: ["Cake", "Ice-Cream", "Pizza", "Apple"], ans: "Ice-Cream" },
-      { q: "Count Balloons: 🎈 🎈 🎈 🎈", options: ["3", "4", "5", "2"], ans: "4" },
-      { q: "Which shape is Triangle 🔺?", options: ["Triangle", "Circle", "Square", "Star"], ans: "Triangle" },
-      { q: "What comes after '1'?", options: ["2", "3", "4", "5"], ans: "2" },
-      { q: "What color is Milk 🥛?", options: ["White", "Black", "Red", "Green"], ans: "White" }
-    ];
-    return visualBank;
-  } 
-  else if (userClass === "Class 1" || userClass === "Class 2" || userClass === "Class 3") {
-    for(let i = 1; i <= 20; i++) {
-      let num1 = i * day + 3;
-      let num2 = i + 2;
-      questions.push({ q: `${num1} + ${num2} = ?`, options: [`${num1+num2}`, `${num1+num2+2}`, `${num1+num2-1}`, `${num1+num2+4}`], ans: `${num1+num2}` });
-    }
-  } 
-  else if (userClass === "Class 4" || userClass === "Class 5") {
-    let pText = day % 2 === 1 
-      ? `📖 **अनुच्छेद (Day ${day}):** जवाहर नवोदय विद्यालय में प्रवेश पाने के लिए कड़ी मेहनत और नियमित अभ्यास ज़रूरी है। अनुशासन से छात्र समय पर कार्य करना सीखते हैं।`
-      : `📖 **Passage (Day ${day}):** Regular practice brings perfection in Mathematics and Reasoning. Time management is crucial for competitive exams.`;
-
-    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय विद्यालय में सफलता के लिए क्या आवश्यक है?" : "What brings perfection in Mathematics?", options: day % 2 === 1 ? ["कड़ी मेहनत", "आलस्य", "देर तक सोना", "खेलना"] : ["Regular practice", "Sleeping late", "Watching TV", "Luck"], ans: day % 2 === 1 ? "कड़ी मेहनत" : "Regular practice" });
-    questions.push({ passage: pText, q: day % 2 === 1 ? "अनुशासन से छात्र क्या सीखते हैं?" : "What is crucial for competitive exams?", options: day % 2 === 1 ? ["समय पर कार्य करना", "लड़ाई करना", "पढ़ाई छोड़ना", "TV देखना"] : ["Time management", "Fast eating", "Noise", "Sleeping"], ans: day % 2 === 1 ? "समय पर कार्य करना" : "Time management" });
-
-    let mult = (day % 4) + 2;
-    for(let i = 1; i <= 5; i++) {
-      let baseVal = (day * 3) + (i * 4);
-      questions.push({ q: `Series Complete: ${baseVal}, ${baseVal + mult}, ${baseVal + mult*2}, ?`, options: [`${baseVal + mult*3}`, `${baseVal + mult*3 + 2}`, `${baseVal + mult*2 + 1}`, `${baseVal + mult*4}`], ans: `${baseVal + mult*3}` });
-    }
-
-    for(let i = 1; i <= 7; i++) {
-      let a = (day * 3) + (i * 5);
-      let b = (day * 2) + (i * 2);
-      questions.push({ q: `Solve: ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b-2}`, `${a+b+3}`, `${a+b+5}`], ans: `${a+b}` });
-    }
-
-    const staticBank = [
-      { q: "भारत के वर्तमान राष्ट्रपति कौन हैं?", options: ["द्रौपदी मुर्मू", "रामनाथ कोविंद", "नरेंद्र मोदी", "अमित शाह"], ans: "द्रौपदी मुर्मू" },
-      { q: "Opposite of 'ANCIENT' is?", options: ["Old", "Modern", "Past", "Historic"], ans: "Modern" },
-      { q: "100 ka 25% kitna hoga?", options: ["10", "20", "25", "50"], ans: "25" },
-      { q: "L.C.M of 6 and 12 is?", options: ["6", "12", "18", "24"], ans: "12" },
-      { q: "1 kilometer me kitne meter hote hain?", options: ["100m", "500m", "1000m", "10000m"], ans: "1000m" },
-      { q: "Smallest Prime Number (सबसे छोटी अभाज्य संख्या)?", options: ["0", "1", "2", "3"], ans: "2" }
-    ];
-
-    staticBank.forEach(item => { questions.push({ q: item.q, options: item.options, ans: item.ans }); });
-  } 
-  else {
-    for(let i = 1; i <= 20; i++) {
-      let val = i * 2 + day;
-      questions.push({ q: `Algebra / Logic Q${i}: Solve ${i}x + 4 = ${val * 2 + 4}`, options: [`${val}`, `${val+2}`, `${val-1}`, `${val+4}`], ans: `${val}` });
-    }
-  }
-
-  return questions.slice(0, 20);
-}
-
-function isDayCompleted(day) {
-  if (!currentActiveUser || !currentActiveUser.userAnswers) return false;
-  let count = 0;
-  for (let i = 0; i < 20; i++) {
-    if (currentActiveUser.userAnswers[`D${day}_Q${i}`]) count++;
-  }
-  return count === 20;
-}
-
-function handleOptionClick(selectedOpt, correctAns) {
-  let qKey = `D${currentDay}_Q${currentQIndex}`;
-  if (currentActiveUser.userAnswers[qKey]) return;
-
-  currentActiveUser.userAnswers[qKey] = selectedOpt;
-
-  if (selectedOpt === correctAns) {
-    currentActiveUser.points = (currentActiveUser.points || 0) + 10;
-  } else {
-    currentActiveUser.wrong = (currentActiveUser.wrong || 0) + 1;
-  }
-
-  if (currentQIndex === 19) {
-    currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
-    currentActiveUser.lastCompletedDate = getTodayString();
-    alert("🎉 Fantastic! Day " + currentDay + " Complete! Next Day will unlock tomorrow!");
-  }
-
-  let dbKey = currentActiveUser.id.replace(/\s+/g, '_');
-  db.ref('users/' + dbKey).set(currentActiveUser);
-
-  refreshStatsUI();
-  currentQIndex++;
-  renderQuestion();
-}
-
-function renderQuestion() {
-  if (!currentActiveUser) return;
-  let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
-  document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
-
-  let nextBtn = document.getElementById('btnNextDay');
-  let todayStr = getTodayString();
-  let dayFinished = isDayCompleted(currentDay);
-  let isNewDateAvailable = currentActiveUser.lastCompletedDate !== todayStr;
-
-  if (dayFinished && isNewDateAvailable) {
-    nextBtn.disabled = false;
-    nextBtn.style.opacity = "1";
-  } else {
-    nextBtn.disabled = true;
-    nextBtn.style.opacity = "0.5";
-  }
-
-  let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
-  let fill = document.getElementById('progressFill');
-
-  if (currentQIndex >= questions.length) {
-    passageBox.classList.add('hidden');
-    qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
-    optsBox.innerHTML = '';
-    fill.style.width = '100%';
-    return;
-  }
-
-  fill.style.width = `${Math.round((currentQIndex / questions.length) * 100)}%`;
-  let q = questions[currentQIndex];
-
-  if (q.passage) { passageBox.innerHTML = q.passage; passageBox.classList.remove('hidden'); }
-  else { passageBox.classList.add('hidden'); }
-
-  qBox.innerText = `Q${currentQIndex + 1}. ${q.q}`;
-  optsBox.innerHTML = '';
-
-  let qKey = `D${currentDay}_Q${currentQIndex}`;
-  let alreadyAnswered = currentActiveUser.userAnswers && currentActiveUser.userAnswers[qKey];
-
-  q.options.forEach(opt => {
-    let btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.innerText = opt;
-    
-    if (alreadyAnswered) {
-      btn.disabled = true;
-      if (opt === alreadyAnswered) {
-        btn.style.borderColor = opt === q.ans ? 'var(--success)' : 'var(--danger)';
-        btn.style.color = opt === q.ans ? 'var(--success)' : 'var(--danger)';
-      }
-    } else {
-      btn.onclick = function() { handleOptionClick(opt, q.ans); };
-    }
-    optsBox.appendChild(btn);
-  });
-}
-
-function navigateQuestion(delta) {
-  let target = currentQIndex + delta;
-  if (target >= 0 && target < 20) {
-    currentQIndex = target;
-    renderQuestion();
-  }
-}
-
-function changeDay(delta) {
-  if (delta > 0) {
-    if (!isDayCompleted(currentDay)) {
-      alert("🔒 Complete all 20 questions of Day " + currentDay + " first!");
-      return;
-    }
-    let todayStr = getTodayString();
-    if (currentActiveUser.lastCompletedDate === todayStr) {
-      let overridePin = prompt("🔒 Day " + (currentDay + 1) + " unlocks tomorrow!\n\nEnter Admin PIN to unlock early:");
-      if (overridePin === getAdminPin()) {
-        alert("🔓 Day Unlocked by Admin!");
-      } else {
-        if(overridePin) alert("Incorrect Admin PIN!");
-        return;
-      }
-    }
-  }
-  if (currentDay + delta >= 1) {
-    currentDay += delta;
-    currentQIndex = 0;
-    renderQuestion();
-  }
-}
-
-function openAdminModal() {
-  document.getElementById('adminPinInput').value = '';
-  document.getElementById('adminAuthBox').classList.remove('hidden');
-  document.getElementById('adminContentBox').classList.add('hidden');
-  document.getElementById('adminModal').classList.remove('hidden');
-  history.pushState({ page: 'admin' }, '');
-}
-
-function closeAdminModal() { 
-  document.getElementById('adminModal').classList.add('hidden'); 
-}
-
-function verifyAdminPin() {
-  if (document.getElementById('adminPinInput').value === getAdminPin()) {
-    document.getElementById('adminAuthBox').classList.add('hidden');
-    document.getElementById('adminContentBox').classList.remove('hidden');
-    renderAdminUsersList();
-  } else { alert("Incorrect Master Admin PIN!"); }
-}
-
-function renderAdminUsersList() {
-  let list = document.getElementById('adminUsersList');
-  list.innerHTML = '';
-  globalUsersList.forEach((u) => {
-    let row = document.createElement('div');
-    row.style.cssText = 'background:var(--input-bg); padding:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);';
-    let isChecked = u.active !== false ? 'checked' : '';
-
-    row.innerHTML = `
-      <div>
-        <strong>${u.avatar || '🎓'} ${u.id}</strong> <span class="badge">${u.class}</span><br>
-        <small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small>
-      </div>
-      <div style="display:flex; align-items:center; gap:4px;">
-        <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:4px 6px; font-size:0.7rem;">🔄 Reset</button>
-        <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:4px 6px; font-size:0.7rem;">✏️ PIN</button>
-        <label class="switch">
-          <input type="checkbox" ${isChecked} onchange="toggleUserActiveStatus('${u.id}', this.checked)">
-          <span class="slider"></span>
-        </label>
-        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:4px 6px; font-size:0.7rem;">Del</button>` : ''}
-      </div>
-    `;
-    list.appendChild(row);
-  });
-}
-
-function resetUserProgress(id) {
-  let u = globalUsersList.find(x => x.id === id);
-  if (u) {
-    if (confirm(`Reset all practice progress for ${id}? They will start from Day 1 Question 1.`)) {
-      u.points = 0;
-      u.wrong = 0;
-      u.streak = 0;
-      u.userAnswers = {};
-      u.lastCompletedDate = "";
-      let dbKey = id.replace(/\s+/g, '_');
-      db.ref('users/' + dbKey).set(u);
-      alert(`Progress reset for ${id}!`);
-      if (currentActiveUser && currentActiveUser.id === id) {
-        currentDay = 1;
-        currentQIndex = 0;
-        loadUserWorkspace();
-      }
-    }
-  }
-}
-
-function resetStudentPin(id) {
-  let u = globalUsersList.find(x => x.id === id);
-  if (u) {
-    let newPin = prompt(`Enter new 4-digit PIN for ${id}:`, u.pin);
-    if (newPin && newPin.length === 4) {
-      u.pin = newPin;
-      let dbKey = id.replace(/\s+/g, '_');
-      db.ref('users/' + dbKey).set(u);
-      alert(`PIN Updated for ${id}! New PIN: ${newPin}`);
-    } else if(newPin) { alert("PIN must be 4 digits!"); }
-  }
-}
-
-function toggleUserActiveStatus(id, isActive) {
-  let u = globalUsersList.find(x => x.id === id);
-  if(u) {
-    u.active = isActive;
-    let dbKey = id.replace(/\s+/g, '_');
-    db.ref('users/' + dbKey).set(u);
-  }
-}
-
-function addNewStudent() {
-  let name = document.getElementById('newStudentName').value.trim();
-  let gender = document.getElementById('newStudentGender').value;
-  let cls = document.getElementById('newStudentClass').value;
-  if (!name) { alert("Enter Student Name!"); return; }
-
-  let nextNum = globalUsersList.length + 1;
-  let formattedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
-  let generatedID = `${name} ${formattedNum}`;
-  let randomPin = Math.floor(1000 + Math.random() * 9000).toString();
-  let avatar = getRandomAvatar(gender, nextNum);
-
-  let newUser = { 
-    id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, gender: gender,
-    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" 
-  };
-
-  let dbKey = generatedID.replace(/\s+/g, '_');
-  db.ref('users/' + dbKey).set(newUser);
-
-  alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
-  document.getElementById('newStudentName').value = '';
-}
-
-function deleteStudent(id) {
-  if (confirm(`Delete student ${id}?`)) {
-    let dbKey = id.replace(/\s+/g, '_');
-    db.ref('users/' + dbKey).remove();
-  }
-}
-
-function updateAdminPin() {
-  let p = document.getElementById('changeAdminPinVal').value.trim();
-  if (p.length >= 4) {
-    localStorage.setItem('app_master_pin', p);
-    alert("Master Admin PIN Updated!");
-    closeAdminModal();
-  } else { alert("PIN must be at least 4 digits."); }
-}
-
-// PHONE BACK BUTTON NAVIGATION CONTROL
-window.onpopstate = function(e) {
-  let adminModal = document.getElementById('adminModal');
-  if (adminModal && !adminModal.classList.contains('hidden')) {
-    adminModal.classList.add('hidden');
-    return;
-  }
-
-  let practiceWorkspace = document.getElementById('practiceWorkspace');
-  if (practiceWorkspace && !practiceWorkspace.classList.contains('hidden')) {
-    if (confirm("Logout current student?")) {
-      logoutStudent();
-    } else {
-      history.pushState({ page: 'workspace' }, '');
-    }
-    return;
-  }
-
-  // ON LOGIN SCREEN: PRESS BACK AGAIN TO EXIT
-  let now = new Date().getTime();
-  if (now - backPressTime < 2000) {
-    // Allows exiting app/page on second press
-    return;
-  } else {
-    backPressTime = now;
-    showToast("Press back again to exit");
-    history.pushState({ page: 'login' }, '');
-  }
-};
-
-document.addEventListener('click', function(e) {
-  let wrapper = document.querySelector('.autocomplete-wrapper');
-  if (wrapper && !wrapper.contains(e.target)) {
-    let box = document.getElementById('suggestionsBox');
-    if(box) box.classList.add('hidden');
-  }
-});
-
-window.onload = function() {
-  let savedTheme = localStorage.getItem('app_theme') || 'dark';
-  document.body.setAttribute('data-theme', savedTheme);
-  document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
-  history.pushState({ page: 'login' }, '');
-  initCloudSync();
-};
-</script>
-</body>
-</html>
+    document.getElementById('loginScree
