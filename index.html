@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduPortal 2026 - Ultra Fast</title>
+  <title>EduPortal 2026 - Instant Responsive</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
   <!-- Firebase SDKs -->
@@ -46,9 +46,9 @@
     .kids-badge { display: inline-block; background: linear-gradient(90deg, #F59E0B, #EC4899); color: white; padding: 4px 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; }
     
     .autocomplete-wrapper { position: relative; width: 100%; text-align: left; }
-    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 14px; max-height: 180px; overflow-y: auto; z-index: 100; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 14px; max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
     .suggestion-item { padding: 12px 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
-    .suggestion-item:hover { background: var(--primary); color: white; }
+    .suggestion-item:active, .suggestion-item:hover { background: var(--primary); color: white; }
 
     .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
     .btn { padding: 12px 18px; border: none; border-radius: 14px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; }
@@ -93,7 +93,7 @@
 <div class="app-container">
 
   <div class="top-header">
-    <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal <span id="syncStatus" style="font-size:0.7rem; color:var(--success);">• Live Cloud</span></div>
+    <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal <span id="syncStatus" style="font-size:0.7rem; color:var(--success);">• Ready</span></div>
     <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
   </div>
 
@@ -224,7 +224,12 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- LIGHTWEIGHT AUDIO SYNTHESIZER ---
+// --- DEFAULT LOCAL FALLBACK DATA (FOR INSTANT CLICK RESPONSE) ---
+let globalUsersList = [
+  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" },
+  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" }
+];
+
 let audioCtx = null;
 function playSound(type) {
   try {
@@ -238,19 +243,19 @@ function playSound(type) {
     if (type === 'correct') {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(523, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.2);
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
       gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.15);
     } else {
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.2);
+      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.15);
       gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.15);
     }
-  } catch(e) { console.log('Audio disabled/not supported'); }
+  } catch(e) {}
 }
 
 function shuffleArray(arr, seed) {
@@ -266,7 +271,6 @@ function shuffleArray(arr, seed) {
 const BOY_AVATARS = ["👦", "🧑‍🚀", "🦸‍♂️", "🦁", "🐯", "🤖"];
 const GIRL_AVATARS = ["👧", "👩‍🚀", "🦸‍♀️", "🦄", "🦊", "🐼"];
 
-let globalUsersList = [];
 let currentActiveUser = null;
 let currentQIndex = 0;
 let currentDay = 1;
@@ -308,28 +312,23 @@ function toggleTheme() {
 }
 
 function initCloudSync() {
-  db.ref('users').on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      globalUsersList = Object.keys(data).map(key => data[key]);
-    } else {
-      let defaultUser = { 
-        id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy",
-        avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" 
-      };
-      db.ref('users/Ayush_01').set(defaultUser);
-      globalUsersList = [defaultUser];
-    }
-
-    if (currentActiveUser) {
-      let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
-      if (updated) currentActiveUser = updated;
-    }
-    
-    if (document.getElementById('adminModal') && !document.getElementById('adminContentBox').classList.contains('hidden')) {
-      renderAdminUsersList();
-    }
-  });
+  try {
+    db.ref('users').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        globalUsersList = Object.keys(data).map(key => data[key]);
+        let syncText = document.getElementById('syncStatus');
+        if (syncText) syncText.innerText = '• Live Cloud';
+      }
+      if (currentActiveUser) {
+        let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
+        if (updated) currentActiveUser = updated;
+      }
+      if (document.getElementById('adminModal') && !document.getElementById('adminContentBox').classList.contains('hidden')) {
+        renderAdminUsersList();
+      }
+    });
+  } catch(e) { console.log('Firebase Offline - Using Local Engine'); }
 }
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
@@ -349,8 +348,8 @@ function showSuggestions(showAll = false) {
     let item = document.createElement('div');
     item.className = 'suggestion-item';
     item.innerHTML = `<span>${m.avatar || '🎓'} ${m.id}</span> <span class="badge">${m.class}</span>`;
-    item.onclick = function(e) {
-      e.stopPropagation();
+    item.onmousedown = function(e) {
+      e.preventDefault();
       document.getElementById('loginUsername').value = m.id;
       box.classList.add('hidden');
       document.getElementById('loginPin').focus();
@@ -529,7 +528,7 @@ function handleOptionClick(selectedOpt, correctAns) {
   }
 
   let dbKey = currentActiveUser.id.replace(/\s+/g, '_');
-  db.ref('users/' + dbKey).set(currentActiveUser);
+  try { db.ref('users/' + dbKey).set(currentActiveUser); } catch(e){}
 
   refreshStatsUI();
   currentQIndex++;
@@ -687,7 +686,7 @@ function resetUserProgress(id) {
       u.userAnswers = {};
       u.lastCompletedDate = "";
       let dbKey = id.replace(/\s+/g, '_');
-      db.ref('users/' + dbKey).set(u);
+      try { db.ref('users/' + dbKey).set(u); } catch(e){}
       alert(`Progress reset for ${id}!`);
       if (currentActiveUser && currentActiveUser.id === id) {
         currentDay = 1;
@@ -705,7 +704,7 @@ function resetStudentPin(id) {
     if (newPin && newPin.length === 4) {
       u.pin = newPin;
       let dbKey = id.replace(/\s+/g, '_');
-      db.ref('users/' + dbKey).set(u);
+      try { db.ref('users/' + dbKey).set(u); } catch(e){}
       alert(`PIN Updated for ${id}! New PIN: ${newPin}`);
     } else if(newPin) { alert("PIN must be 4 digits!"); }
   }
@@ -716,7 +715,7 @@ function toggleUserActiveStatus(id, isActive) {
   if(u) {
     u.active = isActive;
     let dbKey = id.replace(/\s+/g, '_');
-    db.ref('users/' + dbKey).set(u);
+    try { db.ref('users/' + dbKey).set(u); } catch(e){}
   }
 }
 
@@ -737,8 +736,9 @@ function addNewStudent() {
     avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" 
   };
 
+  globalUsersList.push(newUser);
   let dbKey = generatedID.replace(/\s+/g, '_');
-  db.ref('users/' + dbKey).set(newUser);
+  try { db.ref('users/' + dbKey).set(newUser); } catch(e){}
 
   alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
   document.getElementById('newStudentName').value = '';
@@ -746,8 +746,10 @@ function addNewStudent() {
 
 function deleteStudent(id) {
   if (confirm(`Delete student ${id}?`)) {
+    globalUsersList = globalUsersList.filter(u => u.id !== id);
     let dbKey = id.replace(/\s+/g, '_');
-    db.ref('users/' + dbKey).remove();
+    try { db.ref('users/' + dbKey).remove(); } catch(e){}
+    renderAdminUsersList();
   }
 }
 
