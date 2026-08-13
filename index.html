@@ -160,8 +160,8 @@
     </div>
 
     <div id="adminAuthBox">
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin PIN (Default: 7258)</p>
-      <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" style="text-align: center;" />
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin Security PIN</p>
+      <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" style="text-align: center; letter-spacing: 4px;" />
       <button class="btn" onclick="verifyAdminPin()" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
     </div>
 
@@ -253,7 +253,6 @@ function initCloudSync() {
     if (data) {
       globalUsersList = Object.keys(data).map(key => data[key]);
     } else {
-      // Seed initial default user if database is empty
       let defaultUser = { 
         id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy",
         avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {} 
@@ -262,7 +261,6 @@ function initCloudSync() {
       globalUsersList = [defaultUser];
     }
     
-    // Auto-update UI if active or admin open
     if (document.getElementById('adminModal') && !document.getElementById('adminContentBox').classList.contains('hidden')) {
       renderAdminUsersList();
     }
@@ -426,7 +424,6 @@ function handleOptionClick(selectedOpt, correctAns) {
     alert("🎉 Day Practice Complete! Streak Updated!");
   }
 
-  // Live Cloud Update
   let dbKey = currentActiveUser.id.replace(/\s+/g, '_');
   db.ref('users/' + dbKey).set(currentActiveUser);
 
