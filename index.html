@@ -3,85 +3,290 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Practice App</title>
+  <title>JNVST Practice Portal - Ayush</title>
   <style>
     :root {
       --primary: #4F46E5;
       --primary-hover: #4338CA;
-      --bg: #F3F4F6;
+      --bg: #F8FAFC;
       --card-bg: #FFFFFF;
-      --text: #1F2937;
-      --text-light: #6B7280;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
       --success: #10B981;
       --danger: #EF4444;
+      --accent: #F59E0B;
+      --border: #E2E8F0;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 15px; display: flex; justify-content: center; }
-    .app-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
-
-    /* Card Styling */
-    .card { background: var(--card-bg); border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     
-    /* Top Bar & Stats */
-    .top-bar { display: flex; justify-content: space-between; align-items: center; }
-    .stats-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
-    .stat-badge { background: #EEF2FF; padding: 8px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; color: var(--primary); }
+    body { 
+      background-color: var(--bg); 
+      color: var(--text-main); 
+      min-height: 100vh;
+      padding: 16px; 
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start;
+    }
+
+    .app-container { 
+      width: 100%; 
+      max-width: 520px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 16px; 
+    }
+
+    /* Cards & Layout */
+    .card { 
+      background: var(--card-bg); 
+      border-radius: 16px; 
+      padding: 18px; 
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Professional Top Banner */
+    .profile-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+      color: white;
+      border: none;
+    }
+
+    .user-info h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 2px; }
+    .user-info p { font-size: 0.8rem; opacity: 0.85; }
+
+    .manage-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Stats Grid */
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 10px; 
+    }
+
+    .stat-card { 
+      background: #F1F5F9; 
+      padding: 10px 8px; 
+      border-radius: 12px; 
+      text-align: center;
+    }
+
+    .stat-card .val { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+    .stat-card .lbl { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
 
     /* Day Navigation */
-    .day-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
-    .btn { padding: 8px 16px; border: none; border-radius: 6px; background: var(--primary); color: white; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    .btn:hover { background: var(--primary-hover); }
-    .btn-secondary { background: #E5E7EB; color: var(--text); }
-    .btn-secondary:hover { background: #D1D5DB; }
+    .day-nav { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      margin-bottom: 12px;
+    }
 
-    /* Question Display */
-    .q-counter { font-size: 0.85rem; color: var(--text-light); text-align: center; margin-top: 10px; font-weight: 600; }
-    .question-box { font-size: 1.15rem; font-weight: 600; margin: 15px 0; text-align: center; min-height: 55px; display: flex; align-items: center; justify-content: center; }
-    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .option-btn { padding: 12px; border: 2px solid #E5E7EB; border-radius: 8px; background: white; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
+    .btn { 
+      padding: 10px 18px; 
+      border: none; 
+      border-radius: 10px; 
+      background: var(--primary); 
+      color: white; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn-secondary { background: #E2E8F0; color: var(--text-main); }
+
+    /* Progress Bar */
+    .progress-wrapper {
+      margin: 12px 0 16px 0;
+    }
+    
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #E2E8F0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 10px;
+    }
+
+    /* Question & Options */
+    .question-box { 
+      font-size: 1.15rem; 
+      font-weight: 600; 
+      margin: 16px 0 20px 0; 
+      text-align: center; 
+      min-height: 60px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      line-height: 1.4;
+      padding: 0 8px;
+    }
+
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .option-btn { 
+      padding: 14px 10px; 
+      border: 2px solid var(--border); 
+      border-radius: 12px; 
+      background: white; 
+      font-size: 0.95rem; 
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer; 
+      transition: all 0.2s; 
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+
     .option-btn:hover { border-color: var(--primary); background: #EEF2FF; }
 
-    /* PIN Modal & Analytics Modal */
-    .modal-overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-card { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 380px; text-align: center; }
-    .modal-card input { width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 1.2rem; text-align: center; letter-spacing: 4px; }
+    /* Navodaya Tip Widget */
+    .tip-box {
+      background: #FEF3C7;
+      border: 1px solid #FCD34D;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.82rem;
+      color: #92400E;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay { 
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100vw; height: 100vh; 
+      background: rgba(15, 23, 42, 0.6); 
+      backdrop-filter: blur(4px);
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      z-index: 1000; 
+    }
+
+    .modal-card { 
+      background: white; 
+      padding: 24px; 
+      border-radius: 16px; 
+      width: 90%; 
+      max-width: 380px; 
+      text-align: center; 
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+
+    .modal-card input { 
+      width: 100%; 
+      padding: 12px; 
+      margin: 16px 0; 
+      border: 2px solid var(--border); 
+      border-radius: 10px; 
+      font-size: 1.25rem; 
+      text-align: center; 
+      letter-spacing: 6px; 
+    }
 
     .hidden { display: none !important; }
-    .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-    .analytics-item { background: #F9FAFB; padding: 10px; border-radius: 8px; border: 1px solid #E5E7EB; }
+
+    .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+    .analytics-item { background: #F8FAFC; padding: 12px; border-radius: 10px; border: 1px solid var(--border); }
   </style>
 </head>
 <body>
 
 <div class="app-container">
 
-  <!-- Header & Stats Bar -->
-  <div class="card">
-    <div class="top-bar" style="margin-bottom: 12px;">
-      <h2 style="font-size: 1.2rem; color: var(--primary);">Daily Practice</h2>
-      <button class="btn btn-secondary" onclick="openSyllabusModal()" style="font-size: 0.8rem; padding: 6px 10px;">Manage Syllabus</button>
+  <!-- Profile Banner -->
+  <div class="card profile-banner">
+    <div class="user-info">
+      <h1>JNVST Prep 🎓</h1>
+      <p>Target: Navodaya Class 6th Entrance</p>
     </div>
-    <div class="stats-bar">
-      <div class="stat-badge">🔥 <span id="streakCount">0</span> Days</div>
-      <div class="stat-badge">⭐ <span id="totalPoints">0</span> Pts</div>
-      <button class="btn" onclick="openAnalyticsModal()" style="font-size: 0.8rem; padding: 6px;">📊 Analytics</button>
+    <button class="manage-btn" onclick="openSyllabusModal()">Manage</button>
+  </div>
+
+  <!-- Performance Overview Stats -->
+  <div class="card">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="val">🔥 <span id="streakCount">0</span></div>
+        <div class="lbl">Day Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">⭐ <span id="totalPoints">0</span></div>
+        <div class="lbl">Score Pts</div>
+      </div>
+      <div class="stat-card" style="cursor: pointer;" onclick="openAnalyticsModal()">
+        <div class="val">📊</div>
+        <div class="lbl">Analytics</div>
+      </div>
     </div>
   </div>
 
-  <!-- Main Question Card -->
+  <!-- Question & Quiz Workspace -->
   <div class="card">
     <div class="day-nav">
       <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev</button>
-      <span id="currentDayLabel" style="font-weight: 700;">Day 1</span>
+      <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 700;">Day 1</span>
       <button class="btn btn-secondary" onclick="changeDay(1)">Next →</button>
     </div>
 
-    <div class="q-counter" id="questionCounter">Question 1 of 20</div>
+    <!-- Live Progress Bar -->
+    <div class="progress-wrapper">
+      <div class="progress-info">
+        <span id="questionCounter">Question 1 of 20</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
     <div class="question-box" id="questionText">Loading question...</div>
 
     <div class="options-grid" id="optionsContainer">
-      <!-- Options rendered via JS -->
+      <!-- Options rendered dynamically -->
+    </div>
+  </div>
+
+  <!-- Daily Exam Tip Box -->
+  <div class="tip-box">
+    <span style="font-size: 1.2rem;">💡</span>
+    <div>
+      <strong>Navodaya Tip:</strong> Har sawaal dhyan se padhein. Maths me rough paper par calculate zaroor karein!
     </div>
   </div>
 
@@ -90,11 +295,12 @@
 <!-- Custom PIN Lock Modal -->
 <div id="pinModal" class="modal-overlay hidden">
   <div class="modal-card">
-    <h3>Enter PIN</h3>
+    <h3 style="font-size: 1.2rem; color: var(--text-main);">Enter Parent PIN</h3>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Locked area access</p>
     <input type="password" id="pinInput" maxlength="6" placeholder="••••" />
     <div style="display: flex; gap: 10px; justify-content: center;">
-      <button class="btn btn-secondary" onclick="closePinModal()">Cancel</button>
-      <button class="btn" onclick="submitPin()">Unlock</button>
+      <button class="btn btn-secondary" onclick="closePinModal()" style="width: 50%;">Cancel</button>
+      <button class="btn" onclick="submitPin()" style="width: 50%;">Unlock</button>
     </div>
   </div>
 </div>
@@ -102,23 +308,25 @@
 <!-- Analytics Dashboard Modal -->
 <div id="analyticsModal" class="modal-overlay hidden">
   <div class="modal-card">
-    <h3 style="margin-bottom: 10px;">📊 Performance Summary</h3>
+    <h3 style="margin-bottom: 4px;">📊 Analytics Dashboard</h3>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">Ayush's Practice Insights</p>
+    
     <div class="analytics-grid">
       <div class="analytics-item">
-        <span style="font-size: 0.75rem; color: var(--text-light);">Answered</span>
-        <h4 id="statTotal">0</h4>
+        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">ATTEMPTED</span>
+        <h4 id="statTotal" style="font-size: 1.2rem; margin-top: 4px;">0</h4>
       </div>
       <div class="analytics-item">
-        <span style="font-size: 0.75rem; color: var(--text-light);">Accuracy</span>
-        <h4 id="statAccuracy">0%</h4>
+        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">ACCURACY</span>
+        <h4 id="statAccuracy" style="font-size: 1.2rem; margin-top: 4px; color: var(--success);">0%</h4>
       </div>
       <div class="analytics-item">
-        <span style="font-size: 0.75rem; color: var(--text-light);">Avg Speed</span>
-        <h4 id="statSpeed">0s</h4>
+        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">AVG SPEED</span>
+        <h4 id="statSpeed" style="font-size: 1.2rem; margin-top: 4px;">0s</h4>
       </div>
       <div class="analytics-item">
-        <span style="font-size: 0.75rem; color: var(--text-light);">Needs Focus</span>
-        <h4 id="statWeak" style="color: var(--danger); font-size: 0.85rem;">None</h4>
+        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">WEAK AREA</span>
+        <h4 id="statWeak" style="color: var(--danger); font-size: 0.9rem; margin-top: 6px;">None</h4>
       </div>
     </div>
     <button class="btn btn-secondary" onclick="closeAnalyticsModal()" style="width: 100%;">Close</button>
@@ -139,7 +347,7 @@ if (!localStorage.getItem('app_start_date')) {
   localStorage.setItem('app_start_date', appData.startDate);
 }
 
-// 20 Questions per day (Maths, GK, English)
+// 20 Questions per day (Navodaya Exam Focused)
 const questionsBank = {
   1: [
     { q: "25 + 15 = ?", options: ["30", "40", "35", "45"], ans: "40", cat: "Math" },
@@ -183,7 +391,7 @@ const questionsBank = {
     { q: "मानव शरीर की सबसे बड़ी हड्डी कौन सी है?", options: ["फीमर", "स्टेप्स", "रेडियस", "अल्ना"], ans: "फीमर", cat: "GK" },
     { q: "Young one of a 'Dog' is called?", options: ["Kitten", "Calf", "Puppy", "Cub"], ans: "Puppy", cat: "English" },
     { q: "60 ÷ 5 = ?", options: ["10", "11", "12", "15"], ans: "12", cat: "Math" },
-    { q: "हमारे देश के प्रथम प्रधानमंत्री कौन थे?", options: ["मात्मा गांधी", "जवाहरलाल नेहरू", "राजेंद्र प्रसाद", "भगत सिंह"], ans: "जवाहरलाल नेहरू", cat: "GK" }
+    { q: "हमारे देश के प्रथम प्रधानमंत्री कौन थे?", options: ["महात्मा गांधी", "जवाहरलाल नेहरू", "राजेंद्र प्रसाद", "भगत सिंह"], ans: "जवाहरलाल नेहरू", cat: "GK" }
   ]
 };
 
@@ -205,8 +413,8 @@ const SoundFx = {
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(523.25, this.ctx.currentTime); // C5
-    osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.15); // E5
+    osc.frequency.setValueAtTime(523.25, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.15);
     gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
     osc.connect(gain);
@@ -221,8 +429,8 @@ const SoundFx = {
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(220, this.ctx.currentTime); // A3
-    osc.frequency.exponentialRampToValueAtTime(130.81, this.ctx.currentTime + 0.2); // C3
+    osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(130.81, this.ctx.currentTime + 0.2);
     gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
     osc.connect(gain);
@@ -345,15 +553,26 @@ function renderQuestion() {
   const counterBox = document.getElementById('questionCounter');
   const qBox = document.getElementById('questionText');
   const optsBox = document.getElementById('optionsContainer');
+  const progressFill = document.getElementById('progressFill');
+  const progressPercent = document.getElementById('progressPercent');
 
   if (!dayQuestions.length || currentQuestionIndex >= dayQuestions.length) {
     counterBox.innerText = `Completed!`;
-    qBox.innerText = "Great job! You have completed all questions for this day.";
+    progressFill.style.width = `100%`;
+    progressPercent.innerText = `100%`;
+    qBox.innerText = "🎉 Excellent! You completed all questions for today.";
     optsBox.innerHTML = '';
     return;
   }
 
-  counterBox.innerText = `Question ${currentQuestionIndex + 1} of ${dayQuestions.length}`;
+  const totalQ = dayQuestions.length;
+  const currQNum = currentQuestionIndex + 1;
+  const percent = Math.round((currentQuestionIndex / totalQ) * 100);
+
+  counterBox.innerText = `Question ${currQNum} of ${totalQ}`;
+  progressFill.style.width = `${percent}%`;
+  progressPercent.innerText = `${percent}%`;
+
   const qData = dayQuestions[currentQuestionIndex];
   qBox.innerText = qData.q;
   optsBox.innerHTML = '';
@@ -386,7 +605,7 @@ function checkAnswer(selected, correct, category) {
 }
 
 // ==========================================
-// 6. ANALYTICS MODAL
+// 6. ANALYTICS & PIN RESET LOGIC
 // ==========================================
 function openAnalyticsModal() {
   const summary = Analytics.getSummary();
@@ -402,9 +621,14 @@ function closeAnalyticsModal() {
 }
 
 function openSyllabusModal() {
-  const pin = prompt("Enter Parent PIN to manage syllabus:");
+  const pin = prompt("Enter Parent PIN for Settings / Clear App Data:");
   if (pin === appData.parentPin) {
-    alert("Syllabus management unlocked.");
+    const action = confirm("PIN Verified!\n\nClick 'OK' to Clear All Progress Data (Reset App for testing), or 'Cancel' to close.");
+    if (action) {
+      localStorage.clear();
+      alert("App data reset successfully!");
+      window.location.reload();
+    }
   } else if (pin !== null) {
     alert("Incorrect PIN");
   }
