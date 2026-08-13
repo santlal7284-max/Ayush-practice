@@ -73,6 +73,11 @@
     .option-btn { padding: 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--input-bg); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; touch-action: manipulation; }
     .option-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
+    /* ADMIN MODAL CLEAN MOBILE RESPONSIVE CARDS */
+    .admin-student-card { background: var(--input-bg); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); }
+    .admin-student-header { display: flex; justify-content: space-between; align-items: center; }
+    .admin-student-actions { display: flex; align-items: center; justify-content: space-between; gap: 6px; border-top: 1px dashed var(--border); padding-top: 8px; }
+
     .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--danger); transition: .3s; border-radius: 24px; }
@@ -81,11 +86,18 @@
     input:checked + .slider:before { transform: translateX(20px); }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-card { background: var(--card-bg); padding: 22px; border-radius: 22px; width: 92%; max-width: 420px; border: 2px solid var(--border); max-height: 85vh; overflow-y: auto; }
+    .modal-card { background: var(--card-bg); padding: 22px; border-radius: 22px; width: 92%; max-width: 440px; border: 2px solid var(--border); max-height: 85vh; overflow-y: auto; }
     .hidden { display: none !important; }
     .badge { background: rgba(99, 102, 241, 0.2); color: var(--primary); padding: 3px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; }
 
     .toast-msg { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: #1E293B; color: #FFF; padding: 10px 20px; border-radius: 25px; font-size: 0.85rem; font-weight: 700; border: 1.5px solid var(--primary); z-index: 9999; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+
+    /* SPARKLE EFFECT ANIMATION */
+    .sparkle-particle { position: fixed; pointer-events: none; z-index: 99999; animation: floatUp 0.8s ease-out forwards; font-size: 1.5rem; }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translate(0, 0) scale(0.5); }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.5); }
+    }
   </style>
 </head>
 <body>
@@ -198,7 +210,7 @@
       </div>
 
       <h4 style="font-size: 0.9rem; margin-bottom: 6px;">📋 Registered Students & Status</h4>
-      <div id="adminUsersList" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+      <div id="adminUsersList" style="max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
 
       <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
         <h4 style="font-size: 0.85rem; margin-bottom: 4px;">🔑 Change Master Admin PIN</h4>
@@ -224,7 +236,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- DEFAULT LOCAL FALLBACK DATA (FOR INSTANT CLICK RESPONSE) ---
 let globalUsersList = [
   { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" },
   { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" }
@@ -256,6 +267,22 @@ function playSound(type) {
       osc.start(); osc.stop(audioCtx.currentTime + 0.15);
     }
   } catch(e) {}
+}
+
+// SPARKLE BURST ANIMATION
+function triggerSparkleBurst() {
+  const emojis = ['✨', '⭐', '🎉', '🌟', '👏'];
+  for (let i = 0; i < 15; i++) {
+    const p = document.createElement('div');
+    p.className = 'sparkle-particle';
+    p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = (window.innerWidth / 2 + (Math.random() * 160 - 80)) + 'px';
+    p.style.top = (window.innerHeight / 2 + (Math.random() * 160 - 80)) + 'px';
+    p.style.setProperty('--dx', (Math.random() * 200 - 100) + 'px');
+    p.style.setProperty('--dy', (Math.random() * -250 - 50) + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 800);
+  }
 }
 
 function shuffleArray(arr, seed) {
@@ -328,7 +355,7 @@ function initCloudSync() {
         renderAdminUsersList();
       }
     });
-  } catch(e) { console.log('Firebase Offline - Using Local Engine'); }
+  } catch(e) {}
 }
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
@@ -514,6 +541,7 @@ function handleOptionClick(selectedOpt, correctAns) {
   if (selectedOpt === correctAns) {
     currentActiveUser.points = (currentActiveUser.points || 0) + 10;
     playSound('correct');
+    triggerSparkleBurst();
   } else {
     currentActiveUser.wrong = (currentActiveUser.wrong || 0) + 1;
     playSound('wrong');
@@ -649,27 +677,33 @@ function verifyAdminPin() {
   } else { alert("Incorrect Master Admin PIN!"); }
 }
 
+// CLEAN RESPONSIVE 2-ROW ADMIN CARDS
 function renderAdminUsersList() {
   let list = document.getElementById('adminUsersList');
   list.innerHTML = '';
   globalUsersList.forEach((u) => {
     let row = document.createElement('div');
-    row.style.cssText = 'background:var(--input-bg); padding:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);';
+    row.className = 'admin-student-card';
     let isChecked = u.active !== false ? 'checked' : '';
 
     row.innerHTML = `
-      <div>
-        <strong>${u.avatar || '🎓'} ${u.id}</strong> <span class="badge">${u.class}</span><br>
+      <div class="admin-student-header">
+        <div>
+          <strong>${u.avatar || '🎓'} ${u.id}</strong> <span class="badge">${u.class}</span>
+        </div>
         <small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small>
       </div>
-      <div style="display:flex; align-items:center; gap:4px;">
-        <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:4px 6px; font-size:0.7rem;">🔄 Reset</button>
-        <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:4px 6px; font-size:0.7rem;">✏️ PIN</button>
-        <label class="switch">
-          <input type="checkbox" ${isChecked} onchange="toggleUserActiveStatus('${u.id}', this.checked)">
-          <span class="slider"></span>
-        </label>
-        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:4px 6px; font-size:0.7rem;">Del</button>` : ''}
+      <div class="admin-student-actions">
+        <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">🔄 Reset</button>
+        <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">✏️ PIN</button>
+        <div style="display:flex; align-items:center; gap:4px;">
+          <small style="font-size:0.7rem; color:var(--text-muted)">Active:</small>
+          <label class="switch">
+            <input type="checkbox" ${isChecked} onchange="toggleUserActiveStatus('${u.id}', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">🗑️ Del</button>` : ''}
       </div>
     `;
     list.appendChild(row);
@@ -706,6 +740,7 @@ function resetStudentPin(id) {
       let dbKey = id.replace(/\s+/g, '_');
       try { db.ref('users/' + dbKey).set(u); } catch(e){}
       alert(`PIN Updated for ${id}! New PIN: ${newPin}`);
+      renderAdminUsersList();
     } else if(newPin) { alert("PIN must be 4 digits!"); }
   }
 }
@@ -742,6 +777,7 @@ function addNewStudent() {
 
   alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
   document.getElementById('newStudentName').value = '';
+  renderAdminUsersList();
 }
 
 function deleteStudent(id) {
