@@ -6,37 +6,41 @@
   <title>JNVST Prep - Ayush Raj</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
   <style>
-    :root { --primary: #4F46E5; --primary-hover: #4338CA; --bg: #F8FAFC; --card-bg: #FFFFFF; --text-main: #0F172A; --text-muted: #64748B; --success: #10B981; --danger: #EF4444; --border: #E2E8F0; }
+    :root { --primary: #4F46E5; --primary-hover: #4338CA; --bg: #F8FAFC; --card-bg: #FFFFFF; --text-main: #0F172A; --text-muted: #64748B; --success: #10B981; --danger: #EF4444; --border: #CBD5E1; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding: 14px; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding: 12px; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; }
     .app-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 12px; }
-    .card { background: var(--card-bg); border-radius: 16px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); }
+    .card { background: var(--card-bg); border-radius: 16px; padding: 16px; border: 1.5px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
     .profile-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%); color: white; border: none; padding: 16px; }
-    .user-info h1 { font-size: 1.25rem; font-weight: 700; }
-    .user-info p { font-size: 0.78rem; opacity: 0.9; }
-    .manage-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+    .user-info h1 { font-size: 1.35rem; font-weight: 700; }
+    .user-info p { font-size: 0.85rem; opacity: 0.95; }
+    .manage-btn { background: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.4); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
     .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .stat-card { background: #F1F5F9; padding: 8px; border-radius: 10px; text-align: center; }
-    .stat-card .val { font-size: 1rem; font-weight: 700; color: var(--primary); }
-    .stat-card .lbl { font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+    .stat-card .val { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+    .stat-card .lbl { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
     .day-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .btn { padding: 8px 14px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: 600; cursor: pointer; }
+    .btn { padding: 10px 16px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
     .btn-secondary { background: #E2E8F0; color: var(--text-main); }
     .btn-danger { background: var(--danger); color: white; }
     .progress-wrapper { margin: 10px 0 14px 0; }
-    .progress-info { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
-    .progress-bar-bg { width: 100%; height: 7px; background: #E2E8F0; border-radius: 10px; overflow: hidden; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+    .progress-bar-bg { width: 100%; height: 9px; background: #E2E8F0; border-radius: 10px; overflow: hidden; }
     .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.2s; }
-    .passage-box { background: #F1F5F9; border-left: 4px solid var(--primary); padding: 10px; border-radius: 6px; font-size: 0.85rem; line-height: 1.4; margin-bottom: 12px; color: #334155; }
-    .question-box { font-size: 1.05rem; font-weight: 600; margin: 10px 0 14px 0; text-align: center; min-height: 48px; display: flex; align-items: center; justify-content: center; }
-    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .option-btn { padding: 12px 8px; border: 1.5px solid var(--border); border-radius: 10px; background: white; font-size: 0.9rem; font-weight: 600; color: var(--text-main); cursor: pointer; }
-    .tip-box { background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 10px; padding: 10px; font-size: 0.8rem; color: #92400E; display: flex; gap: 8px; }
+    
+    /* BADHAYA GAYA FONT SIZE - SPECS COMPATIBLE */
+    .passage-box { background: #F1F5F9; border-left: 5px solid var(--primary); padding: 12px; border-radius: 8px; font-size: 1.15rem; line-height: 1.6; margin-bottom: 14px; color: #1E293B; font-weight: 500; }
+    .question-box { font-size: 1.45rem; font-weight: 700; margin: 12px 0 18px 0; text-align: center; min-height: 55px; display: flex; align-items: center; justify-content: center; color: #0F172A; line-height: 1.35; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .option-btn { padding: 16px 10px; border: 2px solid var(--border); border-radius: 12px; background: white; font-size: 1.25rem; font-weight: 700; color: #0F172A; cursor: pointer; transition: all 0.15s; }
+    .option-btn:active { border-color: var(--primary); background: #EEF2FF; transform: scale(0.98); }
+
+    .tip-box { background: #FEF3C7; border: 1.5px solid #FCD34D; border-radius: 10px; padding: 10px; font-size: 0.85rem; color: #92400E; display: flex; gap: 8px; }
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .modal-card { background: white; padding: 20px; border-radius: 16px; width: 90%; max-width: 380px; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
     .manage-section { background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-    .input-field { width: 100%; padding: 8px 10px; margin: 4px 0; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.9rem; }
+    .input-field { width: 100%; padding: 10px; margin: 4px 0; border: 1.5px solid var(--border); border-radius: 6px; font-size: 1rem; }
     .hidden { display: none !important; }
     .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
     .analytics-item { background: #F8FAFC; padding: 10px; border-radius: 8px; border: 1px solid var(--border); text-align: center; }
@@ -64,7 +68,7 @@
   <div class="card">
     <div class="day-nav">
       <button class="btn btn-secondary" onclick="changeDay(-1)">← Prev</button>
-      <span id="currentDayLabel" style="font-size: 1rem; font-weight: 700;">Day 1 / 90</span>
+      <span id="currentDayLabel" style="font-size: 1.15rem; font-weight: 800;">Day 1 / 90</span>
       <button class="btn btn-secondary" onclick="changeDay(1)">Next →</button>
     </div>
 
@@ -80,7 +84,7 @@
 
   <div class="tip-box">
     <span>💡</span>
-    <div><strong>Exam Tip for Ayush:</strong> Daily practice se speed aur accuracy dono badhti hai. Keep going!</div>
+    <div><strong>Exam Tip for Ayush:</strong> Sawaalon ko dhyan se padhein aur rough copy me solve karein.</div>
   </div>
 </div>
 
@@ -88,8 +92,8 @@
 <div id="pinModal" class="modal-overlay hidden">
   <div class="modal-card" style="text-align: center;">
     <h3>Enter Parent PIN</h3>
-    <p style="font-size: 0.75rem; color: var(--text-muted);">Future days locked for discipline</p>
-    <input type="password" id="pinInput" class="input-field" maxlength="6" placeholder="••••" style="text-align: center; font-size: 1.1rem; letter-spacing: 4px; margin: 12px 0;" />
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Future days locked</p>
+    <input type="password" id="pinInput" class="input-field" maxlength="6" placeholder="••••" style="text-align: center; font-size: 1.25rem; letter-spacing: 4px; margin: 12px 0;" />
     <div style="display: flex; gap: 8px;">
       <button class="btn btn-secondary" onclick="closePinModal()" style="width: 50%;">Cancel</button>
       <button class="btn" onclick="submitPin()" style="width: 50%;">Unlock</button>
@@ -102,18 +106,18 @@
   <div class="modal-card">
     <div class="modal-header">
       <h3>⚙️ Parent Settings</h3>
-      <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeManageModal()">&times;</button>
+      <button style="background:none; border:none; font-size:1.3rem; cursor:pointer;" onclick="closeManageModal()">&times;</button>
     </div>
     <div class="manage-section">
-      <h4 style="font-size: 0.85rem;">🔑 Change Parent PIN</h4>
+      <h4 style="font-size: 0.9rem;">🔑 Change Parent PIN</h4>
       <input type="password" id="currentPinInput" class="input-field" placeholder="Current PIN" maxlength="6" />
       <input type="password" id="newPinInput" class="input-field" placeholder="New PIN" maxlength="6" />
-      <button class="btn" onclick="handlePinChange()" style="width: 100%; margin-top: 6px; font-size: 0.8rem; padding: 6px;">Update PIN</button>
+      <button class="btn" onclick="handlePinChange()" style="width: 100%; margin-top: 6px; font-size: 0.85rem; padding: 8px;">Update PIN</button>
     </div>
     <div class="manage-section" style="background: #FEF2F2; border-color: #FCA5A5;">
-      <h4 style="font-size: 0.85rem; color: var(--danger);">🗑️ Reset All Progress</h4>
+      <h4 style="font-size: 0.9rem; color: var(--danger);">🗑️ Reset All Progress</h4>
       <input type="password" id="clearDataPinInput" class="input-field" placeholder="Enter PIN to confirm" maxlength="6" />
-      <button class="btn btn-danger" onclick="handleClearData()" style="width: 100%; margin-top: 6px; font-size: 0.8rem; padding: 6px;">Reset Data</button>
+      <button class="btn btn-danger" onclick="handleClearData()" style="width: 100%; margin-top: 6px; font-size: 0.85rem; padding: 8px;">Reset Data</button>
     </div>
   </div>
 </div>
@@ -123,13 +127,13 @@
   <div class="modal-card">
     <div class="modal-header">
       <h3>📊 Performance Summary</h3>
-      <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeAnalyticsModal()">&times;</button>
+      <button style="background:none; border:none; font-size:1.3rem; cursor:pointer;" onclick="closeAnalyticsModal()">&times;</button>
     </div>
     <div class="analytics-grid">
-      <div class="analytics-item"><span style="font-size: 0.7rem; color: var(--text-muted);">ATTEMPTED</span><h4 id="statTotal" style="font-size: 1.1rem; margin-top:2px;">0</h4></div>
-      <div class="analytics-item"><span style="font-size: 0.7rem; color: var(--text-muted);">ACCURACY</span><h4 id="statAccuracy" style="font-size: 1.1rem; margin-top:2px; color: var(--success);">0%</h4></div>
-      <div class="analytics-item"><span style="font-size: 0.7rem; color: var(--text-muted);">AVG SPEED</span><h4 id="statSpeed" style="font-size: 1.1rem; margin-top:2px;">0s</h4></div>
-      <div class="analytics-item"><span style="font-size: 0.7rem; color: var(--text-muted);">WEAK AREA</span><h4 id="statWeak" style="color: var(--danger); font-size: 0.85rem; margin-top:2px;">None</h4></div>
+      <div class="analytics-item"><span style="font-size: 0.75rem; color: var(--text-muted);">ATTEMPTED</span><h4 id="statTotal" style="font-size: 1.2rem; margin-top:2px;">0</h4></div>
+      <div class="analytics-item"><span style="font-size: 0.75rem; color: var(--text-muted);">ACCURACY</span><h4 id="statAccuracy" style="font-size: 1.2rem; margin-top:2px; color: var(--success);">0%</h4></div>
+      <div class="analytics-item"><span style="font-size: 0.75rem; color: var(--text-muted);">AVG SPEED</span><h4 id="statSpeed" style="font-size: 1.2rem; margin-top:2px;">0s</h4></div>
+      <div class="analytics-item"><span style="font-size: 0.75rem; color: var(--text-muted);">WEAK AREA</span><h4 id="statWeak" style="color: var(--danger); font-size: 0.9rem; margin-top:2px;">None</h4></div>
     </div>
     <button class="btn btn-secondary" onclick="closeAnalyticsModal()" style="width: 100%;">Close</button>
   </div>
@@ -143,12 +147,8 @@ let appData = {
 };
 if (!localStorage.getItem('app_start_date')) localStorage.setItem('app_start_date', appData.startDate);
 
-// 90-DAY DYNAMIC QUESTION GENERATOR ENGINE FOR JNVST
 function generateDayQuestions(dayNum) {
   let questions = [];
-  let seed = dayNum * 7; // Seed for deterministic variation per day
-  
-  // 1. Passage Questions (Reading Comprehension)
   let pText = dayNum % 2 === 1 
     ? `📖 **अनुच्छेद (Day ${dayNum}):** अनुशासन जीवन का सबसे महत्वपूर्ण अंग है। अनुशासित व्यक्ति हर कार्य समय पर पूरा करता है। जवाहर नवोदय विद्यालय में छात्रों को समय का सही उपयोग करना सिखाया जाता है।`
     : `📖 **Passage (Day ${dayNum}):** Time is money. A student who learns to respect time achieves great success in life. Regular practice makes a person perfect in Mathematics and Reasoning.`;
@@ -156,7 +156,6 @@ function generateDayQuestions(dayNum) {
   questions.push({ passage: pText, q: dayNum % 2 === 1 ? "जीवन का सबसे महत्वपूर्ण अंग क्या है?" : "What makes a student successful?", options: dayNum % 2 === 1 ? ["खेल", "अनुशासन", "आलस्य", "पैसा"] : ["Laziness", "Respecting Time", "Sleeping", "Watching TV"], ans: dayNum % 2 === 1 ? "अनुशासन" : "Respecting Time", cat: "Reading" });
   questions.push({ passage: pText, q: dayNum % 2 === 1 ? "नवोदय विद्यालय में क्या सिखाया जाता है?" : "What makes a person perfect in Math?", options: dayNum % 2 === 1 ? ["समय का उपयोग", "लड़ाई करना", "देर से सोना", "TV देखना"] : ["Reading news", "Regular practice", "Sleeping late", "Eating sweets"], ans: dayNum % 2 === 1 ? "समय का उपयोग" : "Regular practice", cat: "Reading" });
 
-  // 2. Pattern & Mental Ability Reasoning
   let mult = (dayNum % 5) + 2;
   let baseVal = (dayNum * 3);
   questions.push({ q: `Series Complete Karo: ${baseVal}, ${baseVal + mult}, ${baseVal + mult*2}, ?`, options: [`${baseVal + mult*3}`, `${baseVal + mult*3 + 2}`, `${baseVal + mult*2 + 1}`, `${baseVal + mult*4}`], ans: `${baseVal + mult*3}`, cat: "Reasoning" });
@@ -165,7 +164,6 @@ function generateDayQuestions(dayNum) {
   let curOdd = odds[dayNum % odds.length];
   questions.push({ q: `Inme se alag (Odd one out) chuno: [${curOdd.join(', ')}]`, options: curOdd, ans: curOdd[2], cat: "Reasoning" });
 
-  // 3. Mathematics (Dynamic Equations according to JNVST level)
   let a = (dayNum * 5) + 12;
   let b = (dayNum * 3) + 8;
   questions.push({ q: `${a} + ${b} = ?`, options: [`${a+b}`, `${a+b-2}`, `${a+b+5}`, `${a+b+10}`], ans: `${a+b}`, cat: "Math" });
@@ -174,7 +172,6 @@ function generateDayQuestions(dayNum) {
   let fracA = (dayNum % 3) + 1;
   questions.push({ q: `Solve Fraction: ${fracA}/5 + 1/5 = ?`, options: [`${fracA+1}/5`, `${fracA}/10`, `2/5`, `1/5`], ans: `${fracA+1}/5`, cat: "Math" });
 
-  // 4. Fill remaining to make 20 Questions
   const topics = [
     { q: "भारत के वर्तमान राष्ट्रपति कौन हैं?", opts: ["द्रौपदी मुर्मू", "रामनाथ कोविंद", "नरेंद्र मोदी", "अमित शाह"], a: "द्रौपदी मुर्मू", c: "GK" },
     { q: "Opposite of 'ANCIENT' is?", opts: ["Old", "Modern", "Past", "Historic"], a: "Modern", c: "English" },
@@ -202,7 +199,6 @@ function generateDayQuestions(dayNum) {
 let currentQuestionIndex = 0;
 let pendingTargetDay = null;
 
-// Audio Controller
 const SoundFx = {
   ctx: null,
   init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
