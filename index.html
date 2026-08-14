@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduPortal 2026 - Instant Responsive</title>
+  <title>EduPortal 2026 - Math Fix Upgrade</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
   <!-- Firebase SDKs -->
@@ -238,7 +238,8 @@ const db = firebase.database();
 
 let globalUsersList = [
   { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" },
-  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" }
+  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" },
+  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" }
 ];
 
 let audioCtx = null;
@@ -269,7 +270,6 @@ function playSound(type) {
   } catch(e) {}
 }
 
-// SPARKLE BURST ANIMATION
 function triggerSparkleBurst() {
   const emojis = ['✨', '⭐', '🎉', '🌟', '👏'];
   for (let i = 0; i < 15; i++) {
@@ -436,6 +436,7 @@ function refreshStatsUI() {
   document.getElementById('reportPercent').innerText = `${accuracy}%`;
 }
 
+// 100% ACCURATE MATHEMATICAL QUESTION GENERATOR
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
 
@@ -503,9 +504,18 @@ function generateAdaptiveQuestions(userClass, day) {
     staticBank.forEach(item => { questions.push({ q: item.q, options: item.options, ans: item.ans }); });
   } 
   else {
+    // ACCURATE ALGEBRA GENERATOR (GUARANTEED INTEGER SOLUTIONS)
     for(let i = 1; i <= 20; i++) {
-      let val = i * 2 + day;
-      questions.push({ q: `Algebra / Logic Q${i}: Solve ${i}x + 4 = ${val * 2 + 4}`, options: [`${val}`, `${val+2}`, `${val-1}`, `${val+4}`], ans: `${val}` });
+      let xAns = i + (day % 3) + 2; // Exact Answer (e.g., 4, 5, 6)
+      let coeff = (i % 5) + 2;     // Coefficient (e.g., 2, 3, 4, 5, 6)
+      let constant = (i * 2) + 1;  // Constant (e.g., 3, 5, 7)
+      let totalRHS = (coeff * xAns) + constant; // Exact RHS
+
+      questions.push({ 
+        q: `Solve for x: ${coeff}x + ${constant} = ${totalRHS}`, 
+        options: [`${xAns}`, `${xAns + 2}`, `${xAns - 1 > 0 ? xAns - 1 : xAns + 3}`, `${xAns + 4}`], 
+        ans: `${xAns}` 
+      });
     }
   }
 
@@ -677,7 +687,6 @@ function verifyAdminPin() {
   } else { alert("Incorrect Master Admin PIN!"); }
 }
 
-// CLEAN RESPONSIVE 2-ROW ADMIN CARDS
 function renderAdminUsersList() {
   let list = document.getElementById('adminUsersList');
   list.innerHTML = '';
