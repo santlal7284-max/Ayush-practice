@@ -13,7 +13,7 @@
   <style>
     :root {
       --bg-gradient: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #311042 100%);
-      --card-bg: rgba(30, 41, 59, 0.85);
+      --card-bg: rgba(30, 41, 59, 0.88);
       --text-main: #F8FAFC;
       --text-muted: #94A3B8;
       --primary: #6366F1;
@@ -26,7 +26,7 @@
 
     [data-theme="light"] {
       --bg-gradient: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 50%, #F3E8FF 100%);
-      --card-bg: rgba(255, 255, 255, 0.9);
+      --card-bg: rgba(255, 255, 255, 0.92);
       --text-main: #1E293B;
       --text-muted: #64748B;
       --primary: #4F46E5;
@@ -39,7 +39,7 @@
     .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; position: relative; }
     
     .top-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; }
-    .theme-btn { background: var(--card-bg); border: 1.5px solid var(--border); padding: 8px 12px; border-radius: 20px; font-size: 1.1rem; cursor: pointer; color: var(--text-main); }
+    .theme-btn { background: var(--card-bg); border: 1.5px solid var(--border); padding: 8px 12px; border-radius: 20px; font-size: 1.1rem; cursor: pointer; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     
     .card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 22px; padding: 20px; border: 2px solid var(--border); box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.3); }
     .login-box { text-align: center; }
@@ -51,13 +51,22 @@
     .suggestion-item:active, .suggestion-item:hover { background: var(--primary); color: white; }
 
     .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
-    .btn { padding: 12px 18px; border: none; border-radius: 14px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
-    .btn:active { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; background: var(--border) !important; color: var(--text-muted) !important; transform: none !important; }
+    
+    /* VIBRANT INTERESTING BUTTONS STYLING */
+    .btn { padding: 12px 18px; border: none; border-radius: 16px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35); }
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; background: var(--border) !important; color: var(--text-muted) !important; transform: none !important; box-shadow: none !important; }
+    
+    /* Interesting Colorful Navigation Buttons */
+    .btn-prev-day { background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); border: 1px solid #60A5FA; color: #FFF; box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3); }
+    .btn-next-day { background: linear-gradient(135deg, #10B981 0%, #047857 100%); border: 1px solid #34D399; color: #FFF; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3); }
+    .btn-back-q { background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); border: 1px solid #A78BFA; color: #FFF; box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3); }
+    .btn-next-q { background: linear-gradient(135deg, #EC4899 0%, #BE185D 100%); border: 1px solid #F472B6; color: #FFF; box-shadow: 0 6px 16px rgba(236, 72, 153, 0.3); }
+    
     .btn-secondary { background: var(--card-bg); border: 1.5px solid var(--border); color: var(--text-main); }
-    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger { background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%); color: white; }
 
-    .profile-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; border: none; padding: 18px; }
+    .profile-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; border: none; padding: 18px; border-radius: 20px; box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3); }
     
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .stat-card { background: var(--input-bg); padding: 8px 4px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
@@ -72,18 +81,21 @@
     .question-box { font-size: 1.3rem; font-weight: 800; margin: 12px 0 16px 0; text-align: center; min-height: 60px; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     
-    .option-btn { padding: 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--input-bg); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; touch-action: manipulation; transition: all 0.2s; position: relative; }
+    /* VIBRANT & INTERESTING OPTION BUTTONS */
+    .option-btn { padding: 16px 12px; border: 2px solid var(--border); border-radius: 16px; background: linear-gradient(145deg, var(--input-bg) 0%, rgba(30, 41, 59, 0.5) 100%); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; touch-action: manipulation; transition: all 0.2s ease; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .option-btn:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(99, 102, 241, 0.25); }
+    .option-btn:active:not(:disabled) { transform: translateY(0); }
     .option-btn:disabled { cursor: not-allowed; }
     
     /* Correct & Selected Styling for Review */
-    .option-btn.selected-correct { border-color: var(--success) !important; background: rgba(16, 185, 129, 0.2) !important; color: var(--success) !important; font-weight: 900 !important; }
-    .option-btn.selected-wrong { border-color: var(--danger) !important; background: rgba(239, 68, 68, 0.2) !important; color: var(--danger) !important; font-weight: 900 !important; }
-    .option-btn.show-actual-correct { border-color: var(--success) !important; background: rgba(16, 185, 129, 0.15) !important; color: var(--success) !important; font-weight: 900 !important; }
+    .option-btn.selected-correct { border-color: var(--success) !important; background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.35) 100%) !important; color: #34D399 !important; font-weight: 900 !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4) !important; }
+    .option-btn.selected-wrong { border-color: var(--danger) !important; background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.35) 100%) !important; color: #F87171 !important; font-weight: 900 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important; }
+    .option-btn.show-actual-correct { border-color: var(--success) !important; background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.25) 100%) !important; color: #34D399 !important; font-weight: 900 !important; }
 
     /* ADMIN MODAL CLEAN MOBILE RESPONSIVE CARDS */
     .admin-student-card { background: var(--input-bg); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); }
     .admin-student-header { display: flex; justify-content: space-between; align-items: center; }
-    .admin-student-actions { display: flex; align-items: center; justify-content: space-between; gap: 6px; border-top: 1px dashed var(--border); padding-top: 8px; }
+    .admin-student-actions { display: flex; align-items: center; justify-content: space-between; gap: 6px; border-top: 1px dashed var(--border); padding-top: 8px; flex-wrap: wrap; }
 
     .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
@@ -155,9 +167,9 @@
 
     <div class="card" style="margin-top: 10px;">
       <div class="day-nav">
-        <button class="btn btn-secondary" id="btnPrevDay" onclick="changeDay(-1)">← Prev Day</button>
+        <button class="btn btn-prev-day" id="btnPrevDay" onclick="changeDay(-1)">← Prev Day</button>
         <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 800;">Day 1</span>
-        <button class="btn btn-secondary" id="btnNextDay" onclick="changeDay(1)">Next Day →</button>
+        <button class="btn btn-next-day" id="btnNextDay" onclick="changeDay(1)">Next Day →</button>
       </div>
 
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
@@ -166,8 +178,8 @@
       <div class="options-grid" id="optionsContainer"></div>
 
       <div style="margin-top: 16px; display: flex; justify-content: space-between;">
-        <button class="btn btn-secondary" id="btnBackQuestion" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 8px 14px;">← Back Question</button>
-        <button class="btn btn-secondary" id="btnNextQuestion" onclick="navigateQuestion(1)" style="font-size: 0.85rem; padding: 8px 14px;">Next Question →</button>
+        <button class="btn btn-back-q" id="btnBackQuestion" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 10px 14px;">← Back Question</button>
+        <button class="btn btn-next-q" id="btnNextQuestion" onclick="navigateQuestion(1)" style="font-size: 0.85rem; padding: 10px 14px;">Next Question →</button>
       </div>
     </div>
   </div>
@@ -244,9 +256,9 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let globalUsersList = [
-  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" },
-  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" },
-  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" }
+  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
+  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
+  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" }
 ];
 
 let audioCtx = null;
@@ -406,7 +418,15 @@ function handleStudentLogin() {
     }
     currentActiveUser = found;
     if (!currentActiveUser.userAnswers) currentActiveUser.userAnswers = {};
+    if (!currentActiveUser.dayResetSeeds) currentActiveUser.dayResetSeeds = {};
     
+    // AUTO-ADVANCE LOGIC: Automatically open next uncompleted day
+    let autoDay = 1;
+    while (isDayCompletedForUser(currentActiveUser, autoDay)) {
+      autoDay++;
+    }
+    currentDay = autoDay;
+
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('practiceWorkspace').classList.remove('hidden');
     history.pushState({ page: 'workspace' }, '');
@@ -414,6 +434,15 @@ function handleStudentLogin() {
   } else {
     alert("Invalid Username or PIN!");
   }
+}
+
+function isDayCompletedForUser(user, day) {
+  if (!user || !user.userAnswers) return false;
+  let count = 0;
+  for (let i = 0; i < 20; i++) {
+    if (user.userAnswers[`D${day}_Q${i}`]) count++;
+  }
+  return count === 20;
 }
 
 function logoutStudent() {
@@ -448,7 +477,6 @@ function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
 
   if (userClass === "LKG" || userClass === "UKG") {
-    // CBSE Pre-Primary Foundations: Colors, Shapes, Counting, Alphabets
     const visualBank = [
       { q: "Which color is 🔴?", options: ["Red", "Blue", "Green", "Yellow"], ans: "Red" },
       { q: "Which color is 🟢?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green" },
@@ -474,7 +502,6 @@ function generateAdaptiveQuestions(userClass, day) {
     questions = visualBank;
   } 
   else if (userClass === "Class 1" || userClass === "Class 2" || userClass === "Class 3") {
-    // CBSE Primary Math & English Basics
     for(let i = 1; i <= 10; i++) {
       let a = i * 2 + day;
       let b = i + 3;
@@ -495,7 +522,6 @@ function generateAdaptiveQuestions(userClass, day) {
     questions.push(...primaryEng);
   } 
   else if (userClass === "Class 4" || userClass === "Class 5") {
-    // JNV ENTRANCE EXAM PATTERN (Mental Ability + Arithmetic + Hindi/Eng Passages)
     let pText = day % 2 === 1 
       ? `📖 **JNVST अपठित गद्यांश (Day ${day}):** जवाहर नवोदय विद्यालय में प्रवेश पाने के लिए मानसिक योग्यता, गणित और भाषा परीक्षण की तैयारी महत्वपूर्ण है। समय का सदुपयोग करने वाले छात्र परीक्षा में सफलता प्राप्त करते हैं।`
       : `📖 **JNVST Passage (Day ${day}):** Navodaya Vidyalayas provide quality education to talented children. Regular self-assessment and mental ability practice help students crack JNVST easily.`;
@@ -503,7 +529,6 @@ function generateAdaptiveQuestions(userClass, day) {
     questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय प्रवेश परीक्षा में सफलता के लिए क्या आवश्यक है?" : "What helps students crack JNVST easily?", options: ["समय का सदुपयोग", "आलस्य", "देर तक सोना", "TV देखना"], ans: day % 2 === 1 ? "समय का सदुपयोग" : "Regular self-assessment" });
     questions.push({ passage: pText, q: day % 2 === 1 ? "गद्यांश में किस परीक्षा की चर्चा है?" : "Which school entrance exam is mentioned?", options: ["जवाहर नवोदय विद्यालय", "सैनिक स्कूल", "केंद्रीय विद्यालय", "बोर्ड परीक्षा"], ans: day % 2 === 1 ? "जवाहर नवोदय विद्यालय" : "Navodaya Vidyalayas" });
 
-    // JNV Mental Ability & Number System Math
     const jnvBank = [
       { q: "JNVST Logic: Find the odd one out (असंगत पद चुनें):", options: ["Circle (वृत्त)", "Square (वर्ग)", "Triangle (त्रिभुज)", "Apple (सेब)"], ans: "Apple (सेब)" },
       { q: "JNVST Math: L.C.M of 12 and 16 is?", options: ["48", "32", "24", "16"], ans: "48" },
@@ -528,7 +553,6 @@ function generateAdaptiveQuestions(userClass, day) {
     questions.push(...jnvBank);
   } 
   else if (userClass === "Class 6" || userClass === "Class 7" || userClass === "Class 8") {
-    // CBSE NCERT CLASSROOM SYLLABUS (Maths, Science, English, SST)
     const cbseMiddleBank = [
       { q: "CBSE Science: Green pigment in leaves is called?", options: ["Chlorophyll", "Stomata", "Xylem", "Phloem"], ans: "Chlorophyll" },
       { q: "CBSE Science: SI unit of Speed is?", options: ["m/s", "km/h", "meter", "second"], ans: "m/s" },
@@ -542,7 +566,6 @@ function generateAdaptiveQuestions(userClass, day) {
       { q: "CBSE Science: Vitamin D deficiency causes?", options: ["Rickets", "Scurvy", "Beri-Beri", "Goitre"], ans: "Rickets" }
     ];
 
-    // Solvable CBSE Equations & Ratios
     for(let i = 1; i <= 10; i++) {
       let xVal = i + (day % 3) + 2;
       let coeff = (i % 4) + 2;
@@ -557,7 +580,6 @@ function generateAdaptiveQuestions(userClass, day) {
     questions = cbseMiddleBank;
   }
   else {
-    // CBSE CLASS 9 TO 12 SECONDARY & SR. SECONDARY SYLLABUS
     const cbseHighBank = [
       { q: "CBSE Physics: Acceleration due to gravity (g) on Earth is approx?", options: ["9.8 m/s²", "8.9 m/s²", "10.8 m/s²", "9.0 m/s²"], ans: "9.8 m/s²" },
       { q: "CBSE Chemistry: Atomic number of Carbon is?", options: ["6", "12", "8", "14"], ans: "6" },
@@ -583,7 +605,10 @@ function generateAdaptiveQuestions(userClass, day) {
     questions = cbseHighBank;
   }
 
-  let userSeed = currentActiveUser ? (currentActiveUser.num || 1) * 100 + day * 10 : day * 5;
+  // DYNAMIC SEEDING INCLUDES ADMIN DAY RESET COUNT FOR FRESH QUESTIONS
+  let dayResetSeed = (currentActiveUser && currentActiveUser.dayResetSeeds && currentActiveUser.dayResetSeeds[`D${day}`]) || 0;
+  let userSeed = currentActiveUser ? (currentActiveUser.num || 1) * 100 + day * 10 + dayResetSeed * 777 : day * 5;
+  
   let randomizedQuestions = shuffleArray(questions.slice(0, 20), userSeed);
 
   randomizedQuestions = randomizedQuestions.map((qItem, idx) => {
@@ -598,12 +623,7 @@ function generateAdaptiveQuestions(userClass, day) {
 }
 
 function isDayCompleted(day) {
-  if (!currentActiveUser || !currentActiveUser.userAnswers) return false;
-  let count = 0;
-  for (let i = 0; i < 20; i++) {
-    if (currentActiveUser.userAnswers[`D${day}_Q${i}`]) count++;
-  }
-  return count === 20;
+  return isDayCompletedForUser(currentActiveUser, day);
 }
 
 function handleOptionClick(selectedOpt, correctAns) {
@@ -786,7 +806,19 @@ function renderAdminUsersList() {
         <small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small>
       </div>
       <div class="admin-student-actions">
-        <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">🔄 Reset</button>
+        <div style="display:flex; align-items:center; gap:4px; margin-bottom:4px; width:100%;">
+          <select id="resetDaySelect_${u.id.replace(/\s+/g, '_')}" style="padding:4px; font-size:0.75rem; border-radius:8px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border);">
+            <option value="1">Day 1</option>
+            <option value="2">Day 2</option>
+            <option value="3">Day 3</option>
+            <option value="4">Day 4</option>
+            <option value="5">Day 5</option>
+            <option value="6">Day 6</option>
+            <option value="7">Day 7</option>
+          </select>
+          <button class="btn btn-secondary" onclick="resetSpecificDay('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">🔄 Reset Day</button>
+        </div>
+        <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">🔄 All Reset</button>
         <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">✏️ PIN</button>
         <div style="display:flex; align-items:center; gap:4px;">
           <small style="font-size:0.7rem; color:var(--text-muted)">Active:</small>
@@ -802,6 +834,39 @@ function renderAdminUsersList() {
   });
 }
 
+// ADMIN RESTART/RESET SPECIFIC DAY WITH NEW QUESTIONS
+function resetSpecificDay(id) {
+  let u = globalUsersList.find(x => x.id === id);
+  if (!u) return;
+  
+  let selectElem = document.getElementById(`resetDaySelect_${id.replace(/\s+/g, '_')}`);
+  let targetDay = parseInt(selectElem.value, 10);
+
+  if (confirm(`Restart Day ${targetDay} for ${id} with NEW Questions?`)) {
+    if (!u.userAnswers) u.userAnswers = {};
+    if (!u.dayResetSeeds) u.dayResetSeeds = {};
+
+    // Clear saved answers for this day
+    for (let i = 0; i < 20; i++) {
+      delete u.userAnswers[`D${targetDay}_Q${i}`];
+    }
+
+    // Increment seed count so new questions are generated
+    u.dayResetSeeds[`D${targetDay}`] = (u.dayResetSeeds[`D${targetDay}`] || 0) + 1;
+
+    let dbKey = id.replace(/\s+/g, '_');
+    try { db.ref('users/' + dbKey).set(u); } catch(e){}
+
+    alert(`Day ${targetDay} successfully restarted with NEW questions for ${id}!`);
+
+    if (currentActiveUser && currentActiveUser.id === id) {
+      currentDay = targetDay;
+      currentQIndex = 0;
+      renderQuestion();
+    }
+  }
+}
+
 function resetUserProgress(id) {
   let u = globalUsersList.find(x => x.id === id);
   if (u) {
@@ -810,6 +875,7 @@ function resetUserProgress(id) {
       u.wrong = 0;
       u.streak = 0;
       u.userAnswers = {};
+      u.dayResetSeeds = {};
       u.lastCompletedDate = "";
       let dbKey = id.replace(/\s+/g, '_');
       try { db.ref('users/' + dbKey).set(u); } catch(e){}
@@ -860,7 +926,7 @@ function addNewStudent() {
 
   let newUser = { 
     id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, gender: gender,
-    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, lastCompletedDate: "" 
+    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" 
   };
 
   globalUsersList.push(newUser);
