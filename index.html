@@ -88,11 +88,17 @@
     .option-btn.selected-wrong { border-color: var(--danger) !important; background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.35) 100%) !important; color: #F87171 !important; font-weight: 900 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important; }
     .option-btn.show-actual-correct { border-color: var(--success) !important; background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.25) 100%) !important; color: #34D399 !important; font-weight: 900 !important; }
 
-    /* ADMIN DASHBOARD STYLING */
-    .admin-dashboard-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
-    .dash-box { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%); padding: 10px; border-radius: 14px; border: 1px solid var(--border); text-align: center; }
-    .dash-box .num { font-size: 1.2rem; font-weight: 900; color: var(--accent-gold); }
-    .dash-box .label { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+    /* CLICKABLE DASHBOARD METRIC BUTTONS */
+    .admin-dashboard-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+    .dash-btn { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%); padding: 12px 8px; border-radius: 14px; border: 1.5px solid var(--border); text-align: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .dash-btn:active, .dash-btn:hover { border-color: var(--primary); transform: translateY(-2px); background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(30, 41, 59, 0.95) 100%); }
+    .dash-btn .num { font-size: 1.25rem; font-weight: 900; color: var(--accent-gold); }
+    .dash-btn .label { font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-top: 2px; }
+
+    .dash-detail-panel { background: var(--input-bg); border: 1px solid var(--primary); padding: 12px; border-radius: 14px; margin-bottom: 14px; font-size: 0.85rem; }
+    .dash-detail-panel h5 { color: var(--accent-gold); margin-bottom: 6px; font-size: 0.9rem; }
+    .dash-detail-list { max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-right: 4px; }
+    .dash-detail-item { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding: 4px 0; }
 
     .admin-student-card { background: var(--input-bg); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border); }
     .admin-student-header { display: flex; justify-content: space-between; align-items: center; }
@@ -107,7 +113,8 @@
     input:checked + .slider:before { transform: translateX(20px); }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-card { background: var(--card-bg); padding: 22px; border-radius: 22px; width: 92%; max-width: 440px; border: 2px solid var(--border); max-height: 85vh; overflow-y: auto; }
+    /* SCROLLABLE MODAL CARD FIX */
+    .modal-card { background: var(--card-bg); padding: 22px; border-radius: 22px; width: 92%; max-width: 440px; border: 2px solid var(--border); max-height: 85vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .hidden { display: none !important; }
     .badge { background: rgba(99, 102, 241, 0.2); color: var(--primary); padding: 3px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; }
 
@@ -203,16 +210,40 @@
     </div>
 
     <div id="adminContentBox" class="hidden">
-      <!-- DASHBOARD PERFORMANCE SUMMARY -->
+      <!-- DASHBOARD CLICKABLE METRIC BUTTONS -->
       <div class="admin-dashboard-summary">
-        <div class="dash-box"><div class="num" id="dashTotalStudents">0</div><div class="label">Total Students</div></div>
-        <div class="dash-box"><div class="num" id="dashTotalPoints">0</div><div class="label">Points Earned</div></div>
-        <div class="dash-box"><div class="num" id="dashTotalAttempted">0</div><div class="label">Questions Solved</div></div>
-        <div class="dash-box"><div class="num" id="dashAvgAccuracy">0%</div><div class="label">Avg System Accuracy</div></div>
+        <div class="dash-btn" onclick="toggleDashMetricDetail('students')">
+          <div class="num" id="dashTotalStudents">0</div>
+          <div class="label">Students 🔍</div>
+        </div>
+        <div class="dash-btn" onclick="toggleDashMetricDetail('points')">
+          <div class="num" id="dashTotalPoints">0</div>
+          <div class="label">Points 🏆</div>
+        </div>
+        <div class="dash-btn" onclick="toggleDashMetricDetail('solved')">
+          <div class="num" id="dashTotalAttempted">0</div>
+          <div class="label">Solved 📝</div>
+        </div>
+        <div class="dash-btn" onclick="toggleDashMetricDetail('accuracy')">
+          <div class="num" id="dashAvgAccuracy">0%</div>
+          <div class="label">Accuracy 🎯</div>
+        </div>
       </div>
 
-      <div style="background: var(--input-bg); padding: 12px; border-radius: 14px; margin-bottom: 14px; border: 1px solid var(--border);">
-        <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 6px;">➕ Add New Student</h4>
+      <!-- DYNAMIC METRIC DETAILS EXPANDABLE PANEL -->
+      <div id="dashMetricDetailBox" class="dash-detail-panel hidden">
+        <h5 id="dashDetailTitle">Metric Breakdown</h5>
+        <div id="dashDetailContent" class="dash-detail-list"></div>
+      </div>
+
+      <!-- COLLAPSIBLE ADD STUDENT BUTTON & FORM -->
+      <button class="btn btn-secondary" onclick="toggleAddStudentForm()" style="width: 100%; margin-bottom: 12px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+        <span>➕ Add New Student</span>
+        <span id="addStudentArrow">▼</span>
+      </button>
+
+      <div id="addStudentCollapsibleForm" class="hidden" style="background: var(--input-bg); padding: 12px; border-radius: 14px; margin-bottom: 14px; border: 1px solid var(--border);">
+        <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 6px;">New Student Details</h4>
         <input type="text" id="newStudentName" class="input-field" placeholder="Student Name (e.g. Rohan)" />
         
         <select id="newStudentGender" class="input-field">
@@ -333,6 +364,7 @@ let currentActiveUser = null;
 let currentQIndex = 0;
 let currentDay = 1;
 let backPressTime = 0;
+let activeDashMetricType = null;
 
 function showToast(msg) {
   let existing = document.querySelector('.toast-msg');
@@ -384,6 +416,7 @@ function initCloudSync() {
         if (updated) currentActiveUser = updated;
       }
       if (document.getElementById('adminModal') && !document.getElementById('adminContentBox').classList.contains('hidden')) {
+        renderAdminDashboardSummary();
         renderAdminUsersList();
       }
     });
@@ -499,7 +532,6 @@ function refreshStatsUI() {
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
 
-  // CLASS-SPECIFIC SEED CODES TO PREVENT OVERLAP
   const classSeedMap = {
     "LKG": 1001, "UKG": 1002, "Class 1": 1003, "Class 2": 1004, "Class 3": 1005,
     "Class 4": 1006, "Class 5": 1007, "Class 6": 1008, "Class 7": 1009, "Class 8": 1010,
@@ -737,7 +769,7 @@ function renderQuestion() {
   if (alreadyAnswered) {
     btnNextQ.disabled = (currentQIndex >= 19);
   } else {
-    btnNextQ.disabled = true; // LOCKED UNTIL USER ANSWERS
+    btnNextQ.disabled = true;
   }
 
   let displayOpts = q.shuffledOptions || q.options;
@@ -821,7 +853,69 @@ function verifyAdminPin() {
   } else { alert("Incorrect Master Admin PIN!"); }
 }
 
-// RENDER ADMIN PERFORMANCE ANALYTICS DASHBOARD
+function toggleAddStudentForm() {
+  let formBox = document.getElementById('addStudentCollapsibleForm');
+  let arrow = document.getElementById('addStudentArrow');
+  if (formBox.classList.contains('hidden')) {
+    formBox.classList.remove('hidden');
+    arrow.innerText = '▲';
+  } else {
+    formBox.classList.add('hidden');
+    arrow.innerText = '▼';
+  }
+}
+
+// EXPANDABLE METRIC DETAILS ON CLICKING DASHBOARD CARDS
+function toggleDashMetricDetail(type) {
+  let detailBox = document.getElementById('dashMetricDetailBox');
+  let title = document.getElementById('dashDetailTitle');
+  let content = document.getElementById('dashDetailContent');
+
+  if (activeDashMetricType === type && !detailBox.classList.contains('hidden')) {
+    detailBox.classList.add('hidden');
+    activeDashMetricType = null;
+    return;
+  }
+
+  activeDashMetricType = type;
+  detailBox.classList.remove('hidden');
+  content.innerHTML = '';
+
+  if (type === 'students') {
+    title.innerText = "🏫 Class-wise Student Distribution";
+    let classCounts = {};
+    globalUsersList.forEach(u => {
+      let cName = u.class || 'Unassigned';
+      classCounts[cName] = (classCounts[cName] || 0) + 1;
+    });
+    Object.keys(classCounts).forEach(c => {
+      content.innerHTML += `<div class="dash-detail-item"><span>${c}</span><strong>${classCounts[c]} Student(s)</strong></div>`;
+    });
+  } 
+  else if (type === 'points') {
+    title.innerText = "🏆 Top Performing Leaderboard";
+    let sortedUsers = [...globalUsersList].sort((a,b) => (b.points || 0) - (a.points || 0));
+    sortedUsers.forEach((u, idx) => {
+      content.innerHTML += `<div class="dash-detail-item"><span>#${idx+1} ${u.avatar || '🎓'} ${u.id}</span><strong>⭐ ${u.points || 0} pts</strong></div>`;
+    });
+  } 
+  else if (type === 'solved') {
+    title.innerText = "📝 Total Solved Questions Breakdown";
+    globalUsersList.forEach(u => {
+      let solved = ((u.points || 0) / 10) + (u.wrong || 0);
+      content.innerHTML += `<div class="dash-detail-item"><span>${u.id} (${u.class})</span><strong>${solved} Qs Solved</strong></div>`;
+    });
+  } 
+  else if (type === 'accuracy') {
+    title.innerText = "🎯 Student Accuracy Rates";
+    globalUsersList.forEach(u => {
+      let totalSolved = ((u.points || 0) / 10) + (u.wrong || 0);
+      let acc = totalSolved > 0 ? Math.round((((u.points || 0) / 10) / totalSolved) * 100) : 0;
+      content.innerHTML += `<div class="dash-detail-item"><span>${u.id}</span><strong>${acc}% Acc</strong></div>`;
+    });
+  }
+}
+
 function renderAdminDashboardSummary() {
   let activeStudents = globalUsersList.filter(u => u.active !== false).length;
   let totalPts = 0;
@@ -852,7 +946,6 @@ function renderAdminUsersList() {
     let totalAttempted = ((u.points || 0) / 10) + (u.wrong || 0);
     let uAccuracy = totalAttempted > 0 ? Math.round((((u.points || 0) / 10) / totalAttempted) * 100) : 0;
     
-    // SMART DROPDOWN: ONLY SHOW COMPLETED DAYS FOR DAY RESET
     let completedDays = getCompletedDaysArray(u);
     let dayOptionsHTML = '';
     
@@ -1014,6 +1107,7 @@ function addNewStudent() {
 
   alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
   document.getElementById('newStudentName').value = '';
+  toggleAddStudentForm();
   renderAdminDashboardSummary();
   renderAdminUsersList();
 }
