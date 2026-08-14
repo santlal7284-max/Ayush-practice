@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+# Save the full HTML code to a file so it can be served/downloaded
+html_content = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduPortal 2026 - Math Fix Upgrade</title>
+  <title>EduPortal 2026 - Interactive Practice Workspace</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
   <!-- Firebase SDKs -->
@@ -51,8 +52,9 @@
     .suggestion-item:active, .suggestion-item:hover { background: var(--primary); color: white; }
 
     .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
-    .btn { padding: 12px 18px; border: none; border-radius: 14px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--border) !important; color: var(--text-muted) !important; }
+    .btn { padding: 12px 18px; border: none; border-radius: 14px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; background: var(--border) !important; color: var(--text-muted) !important; transform: none !important; }
     .btn-secondary { background: var(--card-bg); border: 1.5px solid var(--border); color: var(--text-main); }
     .btn-danger { background: var(--danger); color: white; }
 
@@ -70,8 +72,14 @@
     .passage-box { background: var(--input-bg); border-left: 5px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; }
     .question-box { font-size: 1.3rem; font-weight: 800; margin: 12px 0 16px 0; text-align: center; min-height: 60px; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .option-btn { padding: 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--input-bg); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; touch-action: manipulation; }
-    .option-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    
+    .option-btn { padding: 14px; border: 2px solid var(--border); border-radius: 14px; background: var(--input-bg); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; touch-action: manipulation; transition: all 0.2s; position: relative; }
+    .option-btn:disabled { cursor: not-allowed; }
+    
+    /* Correct & Selected Styling for Review */
+    .option-btn.selected-correct { border-color: var(--success) !important; background: rgba(16, 185, 129, 0.2) !important; color: var(--success) !important; font-weight: 900 !important; }
+    .option-btn.selected-wrong { border-color: var(--danger) !important; background: rgba(239, 68, 68, 0.2) !important; color: var(--danger) !important; font-weight: 900 !important; }
+    .option-btn.show-actual-correct { border-color: var(--success) !important; background: rgba(16, 185, 129, 0.15) !important; color: var(--success) !important; font-weight: 900 !important; }
 
     /* ADMIN MODAL CLEAN MOBILE RESPONSIVE CARDS */
     .admin-student-card { background: var(--input-bg); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); }
@@ -159,8 +167,8 @@
       <div class="options-grid" id="optionsContainer"></div>
 
       <div style="margin-top: 16px; display: flex; justify-content: space-between;">
-        <button class="btn btn-secondary" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 8px 14px;">← Back Question</button>
-        <button class="btn btn-secondary" onclick="navigateQuestion(1)" style="font-size: 0.85rem; padding: 8px 14px;">Next Question →</button>
+        <button class="btn btn-secondary" id="btnBackQuestion" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 8px 14px;">← Back Question</button>
+        <button class="btn btn-secondary" id="btnNextQuestion" onclick="navigateQuestion(1)" style="font-size: 0.85rem; padding: 8px 14px;">Next Question →</button>
       </div>
     </div>
   </div>
@@ -436,7 +444,6 @@ function refreshStatsUI() {
   document.getElementById('reportPercent').innerText = `${accuracy}%`;
 }
 
-// 100% ACCURATE MATHEMATICAL QUESTION GENERATOR
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
 
@@ -504,12 +511,11 @@ function generateAdaptiveQuestions(userClass, day) {
     staticBank.forEach(item => { questions.push({ q: item.q, options: item.options, ans: item.ans }); });
   } 
   else {
-    // ACCURATE ALGEBRA GENERATOR (GUARANTEED INTEGER SOLUTIONS)
     for(let i = 1; i <= 20; i++) {
-      let xAns = i + (day % 3) + 2; // Exact Answer (e.g., 4, 5, 6)
-      let coeff = (i % 5) + 2;     // Coefficient (e.g., 2, 3, 4, 5, 6)
-      let constant = (i * 2) + 1;  // Constant (e.g., 3, 5, 7)
-      let totalRHS = (coeff * xAns) + constant; // Exact RHS
+      let xAns = i + (day % 3) + 2;
+      let coeff = (i % 5) + 2;
+      let constant = (i * 2) + 1;
+      let totalRHS = (coeff * xAns) + constant;
 
       questions.push({ 
         q: `Solve for x: ${coeff}x + ${constant} = ${totalRHS}`, 
@@ -569,7 +575,6 @@ function handleOptionClick(selectedOpt, correctAns) {
   try { db.ref('users/' + dbKey).set(currentActiveUser); } catch(e){}
 
   refreshStatsUI();
-  currentQIndex++;
   renderQuestion();
 }
 
@@ -578,17 +583,17 @@ function renderQuestion() {
   let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
   document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
 
-  let nextBtn = document.getElementById('btnNextDay');
+  let nextDayBtn = document.getElementById('btnNextDay');
   let todayStr = getTodayString();
   let dayFinished = isDayCompleted(currentDay);
   let isNewDateAvailable = currentActiveUser.lastCompletedDate !== todayStr;
 
   if (dayFinished && isNewDateAvailable) {
-    nextBtn.disabled = false;
-    nextBtn.style.opacity = "1";
+    nextDayBtn.disabled = false;
+    nextDayBtn.style.opacity = "1";
   } else {
-    nextBtn.disabled = true;
-    nextBtn.style.opacity = "0.5";
+    nextDayBtn.disabled = true;
+    nextDayBtn.style.opacity = "0.5";
   }
 
   let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
@@ -599,6 +604,7 @@ function renderQuestion() {
     qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
     optsBox.innerHTML = '';
     fill.style.width = '100%';
+    document.getElementById('btnNextQuestion').disabled = true;
     return;
   }
 
@@ -614,6 +620,18 @@ function renderQuestion() {
   let qKey = `D${currentDay}_Q${currentQIndex}`;
   let alreadyAnswered = currentActiveUser.userAnswers && currentActiveUser.userAnswers[qKey];
 
+  // NAVIGATION BUTTONS CONTROL (LOCK NEXT UNLESS ATTEMPTED)
+  let btnBackQ = document.getElementById('btnBackQuestion');
+  let btnNextQ = document.getElementById('btnNextQuestion');
+
+  btnBackQ.disabled = (currentQIndex === 0);
+
+  if (alreadyAnswered) {
+    btnNextQ.disabled = (currentQIndex >= 19);
+  } else {
+    btnNextQ.disabled = true; // LOCKED UNTIL USER ANSWERS
+  }
+
   let displayOpts = q.shuffledOptions || q.options;
 
   displayOpts.forEach(opt => {
@@ -624,9 +642,16 @@ function renderQuestion() {
     if (alreadyAnswered) {
       btn.disabled = true;
       if (opt === alreadyAnswered) {
-        btn.style.borderColor = opt === q.ans ? 'var(--success)' : 'var(--danger)';
-        btn.style.color = opt === q.ans ? 'var(--success)' : 'var(--danger)';
-        btn.style.fontWeight = '800';
+        if (opt === q.ans) {
+          btn.classList.add('selected-correct');
+          btn.innerText = opt + "  ✅ (Your Choice)";
+        } else {
+          btn.classList.add('selected-wrong');
+          btn.innerText = opt + "  ❌ (Your Choice)";
+        }
+      } else if (opt === q.ans) {
+        btn.classList.add('show-actual-correct');
+        btn.innerText = opt + "  ⭐ (Correct Answer)";
       }
     } else {
       btn.onclick = function() { handleOptionClick(opt, q.ans); };
@@ -851,4 +876,9 @@ window.onload = function() {
 };
 </script>
 </body>
-</html>
+</html>"""
+
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print("FILE_GENERATED_SUCCESSFULLY")
