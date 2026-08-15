@@ -6,10 +6,10 @@
   <title>EduPortal 2026 - Performance Dashboard & Fast Workspace</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- Async Firebase SDKs for Instant Startup Speed -->
+  <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
     :root {
@@ -78,7 +78,13 @@
     .progress-fill { height: 100%; background: linear-gradient(90deg, #10B981, #059669); width: 0%; transition: width 0.3s; }
     
     .passage-box { background: var(--input-bg); border-left: 5px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; }
-    .question-box { font-size: 1.3rem; font-weight: 800; margin: 12px 0 16px 0; text-align: center; min-height: 60px; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
+    
+    /* QUESTION AND AUDIO CONTAINER */
+    .question-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 16px 0; min-height: 60px; }
+    .question-box { font-size: 1.25rem; font-weight: 800; text-align: left; line-height: 1.4; flex-grow: 1; }
+    .speech-btn { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border: none; padding: 10px 14px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); flex-shrink: 0; transition: transform 0.2s; }
+    .speech-btn:active { transform: scale(0.9); }
+
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     
     .option-btn { padding: 16px 12px; border: 2px solid var(--border); border-radius: 16px; background: linear-gradient(145deg, var(--input-bg) 0%, rgba(30, 41, 59, 0.5) 100%); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; touch-action: manipulation; transition: all 0.2s ease; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
@@ -182,7 +188,13 @@
 
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
       <div id="passageContainer" class="passage-box hidden"></div>
-      <div class="question-box" id="questionText">Loading...</div>
+      
+      <!-- QUESTION HEADER WITH SPEAKER READ-ALOUD BUTTON -->
+      <div class="question-header">
+        <div class="question-box" id="questionText">Loading...</div>
+        <button class="speech-btn" id="speechBtn" onclick="readQuestionAndOptions()" title="Listen Question & Options">🔊</button>
+      </div>
+
       <div class="options-grid" id="optionsContainer"></div>
 
       <div style="margin-top: 16px; display: flex; justify-content: space-between;">
@@ -289,34 +301,37 @@
 </div>
 
 <script>
-// --- FIREBASE CONFIGURATION ---
-const firebaseConfig = {
-  apiKey: "AIzaSyC5Nga075aed2qmzAmRHKoAFNW_9nPBxZE",
-  authDomain: "eduportal-2026-app.firebaseapp.com",
-  projectId: "eduportal-2026-app",
-  storageBucket: "eduportal-2026-app.firebasestorage.app",
-  messagingSenderId: "652509933432",
-  appId: "1:652509933432:web:7a7a4671873e0c9ecb628d",
-  databaseURL: "https://eduportal-2026-app-default-rtdb.firebaseio.com"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const auth = firebase.auth();
+// --- FIREBASE ASYNC INITIALIZATION ENGINE ---
+let db = null;
+let auth = null;
 let firebaseAuthReady = false;
 
-// Sign in anonymously so Database Rules can require auth != null
-// while the app keeps working exactly as before (no visible login step).
-auth.onAuthStateChanged(function(user){
-  if (user) {
-    firebaseAuthReady = true;
-    initCloudSync();
+function initFirebaseDeferred() {
+  if (typeof firebase === 'undefined') return;
+  const firebaseConfig = {
+    apiKey: "AIzaSyC5Nga075aed2qmzAmRHKoAFNW_9nPBxZE",
+    authDomain: "eduportal-2026-app.firebaseapp.com",
+    projectId: "eduportal-2026-app",
+    storageBucket: "eduportal-2026-app.firebasestorage.app",
+    messagingSenderId: "652509933432",
+    appId: "1:652509933432:web:7a7a4671873e0c9ecb628d",
+    databaseURL: "https://eduportal-2026-app-default-rtdb.firebaseio.com"
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
   }
-});
-auth.signInAnonymously().catch(function(err){
-  console.error("Firebase anonymous sign-in failed:", err);
-  // App still works offline via localStorage cache even if cloud sync can't start.
-});
+  db = firebase.database();
+  auth = firebase.auth();
+
+  auth.onAuthStateChanged(function(user){
+    if (user) {
+      firebaseAuthReady = true;
+      initCloudSync();
+    }
+  });
+  auth.signInAnonymously().catch(function(err){ console.error("Firebase auth failed:", err); });
+}
 
 // INSTANT LOCAL CACHE ENGINE FOR 0-SECOND LAUNCH
 let globalUsersList = JSON.parse(localStorage.getItem('cached_users_data')) || [
@@ -386,6 +401,7 @@ let currentQIndex = 0;
 let currentDay = 1;
 let backPressTime = 0;
 let activeDashMetricType = null;
+let currentLoadedQuestions = [];
 
 function showToast(msg) {
   let existing = document.querySelector('.toast-msg');
@@ -423,6 +439,7 @@ function toggleTheme() {
 }
 
 function initCloudSync() {
+  if (!db) return;
   try {
     db.ref('users').on('value', (snapshot) => {
       const data = snapshot.val();
@@ -436,11 +453,10 @@ function initCloudSync() {
         let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
         if (updated) {
           currentActiveUser = updated;
-          // Student's own page is visible — keep stars/points/streak live-updated
           let workspace = document.getElementById('practiceWorkspace');
           if (workspace && !workspace.classList.contains('hidden')) {
             refreshStatsUI();
-            renderQuestion(); // Re-render in case unlock state changed
+            renderQuestion();
           }
         }
       }
@@ -454,6 +470,52 @@ function initCloudSync() {
 }
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
+
+// --- TEXT TO SPEECH (VOICE READ-ALOUD FOR QUESTIONS & OPTIONS) ---
+function readQuestionAndOptions() {
+  if (!('speechSynthesis' in window)) {
+    alert("Speech Synthesis not supported in this browser!");
+    return;
+  }
+  
+  window.speechSynthesis.cancel(); // Stop any ongoing speech
+
+  if (!currentLoadedQuestions.length || currentQIndex >= currentLoadedQuestions.length) return;
+
+  let qObj = currentLoadedQuestions[currentQIndex];
+  let textToRead = "";
+
+  // Clean Question Text (Remove Emojis for clear pronunciation)
+  let cleanQ = qObj.q.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+  textToRead += `Question ${currentQIndex + 1}. ${cleanQ}. ... `;
+
+  let opts = qObj.shuffledOptions || qObj.options || [];
+  let labels = ["Option A", "Option B", "Option C", "Option D"];
+
+  opts.forEach((opt, idx) => {
+    let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+    textToRead += `${labels[idx] || 'Option'}: ${cleanOpt}. ... `;
+  });
+
+  let utterance = new SpeechSynthesisUtterance(textToRead);
+  
+  // Detect language: Hindi or English
+  let isHindi = /[\u0900-\u097F]/.test(textToRead);
+  utterance.lang = isHindi ? 'hi-IN' : 'en-US';
+  utterance.rate = 0.9; // Slightly slower for kids
+
+  let speechBtn = document.getElementById('speechBtn');
+  if (speechBtn) speechBtn.innerText = '🔊 ...';
+
+  utterance.onend = function() {
+    if (speechBtn) speechBtn.innerText = '🔊';
+  };
+  utterance.onerror = function() {
+    if (speechBtn) speechBtn.innerText = '🔊';
+  };
+
+  window.speechSynthesis.speak(utterance);
+}
 
 function showSuggestions(showAll = false) {
   let val = document.getElementById('loginUsername').value.trim().toLowerCase();
@@ -497,7 +559,6 @@ function handleStudentLogin() {
     if (!currentActiveUser.dayResetSeeds) currentActiveUser.dayResetSeeds = {};
     if (currentActiveUser.manualUnlockTillDay === undefined) currentActiveUser.manualUnlockTillDay = 0;
     
-    // AUTO-ADVANCE LOGIC: Open first uncompleted day
     let autoDay = 1;
     while (isDayCompletedForUser(currentActiveUser, autoDay)) {
       autoDay++;
@@ -533,6 +594,7 @@ function getCompletedDaysArray(user) {
 }
 
 function logoutStudent() {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   currentActiveUser = null;
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPin').value = '';
@@ -572,25 +634,25 @@ function generateAdaptiveQuestions(userClass, day) {
 
   if (userClass === "LKG" || userClass === "UKG") {
     const visualBank = [
-      { q: "Which color is 🔴?", options: ["Red", "Blue", "Green", "Yellow"], ans: "Red" },
-      { q: "Which color is 🟢?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green" },
-      { q: "Which color is 🟡?", options: ["Yellow", "Pink", "Orange", "Purple"], ans: "Yellow" },
-      { q: "Identify Shape: ⭕", options: ["Circle", "Square", "Triangle", "Star"], ans: "Circle" },
-      { q: "Identify Shape: ⬛", options: ["Square", "Circle", "Rectangle", "Oval"], ans: "Square" },
-      { q: "Identify Shape: ⭐", options: ["Star", "Square", "Circle", "Heart"], ans: "Star" },
+      { q: "Which color is Red 🔴?", options: ["Red", "Blue", "Green", "Yellow"], ans: "Red" },
+      { q: "Which color is Green 🟢?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green" },
+      { q: "Which color is Yellow 🟡?", options: ["Yellow", "Pink", "Orange", "Purple"], ans: "Yellow" },
+      { q: "Identify Shape: Circle ⭕", options: ["Circle", "Square", "Triangle", "Star"], ans: "Circle" },
+      { q: "Identify Shape: Square ⬛", options: ["Square", "Circle", "Rectangle", "Oval"], ans: "Square" },
+      { q: "Identify Shape: Star ⭐", options: ["Star", "Square", "Circle", "Heart"], ans: "Star" },
       { q: "Count Apple: 🍎", options: ["1", "2", "3", "4"], ans: "1" },
       { q: "Count Apples: 🍎 🍎 🍎", options: ["3", "2", "4", "5"], ans: "3" },
       { q: "Count Stars: ⭐ ⭐", options: ["2", "1", "3", "4"], ans: "2" },
       { q: "Find Dog 🐶", options: ["Dog", "Cat", "Lion", "Tiger"], ans: "Dog" },
       { q: "Find Elephant 🐘", options: ["Elephant", "Monkey", "Dog", "Bird"], ans: "Elephant" },
-      { q: "What comes after 'A'?", options: ["B", "C", "D", "E"], ans: "B" },
-      { q: "What comes after 'C'?", options: ["D", "E", "F", "G"], ans: "D" },
-      { q: "Count: 1 + 1 = ?", options: ["2", "3", "4", "1"], ans: "2" },
+      { q: "What comes after letter 'A'?", options: ["B", "C", "D", "E"], ans: "B" },
+      { q: "What comes after letter 'C'?", options: ["D", "E", "F", "G"], ans: "D" },
+      { q: "Count: 1 plus 1 equals?", options: ["2", "3", "4", "1"], ans: "2" },
       { q: "Which one is Sun ☀️?", options: ["Sun", "Moon", "Cloud", "Rain"], ans: "Sun" },
       { q: "Which one is Ice-Cream 🍦?", options: ["Ice-Cream", "Cake", "Pizza", "Apple"], ans: "Ice-Cream" },
       { q: "Count Balloons: 🎈 🎈 🎈 🎈", options: ["4", "3", "5", "2"], ans: "4" },
       { q: "Which shape is Triangle 🔺?", options: ["Triangle", "Circle", "Square", "Star"], ans: "Triangle" },
-      { q: "What comes after '1'?", options: ["2", "3", "4", "5"], ans: "2" },
+      { q: "What comes after number '1'?", options: ["2", "3", "4", "5"], ans: "2" },
       { q: "What color is Milk 🥛?", options: ["White", "Black", "Red", "Green"], ans: "White" }
     ];
     questions = visualBank;
@@ -721,6 +783,8 @@ function isDayCompleted(day) {
 }
 
 function handleOptionClick(selectedOpt, correctAns) {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
   let qKey = `D${currentDay}_Q${currentQIndex}`;
   if (currentActiveUser.userAnswers[qKey]) return;
 
@@ -750,7 +814,7 @@ function handleOptionClick(selectedOpt, correctAns) {
   }
 
   let dbKey = currentActiveUser.id.replace(/\s+/g, '_');
-  try { db.ref('users/' + dbKey).set(currentActiveUser); } catch(e){}
+  try { if (db) db.ref('users/' + dbKey).set(currentActiveUser); } catch(e){}
 
   refreshStatsUI();
   renderQuestion();
@@ -758,7 +822,9 @@ function handleOptionClick(selectedOpt, correctAns) {
 
 function renderQuestion() {
   if (!currentActiveUser) return;
-  let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+  currentLoadedQuestions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
   document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
 
   let nextDayBtn = document.getElementById('btnNextDay');
@@ -778,7 +844,7 @@ function renderQuestion() {
   let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
   let fill = document.getElementById('progressFill');
 
-  if (currentQIndex >= questions.length) {
+  if (currentQIndex >= currentLoadedQuestions.length) {
     passageBox.classList.add('hidden');
     qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
     optsBox.innerHTML = '';
@@ -787,8 +853,8 @@ function renderQuestion() {
     return;
   }
 
-  fill.style.width = `${Math.round((currentQIndex / questions.length) * 100)}%`;
-  let q = questions[currentQIndex];
+  fill.style.width = `${Math.round((currentQIndex / currentLoadedQuestions.length) * 100)}%`;
+  let q = currentLoadedQuestions[currentQIndex];
 
   if (q.passage) { passageBox.innerHTML = q.passage; passageBox.classList.remove('hidden'); }
   else { passageBox.classList.add('hidden'); }
@@ -974,8 +1040,6 @@ function renderDashMetricDetail(type) {
   }
 }
 
-// Re-renders whichever analytics detail panel (leaderboard / accuracy / etc.)
-// is currently open, so it never shows stale numbers after a reset or cloud sync.
 function refreshDashMetricDetailIfOpen() {
   let detailBox = document.getElementById('dashMetricDetailBox');
   if (activeDashMetricType && detailBox && !detailBox.classList.contains('hidden')) {
@@ -1021,7 +1085,6 @@ function renderAdminUsersList() {
       dayOptionsHTML = `<option value="">No Completed Days</option>`;
     }
 
-    // CLEAN STUDENT CARD WITH MANUAL UNLOCK SETTING
     row.innerHTML = `
       <div class="admin-student-header">
         <div>
@@ -1083,7 +1146,7 @@ function setManualUnlock(id) {
   }
 
   let dbKey = id.replace(/\s+/g, '_');
-  try { db.ref('users/' + dbKey).set(u); } catch(e){}
+  try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
   localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
 
   if (u.manualUnlockTillDay > 0) {
@@ -1122,7 +1185,7 @@ function resetSpecificDay(id) {
     u.dayResetSeeds[`D${targetDay}`] = (u.dayResetSeeds[`D${targetDay}`] || 0) + 1;
 
     let dbKey = id.replace(/\s+/g, '_');
-    try { db.ref('users/' + dbKey).set(u); } catch(e){}
+    try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
     localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
 
     alert(`Day ${targetDay} successfully restarted with NEW questions for ${id}!`);
@@ -1150,7 +1213,7 @@ function resetUserProgress(id) {
       u.lastCompletedDate = "";
       u.manualUnlockTillDay = 0;
       let dbKey = id.replace(/\s+/g, '_');
-      try { db.ref('users/' + dbKey).set(u); } catch(e){}
+      try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
       alert(`Progress reset for ${id}!`);
       renderAdminDashboardSummary();
@@ -1172,7 +1235,7 @@ function resetStudentPin(id) {
     if (newPin && newPin.length === 4) {
       u.pin = newPin;
       let dbKey = id.replace(/\s+/g, '_');
-      try { db.ref('users/' + dbKey).set(u); } catch(e){}
+      try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
       alert(`PIN Updated for ${id}! New PIN: ${newPin}`);
       renderAdminUsersList();
@@ -1185,7 +1248,7 @@ function toggleUserActiveStatus(id, isActive) {
   if(u) {
     u.active = isActive;
     let dbKey = id.replace(/\s+/g, '_');
-    try { db.ref('users/' + dbKey).set(u); } catch(e){}
+    try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
     localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
     renderAdminDashboardSummary();
   }
@@ -1210,7 +1273,7 @@ function addNewStudent() {
 
   globalUsersList.push(newUser);
   let dbKey = generatedID.replace(/\s+/g, '_');
-  try { db.ref('users/' + dbKey).set(newUser); } catch(e){}
+  try { if (db) db.ref('users/' + dbKey).set(newUser); } catch(e){}
   localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
 
   alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
@@ -1224,7 +1287,7 @@ function deleteStudent(id) {
   if (confirm(`Delete student ${id}?`)) {
     globalUsersList = globalUsersList.filter(u => u.id !== id);
     let dbKey = id.replace(/\s+/g, '_');
-    try { db.ref('users/' + dbKey).remove(); } catch(e){}
+    try { if (db) db.ref('users/' + dbKey).remove(); } catch(e){}
     localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
     renderAdminDashboardSummary();
     renderAdminUsersList();
@@ -1280,8 +1343,9 @@ window.onload = function() {
   document.body.setAttribute('data-theme', savedTheme);
   document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
   history.pushState({ page: 'login' }, '');
-  // initCloudSync() is now triggered automatically once Firebase anonymous
-  // sign-in completes (see auth.onAuthStateChanged above) — no need to call it here.
+
+  // Instant UI Ready via LocalStorage Cache (Zero Lag)
+  setTimeout(initFirebaseDeferred, 500); // Async Background Load for Cloud Sync
 };
 </script>
 </body>
