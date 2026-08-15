@@ -53,7 +53,6 @@
 
     .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
     
-    /* VIBRANT BUTTONS STYLING */
     .btn { padding: 12px 18px; border: none; border-radius: 16px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35); }
     .btn:active { transform: scale(0.96); }
     .btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; background: var(--border) !important; color: var(--text-muted) !important; transform: none !important; box-shadow: none !important; }
@@ -79,7 +78,6 @@
     
     .passage-box { background: var(--input-bg); border-left: 5px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; }
     
-    /* QUESTION HEADER WITH SPEAKER READ-ALOUD BUTTON */
     .question-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 16px 0; min-height: 60px; }
     .question-box { font-size: 1.25rem; font-weight: 800; text-align: left; line-height: 1.4; flex-grow: 1; }
     .speech-btn { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border: none; padding: 10px 14px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); flex-shrink: 0; transition: transform 0.2s; }
@@ -95,7 +93,6 @@
     .option-btn.selected-wrong { border-color: var(--danger) !important; background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.35) 100%) !important; color: #F87171 !important; font-weight: 900 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important; }
     .option-btn.show-actual-correct { border-color: var(--success) !important; background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.25) 100%) !important; color: #34D399 !important; font-weight: 900 !important; }
 
-    /* CLICKABLE DASHBOARD METRIC BUTTONS */
     .admin-dashboard-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
     .dash-btn { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%); padding: 12px 8px; border-radius: 14px; border: 1.5px solid var(--border); text-align: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .dash-btn:active, .dash-btn:hover { border-color: var(--primary); transform: translateY(-2px); background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(30, 41, 59, 0.95) 100%); }
@@ -151,7 +148,6 @@
       <div id="suggestionsBox" class="suggestions-list hidden"></div>
     </div>
 
-    <!-- NUMERIC KEYPAD ENABLED FOR FAST PIN ENTERING -->
     <input type="password" id="loginPin" class="input-field" placeholder="4-Digit Student PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
     
     <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
@@ -189,7 +185,6 @@
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
       <div id="passageContainer" class="passage-box hidden"></div>
       
-      <!-- QUESTION HEADER WITH SPEAKER READ-ALOUD BUTTON (VISIBLE ONLY FOR LKG-CLASS 3) -->
       <div class="question-header">
         <div class="question-box" id="questionText">Loading...</div>
         <button class="speech-btn hidden" id="speechBtn" onclick="readQuestionAndOptionsWithTranslation()" title="Listen Question & Options with Hindi Translation">🔊</button>
@@ -215,13 +210,11 @@
 
     <div id="adminAuthBox">
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin Security PIN</p>
-      <!-- NUMERIC KEYPAD FOR ADMIN PIN -->
       <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
       <button class="btn" onclick="verifyAdminPin()" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
     </div>
 
     <div id="adminContentBox" class="hidden">
-      <!-- DASHBOARD CLICKABLE METRIC BUTTONS -->
       <div class="admin-dashboard-summary">
         <div class="dash-btn" onclick="toggleDashMetricDetail('students')">
           <div class="num" id="dashTotalStudents">0</div>
@@ -241,13 +234,11 @@
         </div>
       </div>
 
-      <!-- DYNAMIC METRIC DETAILS EXPANDABLE PANEL -->
       <div id="dashMetricDetailBox" class="dash-detail-panel hidden">
         <h5 id="dashDetailTitle">Metric Breakdown</h5>
         <div id="dashDetailContent" class="dash-detail-list"></div>
       </div>
 
-      <!-- COLLAPSIBLE ADD STUDENT BUTTON & FORM -->
       <button class="btn btn-secondary" onclick="toggleAddStudentForm()" style="width: 100%; margin-bottom: 10px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
         <span>➕ Add New Student</span>
         <span id="addStudentArrow">▼</span>
@@ -281,7 +272,6 @@
         <button class="btn" onclick="addNewStudent()" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
       </div>
 
-      <!-- COLLAPSIBLE STUDENT MANAGEMENT BUTTON -->
       <button class="btn btn-secondary" onclick="toggleStudentManagementForm()" style="width: 100%; margin-bottom: 12px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
         <span>🎓 Student Management & Reports</span>
         <span id="studentMgmtArrow">▼</span>
@@ -301,10 +291,19 @@
 </div>
 
 <script>
-// --- FIREBASE ASYNC INITIALIZATION ENGINE ---
+// --- FIREBASE ASYNC INITIALIZATION & UNIFIED SYNC ENGINE ---
 let db = null;
 let auth = null;
 let firebaseAuthReady = false;
+
+// Default initial safety fallback users list
+const defaultFallbackUsers = [
+  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
+  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
+  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 }
+];
+
+let globalUsersList = JSON.parse(localStorage.getItem('cached_users_data')) || defaultFallbackUsers;
 
 function initFirebaseDeferred() {
   if (typeof firebase === 'undefined') return;
@@ -332,13 +331,6 @@ function initFirebaseDeferred() {
   });
   auth.signInAnonymously().catch(function(err){ console.error("Firebase auth failed:", err); });
 }
-
-// INSTANT LOCAL CACHE ENGINE FOR 0-SECOND LAUNCH
-let globalUsersList = JSON.parse(localStorage.getItem('cached_users_data')) || [
-  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
-  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
-  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 }
-];
 
 let audioCtx = null;
 function playSound(type) {
@@ -444,11 +436,23 @@ function initCloudSync() {
     db.ref('users').on('value', (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        globalUsersList = Object.keys(data).map(key => data[key]);
-        localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
+        let fetchedList = Object.keys(data).map(key => data[key]);
+        if (fetchedList.length > 0) {
+          globalUsersList = fetchedList;
+          localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
+        }
         let syncText = document.getElementById('syncStatus');
         if (syncText) syncText.innerText = '• Live Cloud';
+      } else {
+        // If cloud database is empty, seed it with default fallback users
+        let initialObj = {};
+        defaultFallbackUsers.forEach(u => {
+          let k = u.id.replace(/\s+/g, '_');
+          initialObj[k] = u;
+        });
+        db.ref('users').set(initialObj);
       }
+
       if (currentActiveUser) {
         let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
         if (updated) {
@@ -471,7 +475,6 @@ function initCloudSync() {
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
-// --- SIMPLE BASIC HINDI TRANSLATION DICTIONARY FOR LKG-CLASS 3 VOICE ---
 const basicHindiMap = {
   "red": "लाल", "blue": "नीला", "green": "हरा", "yellow": "पीला",
   "circle": "गोलाकार वृत्त", "square": "वर्ग", "triangle": "त्रिभुज", "star": "तारा",
@@ -490,14 +493,13 @@ function translateToHindiVoiceText(text) {
   return "";
 }
 
-// --- TEXT TO SPEECH (ORIGINAL LANGUAGE + HINDI TRANSLATION) ---
 function readQuestionAndOptionsWithTranslation() {
   if (!('speechSynthesis' in window)) {
     alert("Speech Synthesis not supported in this browser!");
     return;
   }
   
-  window.speechSynthesis.cancel(); // Stop any ongoing speech
+  window.speechSynthesis.cancel();
 
   if (!currentLoadedQuestions.length || currentQIndex >= currentLoadedQuestions.length) return;
 
@@ -520,7 +522,7 @@ function readQuestionAndOptionsWithTranslation() {
   });
 
   let utterance = new SpeechSynthesisUtterance(fullSpeechText);
-  utterance.lang = 'en-US'; // Speaks original first, then Hindi words clearly
+  utterance.lang = 'en-US';
   utterance.rate = 0.85;
 
   let speechBtn = document.getElementById('speechBtn');
@@ -625,7 +627,6 @@ function loadUserWorkspace() {
   document.getElementById('userDisplayName').innerText = `${currentActiveUser.avatar || '🎓'} ${currentActiveUser.id}`;
   document.getElementById('userClassBadge').innerText = currentActiveUser.class;
   
-  // SHOW/HIDE SPEAKER BUTTON BASED ON CLASS (LKG to Class 3 ONLY)
   let speechBtn = document.getElementById('speechBtn');
   let allowedClasses = ["LKG", "UKG", "Class 1", "Class 2", "Class 3"];
   if (speechBtn) {
@@ -652,7 +653,6 @@ function refreshStatsUI() {
   document.getElementById('reportPercent').innerText = `${accuracy}%`;
 }
 
-// 100% ZERO OVERLAP CLASS-SPECIFIC QUESTION GENERATOR
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
 
@@ -1016,7 +1016,6 @@ function toggleStudentManagementForm() {
   }
 }
 
-// EXPANDABLE METRIC DETAILS ON CLICKING DASHBOARD CARDS
 function toggleDashMetricDetail(type) {
   let detailBox = document.getElementById('dashMetricDetailBox');
 
@@ -1125,7 +1124,6 @@ function renderAdminUsersList() {
       </div>
 
       <div class="admin-student-actions">
-        <!-- Day Reset Row -->
         <div style="display:flex; align-items:center; gap:4px; margin-bottom:4px; width:100%;">
           <select id="resetDaySelect_${u.id.replace(/\s+/g, '_')}" style="padding:4px; font-size:0.75rem; border-radius:8px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border);" ${completedDays.length === 0 ? 'disabled' : ''}>
             ${dayOptionsHTML}
@@ -1133,7 +1131,6 @@ function renderAdminUsersList() {
           <button class="btn btn-secondary" onclick="resetSpecificDay('${u.id}')" style="padding:4px 8px; font-size:0.75rem;" ${completedDays.length === 0 ? 'disabled' : ''}>🔄 Reset Day</button>
         </div>
 
-        <!-- Multi-Day Unlock Limit Row -->
         <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; width: 100%; border-bottom: 1px dashed var(--border); padding-bottom: 6px; margin-bottom: 4px;">
           <div style="display:flex; gap:4px; align-items:center;">
             <span style="font-size:0.75rem; color:var(--text-muted);">Multi-Day Unlock:</span>
@@ -1142,7 +1139,6 @@ function renderAdminUsersList() {
           </div>
         </div>
 
-        <!-- Other Actions Row -->
         <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">🔄 All Reset</button>
         <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">✏️ PIN</button>
         <div style="display:flex; align-items:center; gap:4px;">
@@ -1167,7 +1163,7 @@ function setManualUnlock(id) {
   let targetDay = parseInt(val, 10);
   
   if (isNaN(targetDay) || targetDay <= 0) {
-    if (confirm(`Remove multi-day unlock limit for ${id}? (They will return to 1 day/day mode)`)) {
+    if (confirm(`Remove multi-day unlock limit for ${id}?`)) {
       u.manualUnlockTillDay = 0;
     } else {
       return;
@@ -1180,12 +1176,7 @@ function setManualUnlock(id) {
   try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
   localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
 
-  if (u.manualUnlockTillDay > 0) {
-    alert(`🔓 ${id} can now solve back-to-back manually up to Day ${u.manualUnlockTillDay}!`);
-  } else {
-    alert(`🔒 Multi-day unlock removed for ${id}. They will follow the normal 1-day rule.`);
-  }
-  
+  alert(u.manualUnlockTillDay > 0 ? `🔓 ${id} unlocked up to Day ${u.manualUnlockTillDay}!` : `🔒 Unlock limit removed for ${id}.`);
   renderAdminUsersList();
   
   if (currentActiveUser && currentActiveUser.id === id) {
@@ -1198,10 +1189,7 @@ function resetSpecificDay(id) {
   if (!u) return;
   
   let selectElem = document.getElementById(`resetDaySelect_${id.replace(/\s+/g, '_')}`);
-  if (!selectElem || !selectElem.value) {
-    alert("No completed day selected!");
-    return;
-  }
+  if (!selectElem || !selectElem.value) return;
 
   let targetDay = parseInt(selectElem.value, 10);
 
@@ -1219,7 +1207,7 @@ function resetSpecificDay(id) {
     try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
     localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
 
-    alert(`Day ${targetDay} successfully restarted with NEW questions for ${id}!`);
+    alert(`Day ${targetDay} restarted for ${id}!`);
     renderAdminDashboardSummary();
     renderAdminUsersList();
     refreshDashMetricDetailIfOpen();
@@ -1235,7 +1223,7 @@ function resetSpecificDay(id) {
 function resetUserProgress(id) {
   let u = globalUsersList.find(x => x.id === id);
   if (u) {
-    if (confirm(`Reset all practice progress for ${id}? They will start from Day 1 Question 1.`)) {
+    if (confirm(`Reset all practice progress for ${id}?`)) {
       u.points = 0;
       u.wrong = 0;
       u.streak = 0;
@@ -1268,7 +1256,7 @@ function resetStudentPin(id) {
       let dbKey = id.replace(/\s+/g, '_');
       try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
-      alert(`PIN Updated for ${id}! New PIN: ${newPin}`);
+      alert(`PIN Updated for ${id}!`);
       renderAdminUsersList();
     } else if(newPin) { alert("PIN must be 4 digits!"); }
   }
@@ -1375,8 +1363,7 @@ window.onload = function() {
   document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
   history.pushState({ page: 'login' }, '');
 
-  // Instant UI Ready via LocalStorage Cache (Zero Lag)
-  setTimeout(initFirebaseDeferred, 500); // Async Background Load for Cloud Sync
+  setTimeout(initFirebaseDeferred, 300);
 };
 </script>
 </body>
