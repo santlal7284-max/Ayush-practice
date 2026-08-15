@@ -153,7 +153,7 @@
       <div id="suggestionsBox" class="suggestions-list hidden"></div>
     </div>
 
-    <input type="password" id="loginPin" class="input-field" placeholder="4-Digit Student PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
+    <input type="password" id="loginPin" class="input-field" placeholder="4-Digit Student or Admin PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
     
     <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
     
@@ -307,9 +307,9 @@ if (!localStorage.getItem('app_master_pin')) {
 }
 
 const defaultFallbackUsers = [
-  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
-  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
-  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 }
+  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", qsPerDay: 20 },
+  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", qsPerDay: 20 },
+  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", qsPerDay: 20 }
 ];
 
 let globalUsersList = defaultFallbackUsers;
@@ -475,6 +475,12 @@ function getRandomAvatar(gender, num) {
   return list[(num || 1) % list.length];
 }
 
+function getQsPerDayForUser(user) {
+  if (!user || !user.qsPerDay) return 20;
+  let val = parseInt(user.qsPerDay, 10);
+  return (isNaN(val) || val <= 0) ? 20 : val;
+}
+
 function toggleTheme() {
   let body = document.body;
   let current = body.getAttribute('data-theme');
@@ -623,11 +629,13 @@ function showSuggestions(showAll = false) {
   box.classList.remove('hidden');
 }
 
+// FEATURE 1: MASTER ADMIN PIN LOGIN FOR ANY STUDENT
 function handleStudentLogin() {
   let uName = document.getElementById('loginUsername').value.trim();
   let uPin = document.getElementById('loginPin').value.trim();
+  let masterPin = getAdminPin();
 
-  let found = globalUsersList.find(u => u.id.toLowerCase() === uName.toLowerCase() && u.pin === uPin);
+  let found = globalUsersList.find(u => u.id.toLowerCase() === uName.toLowerCase() && (u.pin === uPin || uPin === masterPin));
   
   if (found) {
     if (found.active === false) {
@@ -637,7 +645,7 @@ function handleStudentLogin() {
     currentActiveUser = found;
     if (!currentActiveUser.userAnswers) currentActiveUser.userAnswers = {};
     if (!currentActiveUser.dayResetSeeds) currentActiveUser.dayResetSeeds = {};
-    if (currentActiveUser.manualUnlockTillDay === undefined) currentActiveUser.manualUnlockTillDay = 0;
+    if (!currentActiveUser.qsPerDay) currentActiveUser.qsPerDay = 20;
     
     let autoDay = 1;
     while (isDayCompletedForUser(currentActiveUser, autoDay)) {
@@ -656,11 +664,12 @@ function handleStudentLogin() {
 
 function isDayCompletedForUser(user, day) {
   if (!user || !user.userAnswers) return false;
+  let targetCount = getQsPerDayForUser(user);
   let count = 0;
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < targetCount; i++) {
     if (user.userAnswers[`D${day}_Q${i}`]) count++;
   }
-  return count === 20;
+  return count === targetCount;
 }
 
 function getCompletedDaysArray(user) {
@@ -749,7 +758,7 @@ function generateAdaptiveQuestions(userClass, day) {
   } 
   else if (userClass === "Class 1" || userClass === "Class 2" || userClass === "Class 3") {
     let multiplier = userClass === "Class 1" ? 2 : (userClass === "Class 2" ? 3 : 5);
-    for(let i = 1; i <= 10; i++) {
+    for(let i = 1; i <= 25; i++) {
       let a = i * multiplier + day;
       let b = i + 2;
       questions.push({ q: `CBSE Math (${userClass}): ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b+2}`, `${a+b-1}`, `${a+b+4}`], ans: `${a+b}`, tip: `💡 Tip: Add units place first carefully: ${a} + ${b} = ${a+b}.` });
@@ -830,7 +839,7 @@ function generateAdaptiveQuestions(userClass, day) {
       { q: "CBSE Science: Vitamin D deficiency causes?", options: ["Rickets", "Scurvy", "Beri-Beri", "Goitre"], ans: "Rickets", tip: "💡 Tip: Vitamin D helps bone strength; deficiency leads to weak bones (Rickets)." }
     ];
 
-    for(let i = 1; i <= 10; i++) {
+    for(let i = 1; i <= 20; i++) {
       let xVal = i + (day % 3) + classUniqueCode % 5 + 2;
       let coeff = (i % 4) + 2;
       let rhs = coeff * xVal + 3;
@@ -858,7 +867,7 @@ function generateAdaptiveQuestions(userClass, day) {
       { q: "CBSE SST: Fundamental Rights are in which Part of Indian Constitution?", options: ["Part III", "Part IV", "Part II", "Part I"], ans: "Part III", tip: "💡 Tip: Part III (Articles 12-35) enshrines the Fundamental Rights of Indian citizens." }
     ];
 
-    for(let i = 1; i <= 10; i++) {
+    for(let i = 1; i <= 20; i++) {
       let xVal = i + day + (classUniqueCode % 7) + 1;
       cbseHighBank.push({
         q: `CBSE Math (${userClass}): Solve x² - ${xVal * xVal} = 0 (positive x):`,
@@ -871,10 +880,16 @@ function generateAdaptiveQuestions(userClass, day) {
     questions = cbseHighBank;
   }
 
+  let targetQs = getQsPerDayForUser(currentActiveUser);
   let dayResetSeed = (currentActiveUser && currentActiveUser.dayResetSeeds && currentActiveUser.dayResetSeeds[`D${day}`]) || 0;
   let userSeed = currentActiveUser ? (currentActiveUser.num || 1) * 100 + day * 10 + classUniqueCode + dayResetSeed * 777 : day * 5;
   
-  let randomizedQuestions = shuffleArray(questions.slice(0, 20), userSeed);
+  let selected = [];
+  for (let i = 0; i < targetQs; i++) {
+    selected.push(questions[i % questions.length]);
+  }
+
+  let randomizedQuestions = shuffleArray(selected, userSeed);
 
   randomizedQuestions = randomizedQuestions.map((qItem, idx) => {
     let optSeed = userSeed + idx * 7;
@@ -908,17 +923,13 @@ function handleOptionClick(selectedOpt, correctAns) {
     playSound('wrong');
   }
 
-  if (currentQIndex === 19) {
+  let targetQs = getQsPerDayForUser(currentActiveUser);
+  if (currentQIndex === targetQs - 1) {
     currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
     currentActiveUser.lastCompletedDate = getTodayString();
     setTimeout(() => {
       let targetDay = currentDay + 1;
-      let isManuallyUnlocked = currentActiveUser.manualUnlockTillDay && targetDay <= currentActiveUser.manualUnlockTillDay;
-      if(isManuallyUnlocked) {
-        alert("🎉 Excellent! Day " + currentDay + " Complete! You can immediately start Day " + targetDay + "!");
-      } else {
-        alert("🎉 Fantastic! Day " + currentDay + " Complete! Next Day will unlock tomorrow!");
-      }
+      alert("🎉 Fantastic! Day " + currentDay + " Complete (" + targetQs + " Questions)! Next Day will unlock tomorrow!");
     }, 200);
   }
 
@@ -940,9 +951,8 @@ function renderQuestion() {
   let todayStr = getTodayString();
   let dayFinished = isDayCompleted(currentDay);
   let isNewDateAvailable = currentActiveUser.lastCompletedDate !== todayStr;
-  let isManuallyUnlocked = currentActiveUser.manualUnlockTillDay && (currentDay + 1) <= currentActiveUser.manualUnlockTillDay;
 
-  if (dayFinished && (isNewDateAvailable || isManuallyUnlocked)) {
+  if (dayFinished && isNewDateAvailable) {
     nextDayBtn.disabled = false;
     nextDayBtn.style.opacity = "1";
   } else {
@@ -980,8 +990,9 @@ function renderQuestion() {
 
   btnBackQ.disabled = (currentQIndex === 0);
 
+  let targetQs = getQsPerDayForUser(currentActiveUser);
   if (alreadyAnswered) {
-    btnNextQ.disabled = (currentQIndex >= 19);
+    btnNextQ.disabled = (currentQIndex >= targetQs - 1);
     if (q.tip) {
       tipBox.innerText = q.tip;
       tipBox.classList.remove('hidden');
@@ -1022,8 +1033,9 @@ function renderQuestion() {
 }
 
 function navigateQuestion(delta) {
+  let targetQs = getQsPerDayForUser(currentActiveUser);
   let target = currentQIndex + delta;
-  if (target >= 0 && target < 20) {
+  if (target >= 0 && target < targetQs) {
     currentQIndex = target;
     renderQuestion();
   }
@@ -1031,16 +1043,16 @@ function navigateQuestion(delta) {
 
 function changeDay(delta) {
   if (delta > 0) {
+    let targetQs = getQsPerDayForUser(currentActiveUser);
     if (!isDayCompleted(currentDay)) {
-      alert("🔒 Complete all 20 questions of Day " + currentDay + " first!");
+      alert("🔒 Complete all " + targetQs + " questions of Day " + currentDay + " first!");
       return;
     }
     
     let targetDay = currentDay + 1;
     let todayStr = getTodayString();
-    let isManuallyUnlocked = currentActiveUser.manualUnlockTillDay && targetDay <= currentActiveUser.manualUnlockTillDay;
 
-    if (currentActiveUser.lastCompletedDate === todayStr && !isManuallyUnlocked) {
+    if (currentActiveUser.lastCompletedDate === todayStr) {
       let overridePin = prompt("🔒 Day " + targetDay + " unlocks tomorrow!\n\nEnter Admin PIN to unlock early:");
       if (overridePin === getAdminPin()) {
         alert("🔓 Day Unlocked by Admin!");
@@ -1182,6 +1194,7 @@ function renderAdminDashboardSummary() {
   document.getElementById('dashAvgAccuracy').innerText = `${avgAccuracy}%`;
 }
 
+// FEATURE 2: STUDENT MANAGEMENT WITH CUSTOMIZABLE QUESTIONS PER DAY
 function renderAdminUsersList() {
   let list = document.getElementById('adminUsersList');
   list.innerHTML = '';
@@ -1189,7 +1202,6 @@ function renderAdminUsersList() {
     let row = document.createElement('div');
     row.className = 'admin-student-card';
     let isChecked = u.active !== false ? 'checked' : '';
-    
     let completedDays = getCompletedDaysArray(u);
     let dayOptionsHTML = '';
     
@@ -1219,9 +1231,9 @@ function renderAdminUsersList() {
 
         <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; width: 100%; border-bottom: 1px dashed var(--border); padding-bottom: 6px; margin-bottom: 4px;">
           <div style="display:flex; gap:4px; align-items:center;">
-            <span style="font-size:0.75rem; color:var(--text-muted);">Multi-Day Unlock:</span>
-            <input type="number" id="unlockTill_${u.id.replace(/\s+/g, '_')}" placeholder="Day #" style="width:60px; padding:4px; font-size:0.75rem; border-radius:8px; background:var(--card-bg); border:1px solid var(--border); color:var(--text-main);" value="${u.manualUnlockTillDay || ''}" min="1">
-            <button class="btn btn-secondary" onclick="setManualUnlock('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">🔓 Set</button>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Questions/Day:</span>
+            <input type="number" id="qsPerDay_${u.id.replace(/\s+/g, '_')}" placeholder="Qs #" style="width:60px; padding:4px; font-size:0.75rem; border-radius:8px; background:var(--card-bg); border:1px solid var(--border); color:var(--text-main);" value="${u.qsPerDay || 20}" min="1" max="100">
+            <button class="btn btn-secondary" onclick="setQsPerDay('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">⚙️ Set Qs</button>
           </div>
         </div>
 
@@ -1241,28 +1253,21 @@ function renderAdminUsersList() {
   });
 }
 
-function setManualUnlock(id) {
+function setQsPerDay(id) {
   let u = globalUsersList.find(x => x.id === id);
   if (!u) return;
   
-  let val = document.getElementById(`unlockTill_${id.replace(/\s+/g, '_')}`).value;
-  let targetDay = parseInt(val, 10);
+  let val = document.getElementById(`qsPerDay_${id.replace(/\s+/g, '_')}`).value;
+  let targetQs = parseInt(val, 10);
   
-  if (isNaN(targetDay) || targetDay <= 0) {
-    if (confirm(`Remove multi-day unlock limit for ${id}?`)) {
-      u.manualUnlockTillDay = 0;
-    } else {
-      return;
-    }
-  } else {
-    u.manualUnlockTillDay = targetDay;
-  }
+  if (isNaN(targetQs) || targetQs <= 0) targetQs = 20;
+  u.qsPerDay = targetQs;
 
   let dbKey = id.replace(/\s+/g, '_');
   try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
   localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
 
-  alert(u.manualUnlockTillDay > 0 ? `🔓 ${id} unlocked up to Day ${u.manualUnlockTillDay}!` : `🔒 Unlock limit removed for ${id}.`);
+  alert(`⚙️ Daily Question Limit set to ${targetQs} Qs for ${id}!`);
   renderAdminUsersList();
   
   if (currentActiveUser && currentActiveUser.id === id) {
@@ -1283,7 +1288,8 @@ function resetSpecificDay(id) {
     if (!u.userAnswers) u.userAnswers = {};
     if (!u.dayResetSeeds) u.dayResetSeeds = {};
 
-    for (let i = 0; i < 20; i++) {
+    let targetQs = getQsPerDayForUser(u);
+    for (let i = 0; i < targetQs; i++) {
       delete u.userAnswers[`D${targetDay}_Q${i}`];
     }
 
@@ -1316,7 +1322,6 @@ function resetUserProgress(id) {
       u.userAnswers = {};
       u.dayResetSeeds = {};
       u.lastCompletedDate = "";
-      u.manualUnlockTillDay = 0;
       let dbKey = id.replace(/\s+/g, '_');
       try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
@@ -1373,7 +1378,7 @@ function addNewStudent() {
 
   let newUser = { 
     id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, gender: gender,
-    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 
+    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", qsPerDay: 20 
   };
 
   globalUsersList.push(newUser);
