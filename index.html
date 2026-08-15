@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduPortal 2026 - Performance Dashboard & Fast Workspace</title>
+  <title>EduPortal 2026 - JNVST & Multi-Subject Dashboard</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
   <!-- Async Firebase SDKs for Instant Startup Speed -->
@@ -312,7 +312,6 @@ const defaultFallbackUsers = [
   { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, completedDaysMap: {}, lastCompletedDate: "", qsPerDay: 20 }
 ];
 
-// SANITIZE & NORMALIZE USER DATA TO ENSURE ALL PAST AND PRESENT SETTINGS ARE MATCHED
 function sanitizeAndNormalizeUser(u) {
   if (!u) return u;
   return {
@@ -375,7 +374,6 @@ function initFirebaseDeferred() {
   auth.signInAnonymously().catch(function(err){ console.error("Firebase auth failed:", err); });
 }
 
-// FULL TWO-WAY COMPREHENSIVE CLOUD SYNC
 function forceManualCloudSync(isSilent = false) {
   if (!db) {
     if (!isSilent) alert("Cloud connection initializing... Please try again in 2 seconds.");
@@ -384,7 +382,6 @@ function forceManualCloudSync(isSilent = false) {
   let syncText = document.getElementById('syncStatus');
   if (syncText) syncText.innerText = '• Syncing...';
 
-  // Push local active user state first if available to prevent loss of unsaved changes
   if (currentActiveUser) {
     let activeKey = currentActiveUser.id.replace(/\s+/g, '_');
     db.ref('users/' + activeKey).set(sanitizeAndNormalizeUser(currentActiveUser)).catch(() => {});
@@ -398,7 +395,6 @@ function forceManualCloudSync(isSilent = false) {
       if (syncText) syncText.innerText = '• Live Cloud';
       if (!isSilent) showToast("✨ Successfully synchronized all settings & history from Cloud!");
       
-      // Update current active user reference if logged in
       if (currentActiveUser) {
         let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
         if (updated) {
@@ -579,7 +575,7 @@ const basicHindiMap = {
   "red": "लाल", "blue": "नीला", "green": "हरा", "yellow": "पीला",
   "circle": "गोलाकार वृत्त", "square": "वर्ग", "triangle": "त्रिभुज", "star": "तारा",
   "apple": "सेब", "dog": "कुत्ता", "elephant": "हाथी", "sun": "सूरज", "milk": "दूध",
-  "ice-cream": "आइसक्रीम", "cats": "बिल्लियां", "small": "छोटा", "kennel": "कुत्ते का घर",
+  "ice-cream": "आिसक्रीम", "cats": "बिल्लियां", "small": "छोटा", "kennel": "कुत्ते का घर",
   "night": "रात", "cow": "गाय", "fun": "मज़ा", "white": "सफेद"
 };
 
@@ -786,6 +782,7 @@ function refreshStatsUI() {
   document.getElementById('reportPercent').innerText = `${accuracy}%`;
 }
 
+// CLASS 4 & 5 FOCUSED ON JNVST EXAM | ALL OTHER CLASSES BALANCED MULTI-SUBJECT
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
   let targetQs = getQsPerDayForUser(currentActiveUser);
@@ -800,152 +797,231 @@ function generateAdaptiveQuestions(userClass, day) {
   for (let i = 0; i < targetQs; i++) {
     let globalSeed = classCode + (day * 100) + i;
     
-    if (userClass === "LKG" || userClass === "UKG") {
-      let type = i % 5;
-      if (type === 0) {
+    // CLASS 4 & 5: HEAVILY FOCUSED ON JNVST (Navodaya Entrance)
+    if (userClass === "Class 4" || userClass === "Class 5") {
+      let jnvstType = i % 4; // 0: JNVST Passage, 1: Mental Ability, 2: Arithmetic, 3: Science/EVS/GK
+
+      if (jnvstType === 0) {
+        let isHindi = (day % 2 === 1);
+        let pText = isHindi 
+          ? `📖 **JNVST हिंदी अपठित गद्यांश (Day ${day}):** नवोदय विद्यालय समिति मेधावी बच्चों को उत्कृष्ट शिक्षा प्रदान करती है। इसमें प्रवेश के लिए मानसिक योग्यता, गणित और भाषा परीक्षण की नियमित तैयारी आवश्यक है।`
+          : `📖 **JNVST Language Passage (Day ${day}):** Jawahar Navodaya Vidyalaya selection test evaluates candidates on Mental Ability, Arithmetic, and Language skills. Regular practice ensures high scoring.`;
+        questions.push({
+          passage: pText,
+          q: isHindi ? "गद्यांश के अनुसार नवोदय प्रवेश में क्या अनिवार्य है?" : "According to the passage, what ensures success in JNVST?",
+          options: [
+            isHindi ? "नियमित तैयारी" : "Regular practice",
+            isHindi ? "केवल खेलकूद" : "Only sports",
+            isHindi ? "आलस्य करना" : "Being lazy",
+            isHindi ? "कम पढ़ाई" : "Less study"
+          ],
+          ans: isHindi ? "नियमित तैयारी" : "Regular practice",
+          tip: isHindi ? "💡 JNVST Tip: गद्यांश को ध्यान से पढ़कर उत्तर चुनें।" : "💡 JNVST Tip: Always match key words with the passage."
+        });
+      } else if (jnvstType === 1) {
+        let matQs = [
+          { q: `JNVST Mental Ability (Day ${day}): Odd One Out - Which number does NOT fit the group?`, opts: ["27", "8", "64", "15"], ans: "15", tip: "💡 Tip: 27, 8, 64 are perfect cubes, 15 is not!" },
+          { q: `JNVST Mental Ability (Day ${day}): Complete Logic Sequence: 3, 6, 12, 24, ?`, opts: ["48", "36", "40", "50"], ans: "48", tip: "💡 Tip: Multiply each number by 2 to get the next." },
+          { q: `JNVST Mental Ability (Day ${day}): Analogy - Clock : Time :: Thermometer : ?`, opts: ["Temperature", "Heat", "Doctor", "Mercury"], ans: "Temperature", tip: "💡 Tip: Clock measures time, Thermometer measures temperature." },
+          { q: `JNVST Mental Ability (Day ${day}): Pattern Coding - If CAT = 24 (3+1+20), then DOG = ?`, opts: ["26", "23", "30", "28"], ans: "26", tip: "💡 Tip: D(4) + O(15) + G(7) = 26." }
+        ];
+        let sel = matQs[(globalSeed + i) % matQs.length];
+        questions.push({ q: sel.q, options: sel.opts, ans: sel.ans, tip: sel.tip });
+      } else if (jnvstType === 2) {
+        let arithQs = [
+          { q: `JNVST Arithmetic (Day ${day}): Find L.C.M of 12 and 18:`, opts: ["36", "72", "54", "24"], ans: "36", tip: "💡 Tip: Smallest common multiple of 12 and 18 is 36." },
+          { q: `JNVST Arithmetic (Day ${day}): Convert 3/5 into Percentage:`, opts: ["60%", "50%", "75%", "40%"], ans: "60%", tip: "💡 Tip: Multiply fraction by 100: (3/5) × 100 = 60%." },
+          { q: `JNVST Arithmetic (Day ${day}): An item bought for ₹400 is sold for ₹480. Find Profit %:`, opts: ["20%", "15%", "25%", "10%"], ans: "20%", tip: "💡 Tip: Profit = 80; Profit% = (80/400)×100 = 20%." },
+          { q: `JNVST Arithmetic (Day ${day}): Find Average of 10, 20, 30, 40, 50:`, opts: ["30", "25", "35", "40"], ans: "30", tip: "💡 Tip: Sum (150) ÷ 5 = 30." }
+        ];
+        let sel = arithQs[(globalSeed + i) % arithQs.length];
+        questions.push({ q: sel.q, options: sel.opts, ans: sel.ans, tip: sel.tip });
+      } else {
+        let jnvstGk = [
+          { q: `JNVST Science (Day ${day}): Which gas is essential for burning/combustion?`, opts: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], ans: "Oxygen", tip: "💡 Tip: Oxygen supports combustion." },
+          { q: `JNVST EVS (Day ${day}): Which is the largest planet in our Solar System?`, opts: ["Jupiter", "Saturn", "Earth", "Mars"], ans: "Jupiter", tip: "💡 Tip: Jupiter is the giant gas planet." },
+          { q: `JNVST General Knowledge (Day ${day}): How many total states are there in India?`, opts: ["28", "29", "30", "27"], ans: "28", tip: "💡 Tip: Currently India has 28 states and 8 UTs." }
+        ];
+        let sel = jnvstGk[(globalSeed + i) % jnvstGk.length];
+        questions.push({ q: sel.q, options: sel.opts, ans: sel.ans, tip: sel.tip });
+      }
+    }
+    // LKG & UKG
+    else if (userClass === "LKG" || userClass === "UKG") {
+      let subjectType = i % 5;
+      if (subjectType === 0) {
         let n1 = (globalSeed % 5) + 1;
         let emojis = ["🍎", "⭐", "🎈", "🐱", "🐶"][globalSeed % 5];
         let displayStr = Array(n1).fill(emojis).join("");
         questions.push({
-          q: `Count items for ${userClass}: How many ${emojis}? (${displayStr})`,
+          q: `Maths (${userClass}): How many ${emojis}? (${displayStr})`,
           options: [`${n1}`, `${n1+1}`, `${n1 > 1 ? n1-1 : 4}`, `${n1+2}`],
           ans: `${n1}`,
-          tip: `💡 Tip: Count them one by one carefully!`
+          tip: `💡 Tip: Count them one by one!`
         });
-      } else if (type === 1) {
-        let colors = [
-          {name:"Red 🔴", hint:"color of Apple"},
-          {name:"Green 🟢", hint:"color of Grass"},
-          {name:"Yellow 🟡", hint:"color of Sun"},
-          {name:"Blue 🔵", hint:"color of Sky"}
+      } else if (subjectType === 1) {
+        let items = [
+          {q:"Which animal gives us milk?", ans:"Cow 🐄", opts:["Cow 🐄", "Lion 🦁", "Tiger 🐯", "Eagle 🦅"]},
+          {q:"Which is a fruit?", ans:"Apple 🍎", opts:["Apple 🍎", "Potato 🥔", "Carrot 🥕", "Onion 🧅"]}
         ];
-        let selected = colors[globalSeed % colors.length];
-        questions.push({
-          q: `Identify Color (${userClass}): Which option is ${selected.hint}?`,
-          options: [selected.name, colors[(globalSeed+1)%4].name, colors[(globalSeed+2)%4].name, colors[(globalSeed+3)%4].name],
-          ans: selected.name,
-          tip: `💡 Tip: ${selected.name} matches ${selected.hint}!`
-        });
-      } else if (type === 2) {
+        let sel = items[globalSeed % items.length];
+        questions.push({ q: `Science (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: Think about nature around you!` });
+      } else if (subjectType === 2) {
+        let items = [
+          {q:"Where do we go to learn?", ans:"School 🏫", opts:["School 🏫", "Hospital 🏥", "Park 🏞️", "Market 🛒"]},
+          {q:"Who treats us when sick?", ans:"Doctor 🧑‍⚕️", opts:["Doctor 🧑‍⚕️", "Pilot 🧑‍✈️", "Driver 🚘", "Chef 🧑‍🍳"]}
+        ];
+        let sel = items[globalSeed % items.length];
+        questions.push({ q: `Social/GK (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: Think about community helpers!` });
+      } else if (subjectType === 3) {
         let charCode = 65 + (globalSeed % 20);
         let letter = String.fromCharCode(charCode);
         let nextLetter = String.fromCharCode(charCode + 1);
         questions.push({
-          q: `Alphabet (${userClass}): What comes after '${letter}'?`,
+          q: `English (${userClass}): What comes after '${letter}'?`,
           options: [nextLetter, String.fromCharCode(charCode+2), String.fromCharCode(charCode+3), String.fromCharCode(charCode-1)],
           ans: nextLetter,
-          tip: `💡 Tip: Sing the alphabet song: ${letter}, ${nextLetter}...`
+          tip: `💡 Tip: Recite: ${letter}, ${nextLetter}...`
         });
-      } else if (type === 3) {
+      } else {
         let shapes = ["Circle ⭕", "Square ⬛", "Triangle 🔺", "Star ⭐"];
         let sel = shapes[globalSeed % 4];
         questions.push({
-          q: `Shape Quiz (${userClass}): Select the ${sel.split(' ')[0]} shape:`,
+          q: `Logic/Shapes (${userClass}): Select the ${sel.split(' ')[0]} shape:`,
           options: [sel, shapes[(globalSeed+1)%4], shapes[(globalSeed+2)%4], shapes[(globalSeed+3)%4]],
           ans: sel,
           tip: `💡 Tip: Look closely at the icon!`
         });
-      } else {
-        let a = (globalSeed % 3) + 1;
-        let b = (globalSeed % 2) + 1;
-        questions.push({
-          q: `Simple Addition (${userClass}): ${a} + ${b} = ?`,
-          options: [`${a+b}`, `${a+b+1}`, `${a+b+2}`, `${a+b-1}`],
-          ans: `${a+b}`,
-          tip: `💡 Tip: ${a} plus ${b} makes ${a+b}!`
-        });
       }
-    } 
+    }
+    // CLASS 1, 2, 3
     else if (userClass === "Class 1" || userClass === "Class 2" || userClass === "Class 3") {
-      let mult = userClass === "Class 1" ? 3 : (userClass === "Class 2" ? 7 : 12);
-      let a = (i + 1) * mult + (day * 2);
-      let b = (i % 5) + 3;
-      if (i % 2 === 0) {
+      let subjectType = i % 5;
+      if (subjectType === 0) {
+        let a = ((i + 1) * 3 + day) % 30 + 5;
+        let b = (i % 5) + 4;
         questions.push({
-          q: `Math (${userClass}): ${a} + ${b} = ?`,
+          q: `Maths (${userClass}): ${a} + ${b} = ?`,
           options: [`${a+b}`, `${a+b+2}`, `${a+b-1}`, `${a+b+3}`],
           ans: `${a+b}`,
-          tip: `💡 Tip: Add units column first: ${a} + ${b} = ${a+b}.`
+          tip: `💡 Tip: ${a} plus ${b} equals ${a+b}.`
         });
+      } else if (subjectType === 1) {
+        let sciQs = [
+          {q:"Which gas do plants release for human breathing?", ans:"Oxygen", opts:["Oxygen", "Carbon Dioxide", "Nitrogen", "Helium"]},
+          {q:"Which organ pumps blood in our body?", ans:"Heart", opts:["Heart", "Brain", "Lungs", "Stomach"]}
+        ];
+        let sel = sciQs[globalSeed % sciQs.length];
+        questions.push({ q: `Science (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: Essential for life!` });
+      } else if (subjectType === 2) {
+        let sstQs = [
+          {q:"What is the capital of India?", ans:"New Delhi", opts:["New Delhi", "Mumbai", "Kolkata", "Chennai"]},
+          {q:"Which day is Independence Day in India?", ans:"15th August", opts:["15th August", "26th January", "2nd October", "14th November"]}
+        ];
+        let sel = sstQs[globalSeed % sstQs.length];
+        questions.push({ q: `Social Science (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: General knowledge.` });
+      } else if (subjectType === 3) {
+        let eng = [
+          {q:"Opposite word of 'HOT':", ans:"Cold", opts:["Cold", "Warm", "Dry", "Tall"]},
+          {q:"Plural of 'Child':", ans:"Children", opts:["Children", "Childs", "Childes", "Kid"]}
+        ];
+        let sel = eng[globalSeed % eng.length];
+        questions.push({ q: `English Grammar (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: Grammar rule applies.` });
       } else {
-        let nounList = ["Rohan", "Delhi", "Tiger", "Apple", "School", "Doctor", "River", "Pencil"];
-        let noun = nounList[globalSeed % nounList.length];
-        questions.push({
-          q: `Grammar (${userClass}): Identify the Noun in: '${noun} is very clean.'`,
-          options: [noun, "is", "very", "clean"],
-          ans: noun,
-          tip: `💡 Tip: Nouns are names of persons, places, animals, or things.`
-        });
+        let hindiQs = [
+          {q:"'सूर्य' का पर्यायवाची शब्द क्या है?", ans:"दिनकर", opts:["दिनकर", "चन्द्र", "अंबर", "पवन"]},
+          {q:"'सच्चा' शब्द का विलोम क्या होगा?", ans:"झूठा", opts:["झूठा", "अच्छा", "साफ", "कड़वा"]}
+        ];
+        let sel = hindiQs[globalSeed % hindiQs.length];
+        questions.push({ q: `Hindi Vyakaran (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: हिंदी व्याकरण नियम।` });
       }
-    } 
-    else if (userClass === "Class 4" || userClass === "Class 5") {
-      let isHindi = (day % 2 === 1);
-      if (i === 0) {
-        let pText = isHindi 
-          ? `📖 **JNVST अपठित गद्यांश (Day ${day}):** नवोदय विद्यालय समिति मेधावी ग्रामीण छात्रों को उत्कृष्ट शिक्षा प्रदान करती है। निरंतर अभ्यास और समय प्रबंधन परीक्षा में उच्च अंक दिलाने में सहायक हैं।`
-          : `📖 **JNVST Passage (Day ${day}):** Navodaya Vidyalayas aim to nurture talented children from rural areas. Continuous practice and time management are keys to scoring high in JNVST.`;
-        questions.push({
-          passage: pText,
-          q: isHindi ? "गद्यांश के अनुसार सफलता पाने के लिए क्या आवश्यक है?" : "According to the passage, what is key to scoring high?",
-          options: [isHindi ? "निरंतर अभ्यास" : "Continuous practice", isHindi ? "आलस्य" : "Laziness", isHindi ? "खेलना" : "Playing", isHindi ? "कम सोना" : "Less sleep"],
-          ans: isHindi ? "निरंतर अभ्यास" : "Continuous practice",
-          tip: isHindi ? "💡 Tip: गद्यांश में निरंतर अभ्यास को महत्वपूर्ण बताया गया है।" : "💡 Tip: Passage highlights continuous practice and time management."
-        });
-      } else if (i % 3 === 0) {
-        let v1 = (i * 4) + day;
-        let v2 = (i * 6) + day;
-        let ansHcf = (day % 4) + 2;
-        let n1 = v1 * ansHcf;
-        let n2 = v2 * ansHcf;
-        questions.push({
-          q: `JNVST Math (Day ${day}): Find H.C.F of ${n1} and ${n2}:`,
-          options: [`${ansHcf}`, `${ansHcf * 2}`, `${ansHcf + 1}`, `${ansHcf + 3}`],
-          ans: `${ansHcf}`,
-          tip: `💡 Tip: Find the highest common factor that divides both ${n1} and ${n2}.`
-        });
-      } else if (i % 3 === 1) {
-        let step = (globalSeed % 4) + 3;
-        let start = (globalSeed % 10) + 1;
-        let series = [start, start + step, start + 2*step, start + 3*step];
-        let nextVal = start + 4*step;
-        questions.push({
-          q: `JNVST Mental Ability: Complete logic sequence: ${series.join(', ')}, ?`,
-          options: [`${nextVal}`, `${nextVal+2}`, `${nextVal-1}`, `${nextVal+4}`],
-          ans: `${nextVal}`,
-          tip: `💡 Tip: The common difference between consecutive terms is +${step}.`
-        });
-      } else {
-        let num = (i * 50) + (day * 10) + 100;
-        let percent = 10 * ((globalSeed % 4) + 1);
-        let ansVal = (num * percent) / 100;
-        questions.push({
-          q: `JNVST Arithmetic: Calculate ${percent}% of ${num}:`,
-          options: [`${ansVal}`, `${ansVal + 5}`, `${ansVal - 5}`, `${ansVal + 10}`],
-          ans: `${ansVal}`,
-          tip: `💡 Tip: Multiply ${num} by ${percent}/100.`
-        });
-      }
-    } 
+    }
+    // CLASS 6, 7, 8
     else if (userClass === "Class 6" || userClass === "Class 7" || userClass === "Class 8") {
-      let coeff = (i % 5) + 2;
-      let valX = i + day + 3;
-      let constC = (i % 7) + 4;
-      let rhs = coeff * valX + constC;
-      questions.push({
-        q: `CBSE Math (${userClass}): Solve for x: ${coeff}x + ${constC} = ${rhs}`,
-        options: [`${valX}`, `${valX+2}`, `${valX-1}`, `${valX+3}`],
-        ans: `${valX}`,
-        tip: `💡 Tip: ${coeff}x = ${rhs - constC} => x = ${valX}.`
-      });
-    } else {
-      let valX = i + day + 2;
-      let sq = valX * valX;
-      questions.push({
-        q: `CBSE Advanced Math (${userClass}): Solve x² - ${sq} = 0 (for positive x):`,
-        options: [`${valX}`, `${valX+4}`, `${valX-1}`, `${valX*2}`],
-        ans: `${valX}`,
-        tip: `💡 Tip: x² = ${sq} => x = √${sq} = ${valX}.`
-      });
+      let subjectType = i % 5;
+      if (subjectType === 0) {
+        let coeff = (i % 5) + 2;
+        let valX = i + day + 3;
+        let constC = (i % 7) + 4;
+        let rhs = coeff * valX + constC;
+        questions.push({
+          q: `Maths (${userClass}): Solve for x: ${coeff}x + ${constC} = ${rhs}`,
+          options: [`${valX}`, `${valX+2}`, `${valX-1}`, `${valX+3}`],
+          ans: `${valX}`,
+          tip: `💡 Tip: Subtract ${constC} from ${rhs} and divide by ${coeff}.`
+        });
+      } else if (subjectType === 1) {
+        let sciQs = [
+          {q:"What is the SI unit of Force?", ans:"Newton", opts:["Newton", "Joule", "Watt", "Pascal"]},
+          {q:"Which component of blood helps in blood clotting?", ans:"Platelets", opts:["Platelets", "RBCs", "WBCs", "Plasma"]}
+        ];
+        let sel = sciQs[globalSeed % sciQs.length];
+        questions.push({ q: `Science (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: Physics/Biology concept.` });
+      } else if (subjectType === 2) {
+        let sstQs = [
+          {q:"Who was the first President of India?", ans:"Dr. Rajendra Prasad", opts:["Dr. Rajendra Prasad", "Dr. S. Radhakrishnan", "Mahatma Gandhi", "Jawaharlal Nehru"]},
+          {q:"The longest river in India is:", ans:"Ganga", opts:["Ganga", "Yamuna", "Godavari", "Brahmaputra"]}
+        ];
+        let sel = sstQs[globalSeed % sstQs.length];
+        questions.push({ q: `Social Science (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: Indian History & Geography.` });
+      } else if (subjectType === 3) {
+        let engQs = [
+          {q:"Identify Adverb: 'He spoke very clearly.'", ans:"clearly", opts:["clearly", "spoke", "He", "very"]},
+          {q:"Synonym of 'ANCIENT':", ans:"Old", opts:["Old", "Modern", "New", "Future"]}
+        ];
+        let sel = engQs[globalSeed % engQs.length];
+        questions.push({ q: `English Grammar (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: English Grammar rule.` });
+      } else {
+        let hindiQs = [
+          {q:"'अंगूठा दिखाना' मुहावरे का सही अर्थ क्या है?", ans:"ऐन वक्त पर मना करना", opts:["ऐन वक्त पर मना करना", "मदद करना", "अंगूठा साफ़ करना", "जीते रहना"]},
+          {q:"'संधि' के कितने मुख्य भेद होते हैं?", ans:"3", opts:["3", "2", "4", "5"]}
+        ];
+        let sel = hindiQs[globalSeed % hindiQs.length];
+        questions.push({ q: `Hindi Vyakaran (${userClass}): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Tip: हिंदी मुहावरा व व्याकरण।` });
+      }
+    }
+    // CLASS 9, 10, 11, 12: EQUAL MIX OF MATHS, SCIENCE, SST, ENGLISH & REASONING/HINDI
+    else {
+      let subjectType = i % 5;
+      if (subjectType === 0) {
+        let valX = (i % 6) + 2 + (day % 3);
+        let sq = valX * valX;
+        questions.push({
+          q: `${userClass} Maths: If x² - ${sq} = 0, find positive value of x:`,
+          options: [`${valX}`, `${valX+3}`, `${valX-1}`, `${valX*2}`],
+          ans: `${valX}`,
+          tip: `💡 Tip: x = √${sq} = ${valX}.`
+        });
+      } else if (subjectType === 1) {
+        let sciQs = [
+          {q:`${userClass} Physics: What is the unit of Electric Current?`, ans:"Ampere (A)", opts:["Ampere (A)", "Volt (V)", "Ohm (Ω)", "Watt (W)"]},
+          {q:`${userClass} Chemistry: What is the pH value of pure neutral water at 25°C?`, ans:"7", opts:["7", "0", "14", "1"]},
+          {q:`${userClass} Biology: The green pigment in plants responsible for photosynthesis is:`, ans:"Chlorophyll", opts:["Chlorophyll", "Xanthophyll", "Carotene", "Hemoglobin"]}
+        ];
+        let sel = sciQs[globalSeed % sciQs.length];
+        questions.push({ q: sel.q, options: sel.opts, ans: sel.ans, tip: `💡 Tip: Science Board conceptual Q.` });
+      } else if (subjectType === 2) {
+        let sstQs = [
+          {q:`${userClass} History: In which year was Non-Cooperation Movement launched by Gandhi Ji?`, ans:"1920", opts:["1920", "1930", "1942", "1915"]},
+          {q:`${userClass} Geography: Which soil is also known as Regur Soil?`, ans:"Black Soil", opts:["Black Soil", "Red Soil", "Alluvial Soil", "Laterite Soil"]}
+        ];
+        let sel = sstQs[globalSeed % sstQs.length];
+        questions.push({ q: sel.q, options: sel.opts, ans: sel.ans, tip: `💡 Tip: History/Geography Board Syllabus.` });
+      } else if (subjectType === 3) {
+        let engQs = [
+          {q:`${userClass} English: Convert to Passive: 'She wrote a story.'`, ans:"A story was written by her.", opts:["A story was written by her.", "A story is written by her.", "She has written a story.", "A story written her."]},
+          {q:`${userClass} English: Pick correct Antonym for 'TRANSPARENT':`, ans:"Opaque", opts:["Opaque", "Clear", "Bright", "Translucent"]}
+        ];
+        let sel = engQs[globalSeed % engQs.length];
+        questions.push({ q: sel.q, options: sel.opts, ans: sel.ans, tip: `💡 Tip: English Active/Passive & vocabulary.` });
+      } else {
+        let mixQs = [
+          {q:`${userClass} Hindi Vyakaran: 'दशानन' (दस हैं आनन जिसके) में कौन सा समास है?`, ans:"बहुव्रीहि समास", opts:["बहुव्रीहि समास", "द्विगु समास", "तत्पुरुष समास", "द्वंद्व समास"]},
+          {q:`${userClass} Reasoning: Complete pattern: 2, 6, 12, 20, 30, ?`, ans:"42", opts:["42", "40", "36", "45"]}
+        ];
+        let sel = mixQs[globalSeed % mixQs.length];
+        questions.push({ q: sel.q, options: sel.opts, ans: sel.ans, tip: `💡 Tip: व्याकरण या रीजनिंग सीरीज पैटर्न (+4, +6, +8, +10, +12)।` });
+      }
     }
   }
 
