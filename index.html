@@ -71,7 +71,6 @@
     .stat-card .val { font-size: 1.1rem; font-weight: 800; color: var(--accent-gold); }
     .stat-card .lbl { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
 
-    /* DAY SELECTOR DROPDOWN (PREV/NEXT BUTTONS REMOVED) */
     .day-nav { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; width: 100%; }
     .day-select-dropdown { width: 100%; background: var(--input-bg); color: var(--text-main); border: 2px solid var(--primary); padding: 10px 14px; border-radius: 14px; font-weight: 800; font-size: 1.05rem; outline: none; cursor: pointer; text-align: center; }
     
@@ -182,7 +181,6 @@
     </div>
 
     <div class="card" style="margin-top: 10px;">
-      <!-- DAY DROPDOWN LIST ONLY (PREV/NEXT BUTTONS REMOVED) -->
       <div class="day-nav">
         <select id="daySelectDropdown" class="day-select-dropdown" onchange="onDayDropdownSelect(this.value)">
           <!-- Options populated dynamically 1 to 30 -->
@@ -314,16 +312,39 @@ const defaultFallbackUsers = [
   { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, completedDaysMap: {}, lastCompletedDate: "", qsPerDay: 20 }
 ];
 
-let globalUsersList = defaultFallbackUsers;
+// SANITIZE & NORMALIZE USER DATA TO ENSURE ALL PAST AND PRESENT SETTINGS ARE MATCHED
+function sanitizeAndNormalizeUser(u) {
+  if (!u) return u;
+  return {
+    id: u.id || "User",
+    name: u.name || u.id || "User",
+    num: u.num || 1,
+    pin: u.pin || "1234",
+    class: u.class || "Class 4",
+    gender: u.gender || "Boy",
+    avatar: u.avatar || getRandomAvatar(u.gender || "Boy", u.num || 1),
+    active: u.active !== undefined ? u.active : true,
+    points: u.points || 0,
+    wrong: u.wrong || 0,
+    streak: u.streak || 0,
+    userAnswers: u.userAnswers || {},
+    dayResetSeeds: u.dayResetSeeds || {},
+    completedDaysMap: u.completedDaysMap || {},
+    lastCompletedDate: u.lastCompletedDate || "",
+    qsPerDay: (u.qsPerDay !== undefined && parseInt(u.qsPerDay, 10) > 0) ? parseInt(u.qsPerDay, 10) : 20
+  };
+}
+
+let globalUsersList = defaultFallbackUsers.map(sanitizeAndNormalizeUser);
 try {
   let storedUsers = JSON.parse(localStorage.getItem('cached_users_data'));
   if (Array.isArray(storedUsers) && storedUsers.length > 0) {
-    globalUsersList = storedUsers;
+    globalUsersList = storedUsers.map(sanitizeAndNormalizeUser);
   } else {
-    localStorage.setItem('cached_users_data', JSON.stringify(defaultFallbackUsers));
+    localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
   }
 } catch(e) {
-  globalUsersList = defaultFallbackUsers;
+  globalUsersList = defaultFallbackUsers.map(sanitizeAndNormalizeUser);
 }
 
 function initFirebaseDeferred() {
@@ -354,6 +375,7 @@ function initFirebaseDeferred() {
   auth.signInAnonymously().catch(function(err){ console.error("Firebase auth failed:", err); });
 }
 
+// FULL TWO-WAY COMPREHENSIVE CLOUD SYNC
 function forceManualCloudSync(isSilent = false) {
   if (!db) {
     if (!isSilent) alert("Cloud connection initializing... Please try again in 2 seconds.");
@@ -362,28 +384,45 @@ function forceManualCloudSync(isSilent = false) {
   let syncText = document.getElementById('syncStatus');
   if (syncText) syncText.innerText = '• Syncing...';
 
+  // Push local active user state first if available to prevent loss of unsaved changes
+  if (currentActiveUser) {
+    let activeKey = currentActiveUser.id.replace(/\s+/g, '_');
+    db.ref('users/' + activeKey).set(sanitizeAndNormalizeUser(currentActiveUser)).catch(() => {});
+  }
+
   db.ref('users').once('value').then((snapshot) => {
     const data = snapshot.val();
     if (data) {
-      globalUsersList = Object.keys(data).map(key => data[key]);
+      globalUsersList = Object.keys(data).map(key => sanitizeAndNormalizeUser(data[key]));
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
       if (syncText) syncText.innerText = '• Live Cloud';
-      if (!isSilent) showToast("✨ Successfully synced " + globalUsersList.length + " users from Cloud!");
+      if (!isSilent) showToast("✨ Successfully synchronized all settings & history from Cloud!");
       
+      // Update current active user reference if logged in
+      if (currentActiveUser) {
+        let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
+        if (updated) {
+          currentActiveUser = updated;
+          refreshStatsUI();
+          renderQuestion();
+        }
+      }
+
       let adminModal = document.getElementById('adminModal');
       if (adminModal && !adminModal.classList.contains('hidden')) {
         renderAdminDashboardSummary();
         renderAdminUsersList();
+        refreshDashMetricDetailIfOpen();
       }
     } else {
       if (!isSilent) showToast("Cloud database is empty. Seeding initial users...");
       let initialObj = {};
       defaultFallbackUsers.forEach(u => {
         let k = u.id.replace(/\s+/g, '_');
-        initialObj[k] = u;
+        initialObj[k] = sanitizeAndNormalizeUser(u);
       });
       db.ref('users').set(initialObj).then(() => {
-        globalUsersList = defaultFallbackUsers;
+        globalUsersList = defaultFallbackUsers.map(sanitizeAndNormalizeUser);
         localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
         if (syncText) syncText.innerText = '• Live Cloud';
       });
@@ -505,7 +544,7 @@ function initCloudSync() {
     db.ref('users').on('value', (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        let fetchedList = Object.keys(data).map(key => data[key]);
+        let fetchedList = Object.keys(data).map(key => sanitizeAndNormalizeUser(data[key]));
         if (fetchedList.length > 0) {
           globalUsersList = fetchedList;
           localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
@@ -599,7 +638,6 @@ function readQuestionAndOptionsWithTranslation() {
   window.speechSynthesis.speak(utterance);
 }
 
-// TOUCH & SCROLL PERFECTED AUTOCOMPLETE DROPDOWN FOR LOGIN
 function selectUser(userObj) {
   let now = Date.now();
   if (now - lastSelectionTime < 300) return;
@@ -669,11 +707,7 @@ function handleStudentLogin() {
       alert("❌ Account Deactivated! Contact Admin.");
       return;
     }
-    currentActiveUser = found;
-    if (!currentActiveUser.userAnswers) currentActiveUser.userAnswers = {};
-    if (!currentActiveUser.dayResetSeeds) currentActiveUser.dayResetSeeds = {};
-    if (!currentActiveUser.completedDaysMap) currentActiveUser.completedDaysMap = {};
-    if (!currentActiveUser.qsPerDay) currentActiveUser.qsPerDay = 20;
+    currentActiveUser = sanitizeAndNormalizeUser(found);
     
     let autoDay = 1;
     while (isDayCompletedForUser(currentActiveUser, autoDay)) {
@@ -965,7 +999,7 @@ function handleOptionClick(selectedOpt, correctAns) {
   }
 
   let dbKey = currentActiveUser.id.replace(/\s+/g, '_');
-  try { if (db) db.ref('users/' + dbKey).set(currentActiveUser); } catch(e){}
+  try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(currentActiveUser)); } catch(e){}
 
   refreshStatsUI();
   renderQuestion();
@@ -1305,13 +1339,14 @@ function setQsPerDay(id) {
   u.qsPerDay = targetQs;
 
   let dbKey = id.replace(/\s+/g, '_');
-  try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
+  try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(u)); } catch(e){}
   localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
 
   alert(`⚙️ Daily Question Limit set to ${targetQs} Qs for ${id}!`);
   renderAdminUsersList();
   
   if (currentActiveUser && currentActiveUser.id === id) {
+    currentActiveUser.qsPerDay = targetQs;
     renderQuestion();
   }
 }
@@ -1339,7 +1374,7 @@ function resetSpecificDay(id) {
     u.dayResetSeeds[`D${targetDay}`] = (u.dayResetSeeds[`D${targetDay}`] || 0) + 1;
 
     let dbKey = id.replace(/\s+/g, '_');
-    try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
+    try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(u)); } catch(e){}
     localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
 
     alert(`Day ${targetDay} restarted for ${id}!`);
@@ -1367,7 +1402,7 @@ function resetUserProgress(id) {
       u.completedDaysMap = {};
       u.lastCompletedDate = "";
       let dbKey = id.replace(/\s+/g, '_');
-      try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
+      try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(u)); } catch(e){}
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
       alert(`Progress reset for ${id}!`);
       renderAdminDashboardSummary();
@@ -1389,7 +1424,7 @@ function resetStudentPin(id) {
     if (newPin && newPin.length === 4) {
       u.pin = newPin;
       let dbKey = id.replace(/\s+/g, '_');
-      try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
+      try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(u)); } catch(e){}
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
       alert(`PIN Updated for ${id}!`);
       renderAdminUsersList();
@@ -1402,7 +1437,7 @@ function toggleUserActiveStatus(id, isActive) {
   if(u) {
     u.active = isActive;
     let dbKey = id.replace(/\s+/g, '_');
-    try { if (db) db.ref('users/' + dbKey).set(u); } catch(e){}
+    try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(u)); } catch(e){}
     localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
     renderAdminDashboardSummary();
   }
@@ -1420,10 +1455,10 @@ function addNewStudent() {
   let randomPin = Math.floor(1000 + Math.random() * 9000).toString();
   let avatar = getRandomAvatar(gender, nextNum);
 
-  let newUser = { 
+  let newUser = sanitizeAndNormalizeUser({ 
     id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, gender: gender,
     avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, completedDaysMap: {}, lastCompletedDate: "", qsPerDay: 20 
-  };
+  });
 
   globalUsersList.push(newUser);
   let dbKey = generatedID.replace(/\s+/g, '_');
