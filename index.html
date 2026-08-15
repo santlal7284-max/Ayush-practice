@@ -47,14 +47,14 @@
     .kids-badge { display: inline-block; background: linear-gradient(90deg, #F59E0B, #EC4899); color: white; padding: 4px 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; }
     
     .autocomplete-wrapper { position: relative; width: 100%; text-align: left; }
-    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 14px; max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    .suggestion-item { padding: 12px 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
+    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 14px; max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); -webkit-overflow-scrolling: touch; }
+    .suggestion-item { padding: 14px 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--text-main); touch-action: manipulation; }
     .suggestion-item:active, .suggestion-item:hover { background: var(--primary); color: white; }
 
     .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
     
     /* VIBRANT BUTTONS STYLING */
-    .btn { padding: 12px 18px; border: none; border-radius: 16px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35); }
+    .btn { padding: 12px 18px; border: none; border-radius: 16px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35); touch-action: manipulation; }
     .btn:active { transform: scale(0.96); }
     .btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; background: var(--border) !important; color: var(--text-muted) !important; transform: none !important; box-shadow: none !important; }
     
@@ -82,7 +82,7 @@
     /* QUESTION HEADER WITH SPEAKER READ-ALOUD BUTTON */
     .question-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 16px 0; min-height: 60px; }
     .question-box { font-size: 1.25rem; font-weight: 800; text-align: left; line-height: 1.4; flex-grow: 1; }
-    .speech-btn { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border: none; padding: 10px 14px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); flex-shrink: 0; transition: transform 0.2s; }
+    .speech-btn { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border: none; padding: 10px 14px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); flex-shrink: 0; transition: transform 0.2s; touch-action: manipulation; }
     .speech-btn:active { transform: scale(0.9); }
 
     .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -97,7 +97,7 @@
 
     /* CLICKABLE DASHBOARD METRIC BUTTONS */
     .admin-dashboard-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-    .dash-btn { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%); padding: 12px 8px; border-radius: 14px; border: 1.5px solid var(--border); text-align: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .dash-btn { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%); padding: 12px 8px; border-radius: 14px; border: 1.5px solid var(--border); text-align: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); touch-action: manipulation; }
     .dash-btn:active, .dash-btn:hover { border-color: var(--primary); transform: translateY(-2px); background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(30, 41, 59, 0.95) 100%); }
     .dash-btn .num { font-size: 1.25rem; font-weight: 900; color: var(--accent-gold); }
     .dash-btn .label { font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-top: 2px; }
@@ -214,7 +214,7 @@
     </div>
 
     <div id="adminAuthBox">
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin Security PIN</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin Security PIN (Default: 7258)</p>
       <!-- NUMERIC KEYPAD FOR ADMIN PIN -->
       <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
       <button class="btn" onclick="verifyAdminPin()" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
@@ -333,12 +333,29 @@ function initFirebaseDeferred() {
   auth.signInAnonymously().catch(function(err){ console.error("Firebase auth failed:", err); });
 }
 
-// INSTANT LOCAL CACHE ENGINE FOR 0-SECOND LAUNCH
-let globalUsersList = JSON.parse(localStorage.getItem('cached_users_data')) || [
+// ENSURE DEFAULT ADMIN PIN IS ALWAYS FORCE-INITIALIZED
+if (!localStorage.getItem('app_master_pin')) {
+  localStorage.setItem('app_master_pin', '7258');
+}
+
+// INSTANT LOCAL CACHE ENGINE FOR 0-SECOND LAUNCH WITH ROBUST FALLBACK
+let defaultUsersSeed = [
   { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
   { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
   { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 }
 ];
+
+let globalUsersList = defaultUsersSeed;
+try {
+  let storedUsers = JSON.parse(localStorage.getItem('cached_users_data'));
+  if (Array.isArray(storedUsers) && storedUsers.length > 0) {
+    globalUsersList = storedUsers;
+  } else {
+    localStorage.setItem('cached_users_data', JSON.stringify(defaultUsersSeed));
+  }
+} catch(e) {
+  globalUsersList = defaultUsersSeed;
+}
 
 let audioCtx = null;
 function playSound(type) {
@@ -505,7 +522,7 @@ function getHindiTranslation(text) {
       return dict[key];
     }
   }
-  return text; // fallback
+  return text;
 }
 
 // --- TEXT TO SPEECH (ORIGINAL LANGUAGE -> THEN HINDI TRANSLATION) ---
@@ -515,7 +532,7 @@ function readQuestionAndOptions() {
     return;
   }
   
-  window.speechSynthesis.cancel(); // Stop ongoing speech
+  window.speechSynthesis.cancel();
 
   if (!currentLoadedQuestions.length || currentQIndex >= currentLoadedQuestions.length) return;
 
@@ -526,7 +543,6 @@ function readQuestionAndOptions() {
   let speechBtn = document.getElementById('speechBtn');
   if (speechBtn) speechBtn.innerText = '🔊 ...';
 
-  // Step 1: Speak Original Language
   let originalText = `Question ${currentQIndex + 1}. ${cleanQ}. `;
   opts.forEach((opt, idx) => {
     let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
@@ -537,7 +553,6 @@ function readQuestionAndOptions() {
   utterOriginal.lang = 'en-US';
   utterOriginal.rate = 0.9;
 
-  // Step 2: Speak Hindi Translation after original finishes
   utterOriginal.onend = function() {
     let hindiQ = getHindiTranslation(cleanQ);
     let hindiText = `हिंदी अनुवाद: प्रश्न ${currentQIndex + 1}. ${hindiQ}. `;
@@ -567,6 +582,7 @@ function readQuestionAndOptions() {
   window.speechSynthesis.speak(utterOriginal);
 }
 
+// FULLY TOUCH-OPTIMIZED AUTOCOMPLETE SUGGESTIONS ENGINE
 function showSuggestions(showAll = false) {
   let val = document.getElementById('loginUsername').value.trim().toLowerCase();
   let box = document.getElementById('suggestionsBox');
@@ -582,12 +598,19 @@ function showSuggestions(showAll = false) {
     let item = document.createElement('div');
     item.className = 'suggestion-item';
     item.innerHTML = `<span>${m.avatar || '🎓'} ${m.id}</span> <span class="badge">${m.class}</span>`;
-    item.onmousedown = function(e) {
+    
+    // Robust mobile tap & click handler without screen scrolling
+    let selectHandler = function(e) {
       e.preventDefault();
+      e.stopPropagation();
       document.getElementById('loginUsername').value = m.id;
       box.classList.add('hidden');
       document.getElementById('loginPin').focus();
     };
+
+    item.addEventListener('touchstart', selectHandler, { passive: false });
+    item.addEventListener('mousedown', selectHandler);
+
     box.appendChild(item);
   });
   box.classList.remove('hidden');
