@@ -39,7 +39,8 @@
     .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; position: relative; }
     
     .top-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; }
-    .theme-btn { background: var(--card-bg); border: 1.5px solid var(--border); padding: 8px 12px; border-radius: 20px; font-size: 1.1rem; cursor: pointer; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .header-controls { display: flex; gap: 8px; align-items: center; }
+    .theme-btn, .sound-btn { background: var(--card-bg); border: 1.5px solid var(--border); padding: 8px 12px; border-radius: 20px; font-size: 1.1rem; cursor: pointer; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     
     .card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 22px; padding: 20px; border: 2px solid var(--border); box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.3); }
     .login-box { text-align: center; }
@@ -52,7 +53,6 @@
 
     .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
     
-    /* VIBRANT BUTTONS STYLING */
     .btn { padding: 12px 18px; border: none; border-radius: 16px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35); }
     .btn:active { transform: scale(0.96); }
     .btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; background: var(--border) !important; color: var(--text-muted) !important; transform: none !important; box-shadow: none !important; }
@@ -88,7 +88,15 @@
     .option-btn.selected-wrong { border-color: var(--danger) !important; background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.35) 100%) !important; color: #F87171 !important; font-weight: 900 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important; }
     .option-btn.show-actual-correct { border-color: var(--success) !important; background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.25) 100%) !important; color: #34D399 !important; font-weight: 900 !important; }
 
-    /* CLICKABLE DASHBOARD METRIC BUTTONS */
+    /* EXPLANATION BOX UI */
+    .explanation-box { background: rgba(99, 102, 241, 0.15); border: 1.5px dashed var(--primary); border-radius: 14px; padding: 12px; margin-top: 14px; font-size: 0.9rem; color: var(--text-main); text-align: left; }
+
+    /* TIMER CONTAINER UI */
+    .timer-container { display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800; font-size: 1rem; color: var(--accent-gold); background: var(--input-bg); border: 1.5px solid var(--border); padding: 4px 12px; border-radius: 16px; width: fit-content; margin: 0 auto 10px auto; }
+    .timer-warn { color: #EF4444 !important; animation: pulse 0.6s infinite alternate; }
+    @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
+
+    /* ADMIN DASHBOARD */
     .admin-dashboard-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
     .dash-btn { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%); padding: 12px 8px; border-radius: 14px; border: 1.5px solid var(--border); text-align: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .dash-btn:active, .dash-btn:hover { border-color: var(--primary); transform: translateY(-2px); background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(30, 41, 59, 0.95) 100%); }
@@ -131,7 +139,10 @@
 
   <div class="top-header">
     <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal <span id="syncStatus" style="font-size:0.7rem; color:var(--success);">• Ready</span></div>
-    <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
+    <div class="header-controls">
+      <button class="sound-btn" id="soundIconBtn" onclick="toggleSound()">🔊</button>
+      <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
+    </div>
   </div>
 
   <div id="loginScreen" class="card login-box">
@@ -144,7 +155,6 @@
       <div id="suggestionsBox" class="suggestions-list hidden"></div>
     </div>
 
-    <!-- NUMERIC KEYPAD ENABLED FOR FAST PIN ENTERING -->
     <input type="password" id="loginPin" class="input-field" placeholder="4-Digit Student PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
     
     <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
@@ -158,7 +168,10 @@
     <div class="card profile-banner">
       <div class="user-info">
         <h1 id="userDisplayName">Ayush 01 🎓</h1>
-        <p><span id="userClassBadge" class="badge" style="background:rgba(255,255,255,0.2); color:white;">Class 4</span></p>
+        <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
+          <span id="userClassBadge" class="badge" style="background:rgba(255,255,255,0.2); color:white;">Class 4</span>
+          <span id="userAchievementBadge" class="badge" style="background:rgba(245,158,11,0.3); color:#FCD34D;">🌱 Novice Learner</span>
+        </div>
       </div>
       <button class="btn btn-secondary" onclick="logoutStudent()" style="font-size: 0.8rem; padding: 6px 12px;">Logout</button>
     </div>
@@ -179,10 +192,18 @@
         <button class="btn btn-next-day" id="btnNextDay" onclick="changeDay(1)">Next Day →</button>
       </div>
 
+      <!-- TIMER BADGE (ONLY VISIBLE IF TIMER ENABLED BY ADMIN FOR THIS STUDENT) -->
+      <div id="timerWrapper" class="timer-container hidden">
+        ⏱️ Time Left: <span id="timerCountdown">30</span>s
+      </div>
+
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
       <div id="passageContainer" class="passage-box hidden"></div>
       <div class="question-box" id="questionText">Loading...</div>
       <div class="options-grid" id="optionsContainer"></div>
+
+      <!-- INSTANT EXPLANATION BOX -->
+      <div id="explanationContainer" class="explanation-box hidden"></div>
 
       <div style="margin-top: 16px; display: flex; justify-content: space-between;">
         <button class="btn btn-back-q" id="btnBackQuestion" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 10px 14px;">← Back Question</button>
@@ -202,13 +223,11 @@
 
     <div id="adminAuthBox">
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin Security PIN</p>
-      <!-- NUMERIC KEYPAD FOR ADMIN PIN -->
       <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
       <button class="btn" onclick="verifyAdminPin()" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
     </div>
 
     <div id="adminContentBox" class="hidden">
-      <!-- DASHBOARD CLICKABLE METRIC BUTTONS -->
       <div class="admin-dashboard-summary">
         <div class="dash-btn" onclick="toggleDashMetricDetail('students')">
           <div class="num" id="dashTotalStudents">0</div>
@@ -228,13 +247,11 @@
         </div>
       </div>
 
-      <!-- DYNAMIC METRIC DETAILS EXPANDABLE PANEL -->
       <div id="dashMetricDetailBox" class="dash-detail-panel hidden">
         <h5 id="dashDetailTitle">Metric Breakdown</h5>
         <div id="dashDetailContent" class="dash-detail-list"></div>
       </div>
 
-      <!-- COLLAPSIBLE ADD STUDENT BUTTON & FORM -->
       <button class="btn btn-secondary" onclick="toggleAddStudentForm()" style="width: 100%; margin-bottom: 10px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
         <span>➕ Add New Student</span>
         <span id="addStudentArrow">▼</span>
@@ -268,14 +285,13 @@
         <button class="btn" onclick="addNewStudent()" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
       </div>
 
-      <!-- COLLAPSIBLE STUDENT MANAGEMENT BUTTON -->
       <button class="btn btn-secondary" onclick="toggleStudentManagementForm()" style="width: 100%; margin-bottom: 12px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
         <span>🎓 Student Management & Reports</span>
         <span id="studentMgmtArrow">▼</span>
       </button>
 
       <div id="studentMgmtCollapsibleBox" class="hidden">
-        <div id="adminUsersList" style="max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;"></div>
+        <div id="adminUsersList" style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;"></div>
       </div>
 
       <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
@@ -302,15 +318,23 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// INSTANT LOCAL CACHE ENGINE FOR 0-SECOND LAUNCH
 let globalUsersList = JSON.parse(localStorage.getItem('cached_users_data')) || [
-  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
-  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
-  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" }
+  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, timerEnabled: false, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
+  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, timerEnabled: false, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
+  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, timerEnabled: false, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" }
 ];
 
 let audioCtx = null;
+let isSoundMuted = localStorage.getItem('app_sound_muted') === 'true';
+
+function toggleSound() {
+  isSoundMuted = !isSoundMuted;
+  localStorage.setItem('app_sound_muted', isSoundMuted);
+  document.getElementById('soundIconBtn').innerText = isSoundMuted ? '🔇' : '🔊';
+}
+
 function playSound(type) {
+  if (isSoundMuted) return;
   try {
     if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
     if (audioCtx.state === 'suspended') { audioCtx.resume(); }
@@ -370,6 +394,8 @@ let currentQIndex = 0;
 let currentDay = 1;
 let backPressTime = 0;
 let activeDashMetricType = null;
+let questionTimerInterval = null;
+let timerSecondsLeft = 30;
 
 function showToast(msg) {
   let existing = document.querySelector('.toast-msg');
@@ -418,7 +444,10 @@ function initCloudSync() {
       }
       if (currentActiveUser) {
         let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
-        if (updated) currentActiveUser = updated;
+        if (updated) {
+          currentActiveUser = updated;
+          renderQuestion();
+        }
       }
       if (document.getElementById('adminModal') && !document.getElementById('adminContentBox').classList.contains('hidden')) {
         renderAdminDashboardSummary();
@@ -471,7 +500,6 @@ function handleStudentLogin() {
     if (!currentActiveUser.userAnswers) currentActiveUser.userAnswers = {};
     if (!currentActiveUser.dayResetSeeds) currentActiveUser.dayResetSeeds = {};
     
-    // AUTO-ADVANCE LOGIC: Open first uncompleted day
     let autoDay = 1;
     while (isDayCompletedForUser(currentActiveUser, autoDay)) {
       autoDay++;
@@ -507,6 +535,7 @@ function getCompletedDaysArray(user) {
 }
 
 function logoutStudent() {
+  clearInterval(questionTimerInterval);
   currentActiveUser = null;
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPin').value = '';
@@ -531,9 +560,17 @@ function refreshStatsUI() {
   let totalAttempted = (currentActiveUser.points / 10) + currentActiveUser.wrong;
   let accuracy = totalAttempted > 0 ? Math.round(((currentActiveUser.points / 10) / totalAttempted) * 100) : 0;
   document.getElementById('reportPercent').innerText = `${accuracy}%`;
+
+  let badgeLabel = "🌱 Novice Learner";
+  let pts = currentActiveUser.points || 0;
+  if (pts >= 1000) badgeLabel = "👑 Legendary Scholar";
+  else if (pts >= 500) badgeLabel = "⚡ Speed Demon";
+  else if (pts >= 200) badgeLabel = "🧙‍♂️ Math Wizard";
+  else if (pts >= 50) badgeLabel = "🌟 Bright Champ";
+
+  document.getElementById('userAchievementBadge').innerText = badgeLabel;
 }
 
-// 100% ZERO OVERLAP CLASS-SPECIFIC QUESTION GENERATOR
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
 
@@ -546,26 +583,26 @@ function generateAdaptiveQuestions(userClass, day) {
 
   if (userClass === "LKG" || userClass === "UKG") {
     const visualBank = [
-      { q: "Which color is 🔴?", options: ["Red", "Blue", "Green", "Yellow"], ans: "Red" },
-      { q: "Which color is 🟢?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green" },
-      { q: "Which color is 🟡?", options: ["Yellow", "Pink", "Orange", "Purple"], ans: "Yellow" },
-      { q: "Identify Shape: ⭕", options: ["Circle", "Square", "Triangle", "Star"], ans: "Circle" },
-      { q: "Identify Shape: ⬛", options: ["Square", "Circle", "Rectangle", "Oval"], ans: "Square" },
-      { q: "Identify Shape: ⭐", options: ["Star", "Square", "Circle", "Heart"], ans: "Star" },
-      { q: "Count Apple: 🍎", options: ["1", "2", "3", "4"], ans: "1" },
-      { q: "Count Apples: 🍎 🍎 🍎", options: ["3", "2", "4", "5"], ans: "3" },
-      { q: "Count Stars: ⭐ ⭐", options: ["2", "1", "3", "4"], ans: "2" },
-      { q: "Find Dog 🐶", options: ["Dog", "Cat", "Lion", "Tiger"], ans: "Dog" },
-      { q: "Find Elephant 🐘", options: ["Elephant", "Monkey", "Dog", "Bird"], ans: "Elephant" },
-      { q: "What comes after 'A'?", options: ["B", "C", "D", "E"], ans: "B" },
-      { q: "What comes after 'C'?", options: ["D", "E", "F", "G"], ans: "D" },
-      { q: "Count: 1 + 1 = ?", options: ["2", "3", "4", "1"], ans: "2" },
-      { q: "Which one is Sun ☀️?", options: ["Sun", "Moon", "Cloud", "Rain"], ans: "Sun" },
-      { q: "Which one is Ice-Cream 🍦?", options: ["Ice-Cream", "Cake", "Pizza", "Apple"], ans: "Ice-Cream" },
-      { q: "Count Balloons: 🎈 🎈 🎈 🎈", options: ["4", "3", "5", "2"], ans: "4" },
-      { q: "Which shape is Triangle 🔺?", options: ["Triangle", "Circle", "Square", "Star"], ans: "Triangle" },
-      { q: "What comes after '1'?", options: ["2", "3", "4", "5"], ans: "2" },
-      { q: "What color is Milk 🥛?", options: ["White", "Black", "Red", "Green"], ans: "White" }
+      { q: "Which color is 🔴?", options: ["Red", "Blue", "Green", "Yellow"], ans: "Red", exp: "🔴 is Red color." },
+      { q: "Which color is 🟢?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green", exp: "🟢 is Green color." },
+      { q: "Which color is 🟡?", options: ["Yellow", "Pink", "Orange", "Purple"], ans: "Yellow", exp: "🟡 is Yellow color." },
+      { q: "Identify Shape: ⭕", options: ["Circle", "Square", "Triangle", "Star"], ans: "Circle", exp: "⭕ has no sharp corners, so it is a Circle." },
+      { q: "Identify Shape: ⬛", options: ["Square", "Circle", "Rectangle", "Oval"], ans: "Square", exp: "⬛ has 4 equal sides." },
+      { q: "Identify Shape: ⭐", options: ["Star", "Square", "Circle", "Heart"], ans: "Star", exp: "⭐ is a Star shape." },
+      { q: "Count Apple: 🍎", options: ["1", "2", "3", "4"], ans: "1", exp: "There is exactly 1 apple." },
+      { q: "Count Apples: 🍎 🍎 🍎", options: ["3", "2", "4", "5"], ans: "3", exp: "1, 2, 3 apples!" },
+      { q: "Count Stars: ⭐ ⭐", options: ["2", "1", "3", "4"], ans: "2", exp: "There are 2 stars." },
+      { q: "Find Dog 🐶", options: ["Dog", "Cat", "Lion", "Tiger"], ans: "Dog", exp: "🐶 represents a Dog." },
+      { q: "Find Elephant 🐘", options: ["Elephant", "Monkey", "Dog", "Bird"], ans: "Elephant", exp: "🐘 represents an Elephant." },
+      { q: "What comes after 'A'?", options: ["B", "C", "D", "E"], ans: "B", exp: "In the alphabet, B comes right after A." },
+      { q: "What comes after 'C'?", options: ["D", "E", "F", "G"], ans: "D", exp: "Alphabet order: A, B, C, D." },
+      { q: "Count: 1 + 1 = ?", options: ["2", "3", "4", "1"], ans: "2", exp: "1 apple + 1 apple = 2 apples." },
+      { q: "Which one is Sun ☀️?", options: ["Sun", "Moon", "Cloud", "Rain"], ans: "Sun", exp: "☀️ represents the Sun." },
+      { q: "Which one is Ice-Cream 🍦?", options: ["Ice-Cream", "Cake", "Pizza", "Apple"], ans: "Ice-Cream", exp: "🍦 is an Ice-Cream." },
+      { q: "Count Balloons: 🎈 🎈 🎈 🎈", options: ["4", "3", "5", "2"], ans: "4", exp: "Count them: 1, 2, 3, 4 balloons." },
+      { q: "Which shape is Triangle 🔺?", options: ["Triangle", "Circle", "Square", "Star"], ans: "Triangle", exp: "🔺 has 3 corners, which makes it a Triangle." },
+      { q: "What comes after '1'?", options: ["2", "3", "4", "5"], ans: "2", exp: "In counting: 1, 2, 3..." },
+      { q: "What color is Milk 🥛?", options: ["White", "Black", "Red", "Green"], ans: "White", exp: "Milk is naturally White." }
     ];
     questions = visualBank;
   } 
@@ -574,19 +611,19 @@ function generateAdaptiveQuestions(userClass, day) {
     for(let i = 1; i <= 10; i++) {
       let a = i * multiplier + day;
       let b = i + 2;
-      questions.push({ q: `CBSE Math (${userClass}): ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b+2}`, `${a+b-1}`, `${a+b+4}`], ans: `${a+b}` });
+      questions.push({ q: `CBSE Math (${userClass}): ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b+2}`, `${a+b-1}`, `${a+b+4}`], ans: `${a+b}`, exp: `Adding ${a} and ${b} equals ${a+b}.` });
     }
     const primaryEng = [
-      { q: "Plural of 'Cat' is?", options: ["Cats", "Cates", "Caties", "Catss"], ans: "Cats" },
-      { q: "Which one is a Vowel?", options: ["E", "B", "C", "D"], ans: "E" },
-      { q: "Opposite of 'Big' is?", options: ["Small", "Tall", "Heavy", "Huge"], ans: "Small" },
-      { q: "A house of a Dog is called?", options: ["Kennel", "Shed", "Stable", "Den"], ans: "Kennel" },
-      { q: "Select the Noun: 'Rohan is reading.'", options: ["Rohan", "Reading", "Is", "A"], ans: "Rohan" },
-      { q: "Opposite of 'Day' is?", options: ["Night", "Morning", "Noon", "Sun"], ans: "Night" },
-      { q: "Which animal gives us milk?", options: ["Cow", "Lion", "Tiger", "Fox"], ans: "Cow" },
-      { q: "How many days are in a week?", options: ["7", "5", "6", "8"], ans: "7" },
-      { q: "The color of grass is?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green" },
-      { q: "Rhyming word for 'Sun' is?", options: ["Fun", "Bat", "Pin", "Dog"], ans: "Fun" }
+      { q: "Plural of 'Cat' is?", options: ["Cats", "Cates", "Caties", "Catss"], ans: "Cats", exp: "Add 's' to make Cat plural -> Cats." },
+      { q: "Which one is a Vowel?", options: ["E", "B", "C", "D"], ans: "E", exp: "Vowels are A, E, I, O, U." },
+      { q: "Opposite of 'Big' is?", options: ["Small", "Tall", "Heavy", "Huge"], ans: "Small", exp: "Antonym of Big is Small." },
+      { q: "A house of a Dog is called?", options: ["Kennel", "Shed", "Stable", "Den"], ans: "Kennel", exp: "A dog lives in a Kennel." },
+      { q: "Select the Noun: 'Rohan is reading.'", options: ["Rohan", "Reading", "Is", "A"], ans: "Rohan", exp: "Rohan is the name of a person (Noun)." },
+      { q: "Opposite of 'Day' is?", options: ["Night", "Morning", "Noon", "Sun"], ans: "Night", exp: "Opposite of Day is Night." },
+      { q: "Which animal gives us milk?", options: ["Cow", "Lion", "Tiger", "Fox"], ans: "Cow", exp: "Cows yield milk." },
+      { q: "How many days are in a week?", options: ["7", "5", "6", "8"], ans: "7", exp: "There are 7 days in a week." },
+      { q: "The color of grass is?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green", exp: "Healthy grass is Green." },
+      { q: "Rhyming word for 'Sun' is?", options: ["Fun", "Bat", "Pin", "Dog"], ans: "Fun", exp: "Sun and Fun rhyme." }
     ];
     questions.push(...primaryEng);
   } 
@@ -595,44 +632,44 @@ function generateAdaptiveQuestions(userClass, day) {
       ? `📖 **JNVST अपठित गद्यांश (Day ${day}):** जवाहर नवोदय विद्यालय में प्रवेश पाने के लिए मानसिक योग्यता, गणित और भाषा परीक्षण की तैयारी महत्वपूर्ण है। समय का सदुपयोग करने वाले छात्र परीक्षा में सफलता प्राप्त करते हैं।`
       : `📖 **JNVST Passage (Day ${day}):** Navodaya Vidyalayas provide quality education to talented children. Regular self-assessment and mental ability practice help students crack JNVST easily.`;
 
-    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय प्रवेश परीक्षा में सफलता के लिए क्या आवश्यक है?" : "What helps students crack JNVST easily?", options: ["समय का सदुपयोग", "आलस्य", "देर तक सोना", "TV देखना"], ans: day % 2 === 1 ? "समय का सदुपयोग" : "Regular self-assessment" });
-    questions.push({ passage: pText, q: day % 2 === 1 ? "गद्यांश में किस परीक्षा की चर्चा है?" : "Which school entrance exam is mentioned?", options: ["जवाहर नवोदय विद्यालय", "सैनिक स्कूल", "केंद्रीय विद्यालय", "बोर्ड परीक्षा"], ans: day % 2 === 1 ? "जवाहर नवोदय विद्यालय" : "Navodaya Vidyalayas" });
+    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय प्रवेश परीक्षा में सफलता के लिए क्या आवश्यक है?" : "What helps students crack JNVST easily?", options: ["समय का सदुपयोग", "आलस्य", "देर तक सोना", "TV देखना"], ans: day % 2 === 1 ? "समय का सदुपयोग" : "Regular self-assessment", exp: "गद्यांश के अनुसार सफलता के लिए समय का सही उपयोग आवश्यक है।" });
+    questions.push({ passage: pText, q: day % 2 === 1 ? "गद्यांश में किस परीक्षा की चर्चा है?" : "Which school entrance exam is mentioned?", options: ["जवाहर नवोदय विद्यालय", "सैनिक स्कूल", "केंद्रीय विद्यालय", "बोर्ड परीक्षा"], ans: day % 2 === 1 ? "जवाहर नवोदय विद्यालय" : "Navodaya Vidyalayas", exp: "गद्यांश में जवाहर नवोदय विद्यालय परीक्षा की चर्चा है।" });
 
     const jnvBank = [
-      { q: "JNVST Logic: Find the odd one out (असंगत पद चुनें):", options: ["Circle (वृत्त)", "Square (वर्ग)", "Triangle (त्रिभुज)", "Apple (सेब)"], ans: "Apple (सेब)" },
-      { q: "JNVST Math: L.C.M of 12 and 16 is?", options: ["48", "32", "24", "16"], ans: "48" },
-      { q: "JNVST Math: H.C.F of 20 and 30 is?", options: ["10", "5", "15", "20"], ans: "10" },
-      { q: "JNVST Math: Value of 0.5 + 0.25 is?", options: ["0.75", "0.50", "0.85", "0.30"], ans: "0.75" },
-      { q: "JNVST Reasoning: 4, 8, 12, 16, ?", options: ["20", "22", "18", "24"], ans: "20" },
-      { q: "JNVST Math: First 5 prime numbers sum is?", options: ["28", "26", "30", "25"], ans: "28" },
-      { q: "JNVST Mental Ability: 🔺, 🔻, 🔺, 🔻, ?", options: ["🔺", "🔻", "⭕", "⬛"], ans: "🔺" },
-      { q: "JNVST Hindi: 'सूर्य' का पर्यायवाची शब्द है?", options: ["दिनकर", "निशाकर", "सुधाकर", "जलद"], ans: "दिनकर" },
-      { q: "JNVST Math: Average of 10, 20, 30 is?", options: ["20", "15", "25", "30"], ans: "20" },
-      { q: "JNVST Math: 25% of 400 is?", options: ["100", "50", "150", "200"], ans: "100" },
-      { q: "JNVST Math: Perimeter of Square with side 6cm is?", options: ["24 cm", "12 cm", "36 cm", "18 cm"], ans: "24 cm" },
-      { q: "JNVST Reasoning: Mirror Image of 'P' looks like?", options: ["q", "P", "b", "d"], ans: "q" },
-      { q: "JNVST Hindi: 'सफल' का विलोम शब्द है?", options: ["असफल", "विफल", "कुफल", "निष्फल"], ans: "असफल" },
-      { q: "JNVST Math: Write 3/5 as decimal:", options: ["0.6", "0.5", "0.3", "0.8"], ans: "0.6" },
-      { q: "JNVST Reasoning: Complete pattern: 1, 4, 9, 16, ?", options: ["25", "20", "24", "30"], ans: "25" },
-      { q: "JNVST Math: Simple Interest on ₹1000 at 5% for 2 years:", options: ["₹100", "₹50", "₹150", "₹200"], ans: "₹100" },
-      { q: "JNVST Hindi: 'जो पढ़ा-लिखा न हो' उसे कहते हैं?", options: ["अनपढ़", "विद्वान", "साक्षर", "ज्ञानी"], ans: "अनपढ़" },
-      { q: "JNVST Reasoning: Water Image of 'M' looks like?", options: ["W", "M", "E", "3"], ans: "W" }
+      { q: "JNVST Logic: Find the odd one out (असंगत पद चुनें):", options: ["Circle (वृत्त)", "Square (वर्ग)", "Triangle (त्रिभुज)", "Apple (सेब)"], ans: "Apple (सेब)", exp: "Apple is a fruit, while others are geometric shapes." },
+      { q: "JNVST Math: L.C.M of 12 and 16 is?", options: ["48", "32", "24", "16"], ans: "48", exp: "Multiples of 12: 12, 24, 36, 48... Multiples of 16: 16, 32, 48... Smallest common is 48." },
+      { q: "JNVST Math: H.C.F of 20 and 30 is?", options: ["10", "5", "15", "20"], ans: "10", exp: "Highest common factor dividing both 20 & 30 is 10." },
+      { q: "JNVST Math: Value of 0.5 + 0.25 is?", options: ["0.75", "0.50", "0.85", "0.30"], ans: "0.75", exp: "0.50 + 0.25 = 0.75" },
+      { q: "JNVST Reasoning: 4, 8, 12, 16, ?", options: ["20", "22", "18", "24"], ans: "20", exp: "Pattern adds 4 continuously: 16 + 4 = 20." },
+      { q: "JNVST Math: First 5 prime numbers sum is?", options: ["28", "26", "30", "25"], ans: "28", exp: "Primes: 2 + 3 + 5 + 7 + 11 = 28." },
+      { q: "JNVST Mental Ability: 🔺, 🔻, 🔺, 🔻, ?", options: ["🔺", "🔻", "⭕", "⬛"], ans: "🔺", exp: "Alternate pattern flips pointing up and down." },
+      { q: "JNVST Hindi: 'सूर्य' का पर्यायवाची शब्द है?", options: ["दिनकर", "निशाकर", "सुधाकर", "जलद"], ans: "दिनकर", exp: "सूर्य को दिनकर भी कहते हैं।" },
+      { q: "JNVST Math: Average of 10, 20, 30 is?", options: ["20", "15", "25", "30"], ans: "20", exp: "Sum = 60, Count = 3. 60 / 3 = 20." },
+      { q: "JNVST Math: 25% of 400 is?", options: ["100", "50", "150", "200"], ans: "100", exp: "(25 / 100) * 400 = 100." },
+      { q: "JNVST Math: Perimeter of Square with side 6cm is?", options: ["24 cm", "12 cm", "36 cm", "18 cm"], ans: "24 cm", exp: "Perimeter = 4 * side = 4 * 6 = 24 cm." },
+      { q: "JNVST Reasoning: Mirror Image of 'P' looks like?", options: ["q", "P", "b", "d"], ans: "q", exp: "Flipping 'P' horizontally gives 'q'." },
+      { q: "JNVST Hindi: 'सफल' का विलोम शब्द है?", options: ["असफल", "विफल", "कुफल", "निष्फल"], ans: "असफल", exp: "सफल का विलोम असफल होता है।" },
+      { q: "JNVST Math: Write 3/5 as decimal:", options: ["0.6", "0.5", "0.3", "0.8"], ans: "0.6", exp: "3 divided by 5 = 0.6." },
+      { q: "JNVST Reasoning: Complete pattern: 1, 4, 9, 16, ?", options: ["25", "20", "24", "30"], ans: "25", exp: "Squares sequence: 1², 2², 3², 4², 5² (25)." },
+      { q: "JNVST Math: Simple Interest on ₹1000 at 5% for 2 years:", options: ["₹100", "₹50", "₹150", "₹200"], ans: "₹100", exp: "SI = (1000 * 5 * 2) / 100 = ₹100." },
+      { q: "JNVST Hindi: 'जो पढ़ा-लिखा न हो' उसे कहते हैं?", options: ["अनपढ़", "विद्वान", "साक्षर", "ज्ञानी"], ans: "अनपढ़", exp: "बिना पढ़े-लिखे व्यक्ति को अनपढ़ कहते हैं।" },
+      { q: "JNVST Reasoning: Water Image of 'M' looks like?", options: ["W", "M", "E", "3"], ans: "W", exp: "Flipping 'M' vertically gives 'W'." }
     ];
 
     questions.push(...jnvBank);
   } 
   else if (userClass === "Class 6" || userClass === "Class 7" || userClass === "Class 8") {
     const cbseMiddleBank = [
-      { q: "CBSE Science: Green pigment in leaves is called?", options: ["Chlorophyll", "Stomata", "Xylem", "Phloem"], ans: "Chlorophyll" },
-      { q: "CBSE Science: SI unit of Speed is?", options: ["m/s", "km/h", "meter", "second"], ans: "m/s" },
-      { q: "CBSE SST: Capital of India is?", options: ["New Delhi", "Mumbai", "Kolkata", "Chennai"], ans: "New Delhi" },
-      { q: "CBSE English: Antonym of 'BRAVE' is?", options: ["Coward", "Hero", "Bold", "Strong"], ans: "Coward" },
-      { q: "CBSE Science: Gas released during photosynthesis?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], ans: "Oxygen" },
-      { q: "CBSE SST: Which is the longest river in India?", options: ["Ganga", "Yamuna", "Godavari", "Narmada"], ans: "Ganga" },
-      { q: "CBSE Science: Chemical formula of Water is?", options: ["H2O", "CO2", "NaCl", "O2"], ans: "H2O" },
-      { q: "CBSE English: Identify Pronoun: 'She is a doctor.'", options: ["She", "Is", "Doctor", "A"], ans: "She" },
-      { q: "CBSE SST: Planet known as the 'Red Planet'?", options: ["Mars", "Venus", "Jupiter", "Saturn"], ans: "Mars" },
-      { q: "CBSE Science: Vitamin D deficiency causes?", options: ["Rickets", "Scurvy", "Beri-Beri", "Goitre"], ans: "Rickets" }
+      { q: "CBSE Science: Green pigment in leaves is called?", options: ["Chlorophyll", "Stomata", "Xylem", "Phloem"], ans: "Chlorophyll", exp: "Chlorophyll gives leaves green color." },
+      { q: "CBSE Science: SI unit of Speed is?", options: ["m/s", "km/h", "meter", "second"], ans: "m/s", exp: "SI standard unit for speed is meters per second." },
+      { q: "CBSE SST: Capital of India is?", options: ["New Delhi", "Mumbai", "Kolkata", "Chennai"], ans: "New Delhi", exp: "New Delhi is the official national capital." },
+      { q: "CBSE English: Antonym of 'BRAVE' is?", options: ["Coward", "Hero", "Bold", "Strong"], ans: "Coward", exp: "Brave means courageous; opposite is Coward." },
+      { q: "CBSE Science: Gas released during photosynthesis?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], ans: "Oxygen", exp: "Plants release Oxygen gas into air." },
+      { q: "CBSE SST: Which is the longest river in India?", options: ["Ganga", "Yamuna", "Godavari", "Narmada"], ans: "Ganga", exp: "River Ganga is the longest river inside India." },
+      { q: "CBSE Science: Chemical formula of Water is?", options: ["H2O", "CO2", "NaCl", "O2"], ans: "H2O", exp: "Two Hydrogen atoms + One Oxygen atom." },
+      { q: "CBSE English: Identify Pronoun: 'She is a doctor.'", options: ["She", "Is", "Doctor", "A"], ans: "She", exp: "She replaces a proper noun (Pronoun)." },
+      { q: "CBSE SST: Planet known as the 'Red Planet'?", options: ["Mars", "Venus", "Jupiter", "Saturn"], ans: "Mars", exp: "Iron oxide on Mars surface makes it look Red." },
+      { q: "CBSE Science: Vitamin D deficiency causes?", options: ["Rickets", "Scurvy", "Beri-Beri", "Goitre"], ans: "Rickets", exp: "Lack of Vitamin D causes weak bones (Rickets)." }
     ];
 
     for(let i = 1; i <= 10; i++) {
@@ -642,7 +679,8 @@ function generateAdaptiveQuestions(userClass, day) {
       cbseMiddleBank.push({
         q: `CBSE Math (${userClass}): Solve ${coeff}x + 3 = ${rhs}`,
         options: [`${xVal}`, `${xVal+2}`, `${xVal-1}`, `${xVal+3}`],
-        ans: `${xVal}`
+        ans: `${xVal}`,
+        exp: `${coeff}x = ${rhs - 3} => x = ${xVal}.`
       });
     }
 
@@ -650,16 +688,16 @@ function generateAdaptiveQuestions(userClass, day) {
   }
   else {
     const cbseHighBank = [
-      { q: "CBSE Physics: Acceleration due to gravity (g) on Earth is approx?", options: ["9.8 m/s²", "8.9 m/s²", "10.8 m/s²", "9.0 m/s²"], ans: "9.8 m/s²" },
-      { q: "CBSE Chemistry: Atomic number of Carbon is?", options: ["6", "12", "8", "14"], ans: "6" },
-      { q: "CBSE Biology: Powerhouse of the cell is?", options: ["Mitochondria", "Nucleus", "Ribosome", "Golgi Body"], ans: "Mitochondria" },
-      { q: "CBSE English: Author of 'Hamlet' is?", options: ["William Shakespeare", "Charles Dickens", "Mark Twain", "Leo Tolstoy"], ans: "William Shakespeare" },
-      { q: "CBSE Economics: Currency of USA is?", options: ["Dollar", "Euro", "Yen", "Pound"], ans: "Dollar" },
-      { q: "CBSE Physics: Unit of Electric Current is?", options: ["Ampere", "Volt", "Ohm", "Watt"], ans: "Ampere" },
-      { q: "CBSE Chemistry: pH of pure water at 25°C is?", options: ["7", "0", "14", "5.6"], ans: "7" },
-      { q: "CBSE Math: Value of sin(90°) is?", options: ["1", "0", "1/2", "√3/2"], ans: "1" },
-      { q: "CBSE Biology: Universal blood donor group is?", options: ["O negative", "AB positive", "A positive", "B negative"], ans: "O negative" },
-      { q: "CBSE SST: Fundamental Rights are in which Part of Indian Constitution?", options: ["Part III", "Part IV", "Part II", "Part I"], ans: "Part III" }
+      { q: "CBSE Physics: Acceleration due to gravity (g) on Earth is approx?", options: ["9.8 m/s²", "8.9 m/s²", "10.8 m/s²", "9.0 m/s²"], ans: "9.8 m/s²", exp: "Standard value of g is 9.8 m/s²." },
+      { q: "CBSE Chemistry: Atomic number of Carbon is?", options: ["6", "12", "8", "14"], ans: "6", exp: "Carbon has 6 protons in nucleus." },
+      { q: "CBSE Biology: Powerhouse of the cell is?", options: ["Mitochondria", "Nucleus", "Ribosome", "Golgi Body"], ans: "Mitochondria", exp: "Mitochondria generates ATP energy." },
+      { q: "CBSE English: Author of 'Hamlet' is?", options: ["William Shakespeare", "Charles Dickens", "Mark Twain", "Leo Tolstoy"], ans: "William Shakespeare", exp: "Shakespeare wrote the tragedy Hamlet." },
+      { q: "CBSE Economics: Currency of USA is?", options: ["Dollar", "Euro", "Yen", "Pound"], ans: "Dollar", exp: "US Dollar is official currency." },
+      { q: "CBSE Physics: Unit of Electric Current is?", options: ["Ampere", "Volt", "Ohm", "Watt"], ans: "Ampere", exp: "Electric current is measured in Amperes (A)." },
+      { q: "CBSE Chemistry: pH of pure water at 25°C is?", options: ["7", "0", "14", "5.6"], ans: "7", exp: "Pure water is neutral with pH 7." },
+      { q: "CBSE Math: Value of sin(90°) is?", options: ["1", "0", "1/2", "√3/2"], ans: "1", exp: "Trigonometric ratio sin(90°) = 1." },
+      { q: "CBSE Biology: Universal blood donor group is?", options: ["O negative", "AB positive", "A positive", "B negative"], ans: "O negative", exp: "O- blood has no antigens, making it universal donor." },
+      { q: "CBSE SST: Fundamental Rights are in which Part of Indian Constitution?", options: ["Part III", "Part IV", "Part II", "Part I"], ans: "Part III", exp: "Articles 12 to 35 in Part III cover Fundamental Rights." }
     ];
 
     for(let i = 1; i <= 10; i++) {
@@ -667,7 +705,8 @@ function generateAdaptiveQuestions(userClass, day) {
       cbseHighBank.push({
         q: `CBSE Math (${userClass}): Solve x² - ${xVal * xVal} = 0 (positive x):`,
         options: [`${xVal}`, `${xVal + 3}`, `${xVal - 1}`, `${xVal * 2}`],
-        ans: `${xVal}`
+        ans: `${xVal}`,
+        exp: `x² = ${xVal * xVal} => x = ${xVal}.`
       });
     }
 
@@ -694,7 +733,46 @@ function isDayCompleted(day) {
   return isDayCompletedForUser(currentActiveUser, day);
 }
 
+function startQuestionTimer() {
+  clearInterval(questionTimerInterval);
+  let timerElem = document.getElementById('timerWrapper');
+  let countElem = document.getElementById('timerCountdown');
+  
+  // PER-STUDENT TIMER CHECK: Checked directly from currentActiveUser.timerEnabled
+  if (!currentActiveUser || !currentActiveUser.timerEnabled) {
+    timerElem.classList.add('hidden');
+    return;
+  }
+
+  timerElem.classList.remove('hidden');
+  timerSecondsLeft = 30;
+  countElem.innerText = timerSecondsLeft;
+  timerElem.classList.remove('timer-warn');
+
+  questionTimerInterval = setInterval(() => {
+    timerSecondsLeft--;
+    countElem.innerText = timerSecondsLeft;
+
+    if (timerSecondsLeft <= 5) {
+      timerElem.classList.add('timer-warn');
+    }
+
+    if (timerSecondsLeft <= 0) {
+      clearInterval(questionTimerInterval);
+      handleTimeOut();
+    }
+  }, 1000);
+}
+
+function handleTimeOut() {
+  let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
+  let q = questions[currentQIndex];
+  handleOptionClick('TIME_OUT', q.ans);
+}
+
 function handleOptionClick(selectedOpt, correctAns) {
+  clearInterval(questionTimerInterval);
+
   let qKey = `D${currentDay}_Q${currentQIndex}`;
   if (currentActiveUser.userAnswers[qKey]) return;
 
@@ -726,6 +804,8 @@ function handleOptionClick(selectedOpt, correctAns) {
 
 function renderQuestion() {
   if (!currentActiveUser) return;
+  clearInterval(questionTimerInterval);
+
   let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
   document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
 
@@ -744,9 +824,12 @@ function renderQuestion() {
 
   let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
   let fill = document.getElementById('progressFill');
+  let expBox = document.getElementById('explanationContainer');
 
   if (currentQIndex >= questions.length) {
     passageBox.classList.add('hidden');
+    expBox.classList.add('hidden');
+    document.getElementById('timerWrapper').classList.add('hidden');
     qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
     optsBox.innerHTML = '';
     fill.style.width = '100%';
@@ -772,9 +855,19 @@ function renderQuestion() {
   btnBackQ.disabled = (currentQIndex === 0);
 
   if (alreadyAnswered) {
+    document.getElementById('timerWrapper').classList.add('hidden');
     btnNextQ.disabled = (currentQIndex >= 19);
+
+    if (q.exp) {
+      expBox.innerHTML = `💡 <strong>Explanation:</strong> ${q.exp}`;
+      expBox.classList.remove('hidden');
+    } else {
+      expBox.classList.add('hidden');
+    }
   } else {
+    expBox.classList.add('hidden');
     btnNextQ.disabled = true;
+    startQuestionTimer();
   }
 
   let displayOpts = q.shuffledOptions || q.options;
@@ -882,7 +975,6 @@ function toggleStudentManagementForm() {
   }
 }
 
-// EXPANDABLE METRIC DETAILS ON CLICKING DASHBOARD CARDS
 function toggleDashMetricDetail(type) {
   let detailBox = document.getElementById('dashMetricDetailBox');
   let title = document.getElementById('dashDetailTitle');
@@ -959,6 +1051,7 @@ function renderAdminUsersList() {
     let row = document.createElement('div');
     row.className = 'admin-student-card';
     let isChecked = u.active !== false ? 'checked' : '';
+    let isTimerChecked = u.timerEnabled === true ? 'checked' : '';
     
     let completedDays = getCompletedDaysArray(u);
     let dayOptionsHTML = '';
@@ -971,7 +1064,7 @@ function renderAdminUsersList() {
       dayOptionsHTML = `<option value="">No Completed Days</option>`;
     }
 
-    // CLEAN STUDENT CARD - MIDDLE LINE REMOVED
+    // PER-STUDENT TIMER SWITCH ADDED IN ADMIN CONTROL CARD
     row.innerHTML = `
       <div class="admin-student-header">
         <div>
@@ -987,8 +1080,18 @@ function renderAdminUsersList() {
           </select>
           <button class="btn btn-secondary" onclick="resetSpecificDay('${u.id}')" style="padding:4px 8px; font-size:0.75rem;" ${completedDays.length === 0 ? 'disabled' : ''}>🔄 Reset Day</button>
         </div>
+        
         <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">🔄 All Reset</button>
         <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">✏️ PIN</button>
+        
+        <div style="display:flex; align-items:center; gap:4px;">
+          <small style="font-size:0.7rem; color:var(--text-muted)">Timer ⏱️:</small>
+          <label class="switch">
+            <input type="checkbox" ${isTimerChecked} onchange="toggleUserTimerStatus('${u.id}', this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
         <div style="display:flex; align-items:center; gap:4px;">
           <small style="font-size:0.7rem; color:var(--text-muted)">Active:</small>
           <label class="switch">
@@ -1001,6 +1104,17 @@ function renderAdminUsersList() {
     `;
     list.appendChild(row);
   });
+}
+
+function toggleUserTimerStatus(id, isTimerOn) {
+  let u = globalUsersList.find(x => x.id === id);
+  if(u) {
+    u.timerEnabled = isTimerOn;
+    let dbKey = id.replace(/\s+/g, '_');
+    try { db.ref('users/' + dbKey).set(u); } catch(e){}
+    localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
+    showToast(`Timer ${isTimerOn ? 'Enabled ⏱️' : 'Disabled 🛑'} for ${u.id}`);
+  }
 }
 
 function resetSpecificDay(id) {
@@ -1106,7 +1220,7 @@ function addNewStudent() {
 
   let newUser = { 
     id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, gender: gender,
-    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" 
+    avatar: avatar, active: true, timerEnabled: false, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" 
   };
 
   globalUsersList.push(newUser);
@@ -1180,6 +1294,7 @@ window.onload = function() {
   let savedTheme = localStorage.getItem('app_theme') || 'dark';
   document.body.setAttribute('data-theme', savedTheme);
   document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
+  document.getElementById('soundIconBtn').innerText = isSoundMuted ? '🔇' : '🔊';
   history.pushState({ page: 'login' }, '');
   initCloudSync();
 };
