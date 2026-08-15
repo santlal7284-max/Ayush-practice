@@ -40,7 +40,8 @@
     .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; position: relative; }
     
     .top-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; }
-    .theme-btn { background: var(--card-bg); border: 1.5px solid var(--border); padding: 8px 12px; border-radius: 20px; font-size: 1.1rem; cursor: pointer; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .theme-btn, .sync-btn-header { background: var(--card-bg); border: 1.5px solid var(--border); padding: 8px 12px; border-radius: 20px; font-size: 1rem; cursor: pointer; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-weight: 700; }
     
     .card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 22px; padding: 20px; border: 2px solid var(--border); box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.3); }
     .login-box { text-align: center; }
@@ -135,7 +136,10 @@
 
   <div class="top-header">
     <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal <span id="syncStatus" style="font-size:0.7rem; color:var(--success);">• Ready</span></div>
-    <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
+    <div class="header-actions">
+      <button class="sync-btn-header" onclick="forceManualCloudSync()" title="Force Sync with Cloud">🔄 Sync</button>
+      <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
+    </div>
   </div>
 
   <div id="loginScreen" class="card login-box">
@@ -296,7 +300,6 @@ let db = null;
 let auth = null;
 let firebaseAuthReady = false;
 
-// Default initial safety fallback users list
 const defaultFallbackUsers = [
   { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
   { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
@@ -330,6 +333,47 @@ function initFirebaseDeferred() {
     }
   });
   auth.signInAnonymously().catch(function(err){ console.error("Firebase auth failed:", err); });
+}
+
+// FORCE MANUAL CLOUD SYNC BUTTON FUNCTION
+function forceManualCloudSync() {
+  if (!db) {
+    alert("Cloud connection initializing... Please try again in 2 seconds.");
+    return;
+  }
+  let syncText = document.getElementById('syncStatus');
+  if (syncText) syncText.innerText = '• Syncing...';
+
+  db.ref('users').once('value').then((snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      globalUsersList = Object.keys(data).map(key => data[key]);
+      localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
+      if (syncText) syncText.innerText = '• Live Cloud';
+      showToast("✨ Successfully synced " + globalUsersList.length + " users from Cloud!");
+      
+      let adminModal = document.getElementById('adminModal');
+      if (adminModal && !adminModal.classList.contains('hidden')) {
+        renderAdminDashboardSummary();
+        renderAdminUsersList();
+      }
+    } else {
+      showToast("Cloud database is empty. Seeding initial users...");
+      let initialObj = {};
+      defaultFallbackUsers.forEach(u => {
+        let k = u.id.replace(/\s+/g, '_');
+        initialObj[k] = u;
+      });
+      db.ref('users').set(initialObj).then(() => {
+        globalUsersList = defaultFallbackUsers;
+        localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
+        if (syncText) syncText.innerText = '• Live Cloud';
+      });
+    }
+  }).catch((err) => {
+    alert("Sync failed: " + err.message);
+    if (syncText) syncText.innerText = '• Error';
+  });
 }
 
 let audioCtx = null;
@@ -444,7 +488,6 @@ function initCloudSync() {
         let syncText = document.getElementById('syncStatus');
         if (syncText) syncText.innerText = '• Live Cloud';
       } else {
-        // If cloud database is empty, seed it with default fallback users
         let initialObj = {};
         defaultFallbackUsers.forEach(u => {
           let k = u.id.replace(/\s+/g, '_');
