@@ -48,8 +48,8 @@
     .kids-badge { display: inline-block; background: linear-gradient(90deg, #F59E0B, #EC4899); color: white; padding: 4px 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; }
     
     .autocomplete-wrapper { position: relative; width: 100%; text-align: left; }
-    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 14px; max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); -webkit-overflow-scrolling: touch; }
-    .suggestion-item { padding: 14px 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--text-main); touch-action: manipulation; }
+    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 14px; max-height: 220px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); -webkit-overflow-scrolling: touch; }
+    .suggestion-item { padding: 14px 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--text-main); user-select: none; }
     .suggestion-item:active, .suggestion-item:hover { background: var(--primary); color: white; }
 
     .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
@@ -58,8 +58,6 @@
     .btn:active { transform: scale(0.96); }
     .btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; background: var(--border) !important; color: var(--text-muted) !important; transform: none !important; box-shadow: none !important; }
     
-    .btn-prev-day { background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); border: 1px solid #60A5FA; color: #FFF; box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3); }
-    .btn-next-day { background: linear-gradient(135deg, #10B981 0%, #047857 100%); border: 1px solid #34D399; color: #FFF; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3); }
     .btn-back-q { background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); border: 1px solid #A78BFA; color: #FFF; box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3); }
     .btn-next-q { background: linear-gradient(135deg, #EC4899 0%, #BE185D 100%); border: 1px solid #F472B6; color: #FFF; box-shadow: 0 6px 16px rgba(236, 72, 153, 0.3); }
     
@@ -73,8 +71,9 @@
     .stat-card .val { font-size: 1.1rem; font-weight: 800; color: var(--accent-gold); }
     .stat-card .lbl { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
 
-    .day-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-    .day-select-dropdown { background: var(--input-bg); color: var(--text-main); border: 2px solid var(--primary); padding: 8px 12px; border-radius: 14px; font-weight: 800; font-size: 1rem; outline: none; cursor: pointer; text-align: center; flex-grow: 1; }
+    /* DAY SELECTOR DROPDOWN (PREV/NEXT BUTTONS REMOVED) */
+    .day-nav { display: flex; align-items: center; justify-content: center; margin-bottom: 10px; width: 100%; }
+    .day-select-dropdown { width: 100%; background: var(--input-bg); color: var(--text-main); border: 2px solid var(--primary); padding: 10px 14px; border-radius: 14px; font-weight: 800; font-size: 1.05rem; outline: none; cursor: pointer; text-align: center; }
     
     .progress-bar-bg { width: 100%; height: 10px; background: var(--border); border-radius: 10px; overflow: hidden; margin: 8px 0 14px 0; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, #10B981, #059669); width: 0%; transition: width 0.3s; }
@@ -183,13 +182,11 @@
     </div>
 
     <div class="card" style="margin-top: 10px;">
-      <!-- FEATURE 3: DROPDOWN DAY SELECTOR LIST FOR STUDENT PAGE -->
+      <!-- DAY DROPDOWN LIST ONLY (PREV/NEXT BUTTONS REMOVED) -->
       <div class="day-nav">
-        <button class="btn btn-prev-day" id="btnPrevDay" onclick="changeDay(-1)">← Prev</button>
         <select id="daySelectDropdown" class="day-select-dropdown" onchange="onDayDropdownSelect(this.value)">
           <!-- Options populated dynamically 1 to 30 -->
         </select>
-        <button class="btn btn-next-day" id="btnNextDay" onclick="changeDay(1)">Next →</button>
       </div>
 
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
@@ -219,7 +216,6 @@
       <button style="background:none; border:none; color:var(--text-main); font-size:1.5rem; cursor:pointer;" onclick="closeAdminModal()">&times;</button>
     </div>
 
-    <!-- FEATURE 1: DEFAULT PIN REMOVED FROM ADMIN PROMPT TEXT -->
     <div id="adminAuthBox">
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin Security PIN</p>
       <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
@@ -460,6 +456,7 @@ let currentDay = 1;
 let backPressTime = 0;
 let activeDashMetricType = null;
 let currentLoadedQuestions = [];
+let lastSelectionTime = 0;
 
 function showToast(msg) {
   let existing = document.querySelector('.toast-msg');
@@ -602,13 +599,25 @@ function readQuestionAndOptionsWithTranslation() {
   window.speechSynthesis.speak(utterance);
 }
 
+// TOUCH & SCROLL PERFECTED AUTOCOMPLETE DROPDOWN FOR LOGIN
+function selectUser(userObj) {
+  let now = Date.now();
+  if (now - lastSelectionTime < 300) return;
+  lastSelectionTime = now;
+
+  document.getElementById('loginUsername').value = userObj.id;
+  let box = document.getElementById('suggestionsBox');
+  if (box) box.classList.add('hidden');
+  document.getElementById('loginPin').focus();
+}
+
 function showSuggestions(showAll = false) {
   let val = document.getElementById('loginUsername').value.trim().toLowerCase();
   let box = document.getElementById('suggestionsBox');
 
   let matches = showAll || !val 
     ? globalUsersList 
-    : globalUsersList.filter(u => u.name.toLowerCase().startsWith(val) || u.id.toLowerCase().startsWith(val));
+    : globalUsersList.filter(u => u.name.toLowerCase().includes(val) || u.id.toLowerCase().includes(val));
 
   if (!matches.length) { box.classList.add('hidden'); return; }
 
@@ -618,16 +627,30 @@ function showSuggestions(showAll = false) {
     item.className = 'suggestion-item';
     item.innerHTML = `<span>${m.avatar || '🎓'} ${m.id}</span> <span class="badge">${m.class}</span>`;
     
-    let selectHandler = function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      document.getElementById('loginUsername').value = m.id;
-      box.classList.add('hidden');
-      document.getElementById('loginPin').focus();
-    };
+    let touchStartY = 0;
+    let isTouchMoved = false;
 
-    item.addEventListener('touchstart', selectHandler, { passive: false });
-    item.addEventListener('mousedown', selectHandler);
+    item.addEventListener('touchstart', function(e) {
+      touchStartY = e.touches[0].clientY;
+      isTouchMoved = false;
+    }, { passive: true });
+
+    item.addEventListener('touchmove', function(e) {
+      if (Math.abs(e.touches[0].clientY - touchStartY) > 8) {
+        isTouchMoved = true;
+      }
+    }, { passive: true });
+
+    item.addEventListener('touchend', function(e) {
+      if (!isTouchMoved) {
+        e.preventDefault();
+        selectUser(m);
+      }
+    });
+
+    item.addEventListener('click', function(e) {
+      selectUser(m);
+    });
 
     box.appendChild(item);
   });
@@ -667,7 +690,6 @@ function handleStudentLogin() {
   }
 }
 
-// FEATURE 2: PRESERVED COMPLETED DAYS COUNTS EVEN WHEN QUESTION QNTY/DAY CHANGES
 function isDayCompletedForUser(user, day) {
   if (!user) return false;
   if (user.completedDaysMap && user.completedDaysMap[`D${day}`] === true) return true;
@@ -730,7 +752,6 @@ function refreshStatsUI() {
   document.getElementById('reportPercent').innerText = `${accuracy}%`;
 }
 
-// FEATURE 4: DYNAMIC DEEP QUESTION GENERATOR WITH ZERO REPETITION & NO CROSS-CLASS MATCHING
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
   let targetQs = getQsPerDayForUser(currentActiveUser);
@@ -955,8 +976,6 @@ function updateDayDropdownUI() {
   if (!selectElem) return;
 
   selectElem.innerHTML = '';
-  let todayStr = getTodayString();
-
   for (let d = 1; d <= 30; d++) {
     let opt = document.createElement('option');
     opt.value = d;
@@ -1010,19 +1029,6 @@ function renderQuestion() {
 
   currentLoadedQuestions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
   updateDayDropdownUI();
-
-  let nextDayBtn = document.getElementById('btnNextDay');
-  let todayStr = getTodayString();
-  let dayFinished = isDayCompleted(currentDay);
-  let isNewDateAvailable = currentActiveUser.lastCompletedDate !== todayStr;
-
-  if (dayFinished && isNewDateAvailable) {
-    nextDayBtn.disabled = false;
-    nextDayBtn.style.opacity = "1";
-  } else {
-    nextDayBtn.disabled = true;
-    nextDayBtn.style.opacity = "0.5";
-  }
 
   let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer'), tipBox = document.getElementById('tipContainer');
   let fill = document.getElementById('progressFill');
@@ -1103,12 +1109,6 @@ function navigateQuestion(delta) {
     currentQIndex = target;
     renderQuestion();
   }
-}
-
-function changeDay(delta) {
-  let targetDay = currentDay + delta;
-  if (targetDay < 1) return;
-  onDayDropdownSelect(targetDay);
 }
 
 function openAdminModal() {
