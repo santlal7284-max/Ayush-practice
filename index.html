@@ -137,7 +137,7 @@
   <div class="top-header">
     <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal <span id="syncStatus" style="font-size:0.7rem; color:var(--success);">• Ready</span></div>
     <div class="header-actions">
-      <button class="sync-btn-header" onclick="forceManualCloudSync()" title="Force Sync with Cloud">🔄 Sync</button>
+      <button class="sync-btn-header" onclick="forceManualCloudSync(false)" title="Force Sync with Cloud">🔄 Sync</button>
       <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
     </div>
   </div>
@@ -330,7 +330,7 @@ function initFirebaseDeferred() {
     if (user) {
       firebaseAuthReady = true;
       initCloudSync();
-      // AUTOMATIC TRIGGER ON APP OPEN
+      // AUTOMATIC TRIGGER ON APP OPEN (Silent Sync)
       forceManualCloudSync(true); 
     }
   });
@@ -702,26 +702,26 @@ function generateAdaptiveQuestions(userClass, day) {
 
   if (userClass === "LKG" || userClass === "UKG") {
     const visualBank = [
-      { q: "Identify this color 🔴", options: ["Red", "Blue", "Green", "Yellow"], ans: "Red" },
-      { q: "Identify this color 🟢", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green" },
-      { q: "Identify this color 🟡", options: ["Yellow", "Pink", "Orange", "Purple"], ans: "Yellow" },
-      { q: "Identify this shape ⭕", options: ["Circle", "Square", "Triangle", "Star"], ans: "Circle" },
-      { q: "Identify this shape ⬛", options: ["Square", "Circle", "Rectangle", "Oval"], ans: "Square" },
-      { q: "Identify this shape ⭐", options: ["Star", "Square", "Circle", "Heart"], ans: "Star" },
-      { q: "Count Apple: 🍎", options: ["1", "2", "3", "4"], ans: "1" },
-      { q: "Count Apples: 🍎 🍎 🍎", options: ["3", "2", "4", "5"], ans: "3" },
-      { q: "Count Stars: ⭐ ⭐", options: ["2", "1", "3", "4"], ans: "2" },
-      { q: "Find the Animal: 🐶", options: ["Dog", "Cat", "Lion", "Tiger"], ans: "Dog" },
-      { q: "Find the Animal: 🐘", options: ["Elephant", "Monkey", "Dog", "Bird"], ans: "Elephant" },
+      { q: "Which of the following is Red?", options: ["Red 🔴", "Blue 🔵", "Green 🟢", "Yellow 🟡"], ans: "Red 🔴" },
+      { q: "Which of the following is Green?", options: ["Green 🟢", "Blue 🔵", "Red 🔴", "Yellow 🟡"], ans: "Green 🟢" },
+      { q: "Which of the following is Yellow?", options: ["Yellow 🟡", "Pink 🌸", "Orange 🍊", "Purple 🟣"], ans: "Yellow 🟡" },
+      { q: "Which of the following is a Circle?", options: ["Circle ⭕", "Square ⬛", "Triangle 🔺", "Star ⭐"], ans: "Circle ⭕" },
+      { q: "Which of the following is a Square?", options: ["Square ⬛", "Circle ⭕", "Rectangle 🟩", "Oval 🥚"], ans: "Square ⬛" },
+      { q: "Which of the following is a Star?", options: ["Star ⭐", "Square ⬛", "Circle ⭕", "Heart 💖"], ans: "Star ⭐" },
+      { q: "Count Apple: Which option shows 1?", options: ["1 🍎", "2 🍎🍎", "3 🍎🍎🍎", "4 🍎🍎🍎🍎"], ans: "1 🍎" },
+      { q: "Count Apples: Which option shows 3?", options: ["3 🍎🍎🍎", "2 🍎🍎", "4 🍎🍎🍎🍎", "5 🍎🍎🍎🍎🍎"], ans: "3 🍎🍎🍎" },
+      { q: "Count Stars: Which option shows 2?", options: ["2 ⭐⭐", "1 ⭐", "3 ⭐⭐⭐", "4 ⭐⭐⭐⭐"], ans: "2 ⭐⭐" },
+      { q: "Find the Dog in options:", options: ["Dog 🐶", "Cat 🐱", "Lion 🦁", "Tiger 🐯"], ans: "Dog 🐶" },
+      { q: "Find the Elephant in options:", options: ["Elephant 🐘", "Monkey 🐒", "Dog 🐶", "Bird 🐦"], ans: "Elephant 🐘" },
       { q: "What comes after letter 'A'?", options: ["B", "C", "D", "E"], ans: "B" },
       { q: "What comes after letter 'C'?", options: ["D", "E", "F", "G"], ans: "D" },
       { q: "Count: 1 plus 1 equals?", options: ["2", "3", "4", "1"], ans: "2" },
-      { q: "Which one is Sun? ☀️", options: ["Sun", "Moon", "Cloud", "Rain"], ans: "Sun" },
-      { q: "Which one is Ice-Cream? 🍦", options: ["Ice-Cream", "Cake", "Pizza", "Apple"], ans: "Ice-Cream" },
-      { q: "Count Balloons: 🎈 🎈 🎈 🎈", options: ["4", "3", "5", "2"], ans: "4" },
-      { q: "Identify this shape 🔺", options: ["Triangle", "Circle", "Square", "Star"], ans: "Triangle" },
+      { q: "Which one is Sun?", options: ["Sun ☀️", "Moon 🌙", "Cloud ☁️", "Rain 🌧️"], ans: "Sun ☀️" },
+      { q: "Which one is Ice-Cream?", options: ["Ice-Cream 🍦", "Cake 🎂", "Pizza 🍕", "Apple 🍎"], ans: "Ice-Cream 🍦" },
+      { q: "Count Balloons: Which option shows 4?", options: ["4 🎈🎈🎈🎈", "3 🎈🎈🎈", "5 🎈🎈🎈🎈🎈", "2 🎈🎈"], ans: "4 🎈🎈🎈🎈" },
+      { q: "Which of the following is a Triangle?", options: ["Triangle 🔺", "Circle ⭕", "Square ⬛", "Star ⭐"], ans: "Triangle 🔺" },
       { q: "What comes after number '1'?", options: ["2", "3", "4", "5"], ans: "2" },
-      { q: "What color is Milk? 🥛", options: ["White", "Black", "Red", "Green"], ans: "White" }
+      { q: "What color is Milk?", options: ["White 🥛", "Black 🖤", "Red 🔴", "Green 🟢"], ans: "White 🥛" }
     ];
     questions = visualBank;
   } 
@@ -761,7 +761,7 @@ function generateAdaptiveQuestions(userClass, day) {
       { q: "JNVST Math: Value of 0.5 + 0.25 is?", options: ["0.75", "0.50", "0.85", "0.30"], ans: "0.75" },
       { q: "JNVST Reasoning: 4, 8, 12, 16, ?", options: ["20", "22", "18", "24"], ans: "20" },
       { q: "JNVST Math: First 5 prime numbers sum is?", options: ["28", "26", "30", "25"], ans: "28" },
-      { q: "JNVST Mental Ability: 🔺, 🔻, 🔺, 🔻, ?", options: ["🔺", "🔻", "⭕", "⬛"], ans: "🔺" },
+      { q: "JNVST Mental Ability: Which comes next in pattern 🔺, 🔻, 🔺, 🔻, ?", options: ["🔺", "🔻", "⭕", "⬛"], ans: "🔺" },
       { q: "JNVST Hindi: 'सूर्य' का पर्यायवाची शब्द है?", options: ["दिनकर", "निशाकर", "सुधाकर", "जलद"], ans: "दिनकर" },
       { q: "JNVST Math: Average of 10, 20, 30 is?", options: ["20", "15", "25", "30"], ans: "20" },
       { q: "JNVST Math: 25% of 400 is?", options: ["100", "50", "150", "200"], ans: "100" },
