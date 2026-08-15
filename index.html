@@ -79,7 +79,7 @@
     
     .passage-box { background: var(--input-bg); border-left: 5px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; }
     
-    /* QUESTION AND AUDIO CONTAINER */
+    /* QUESTION HEADER WITH SPEAKER READ-ALOUD BUTTON */
     .question-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 16px 0; min-height: 60px; }
     .question-box { font-size: 1.25rem; font-weight: 800; text-align: left; line-height: 1.4; flex-grow: 1; }
     .speech-btn { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); border: none; padding: 10px 14px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); flex-shrink: 0; transition: transform 0.2s; }
@@ -189,10 +189,10 @@
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
       <div id="passageContainer" class="passage-box hidden"></div>
       
-      <!-- QUESTION HEADER WITH SPEAKER READ-ALOUD BUTTON -->
+      <!-- QUESTION HEADER WITH SPEAKER READ-ALOUD BUTTON (VISIBLE LKG TO CLASS 3) -->
       <div class="question-header">
         <div class="question-box" id="questionText">Loading...</div>
-        <button class="speech-btn" id="speechBtn" onclick="readQuestionAndOptions()" title="Listen Question & Options">🔊</button>
+        <button class="speech-btn hidden" id="speechBtn" onclick="readQuestionAndOptions()" title="Listen Question & Options">🔊</button>
       </div>
 
       <div class="options-grid" id="optionsContainer"></div>
@@ -471,50 +471,100 @@ function initCloudSync() {
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
-// --- TEXT TO SPEECH (VOICE READ-ALOUD FOR QUESTIONS & OPTIONS) ---
+// --- SIMPLE OFFLINE TRANSLATION MAPPER FOR VOICE READER ---
+function getHindiTranslation(text) {
+  let t = text.toLowerCase();
+  const dict = {
+    "which color is red": "यह कौन सा रंग है? लाल",
+    "which color is green": "यह कौन सा रंग है? हरा",
+    "which color is yellow": "यह कौन सा रंग है? पीला",
+    "identify shape: circle": "आकार पहचानिए: वृत्त",
+    "identify shape: square": "आकार पहचानिए: वर्ग",
+    "identify shape: star": "आकार पहचानिए: तारा",
+    "count apple": "सेब की गिनती कीजिए",
+    "count apples": "सेबों की गिनती कीजिए",
+    "count stars": "तारों की गिनती कीजिए",
+    "find dog": "कुत्ता खोजिए",
+    "find elephant": "हाथी खोजिए",
+    "what comes after letter 'a'": "अक्षर ए के बाद क्या आता है?",
+    "what comes after letter 'c'": "अक्षर सी के बाद क्या आता है?",
+    "count: 1 plus 1 equals": "गिनती कीजिए: 1 जमा 1 कितने होते हैं?",
+    "which one is sun": "सूरज कौन सा है?",
+    "which one is ice-cream": "आइसक्रीम कौन सी है?",
+    "count balloons": "गुब्बारों की गिनती कीजिए",
+    "which shape is triangle": "त्रिभुज आकार कौन सा है?",
+    "what comes after number '1'": "संख्या 1 के बाद क्या आता है?",
+    "what color is milk": "दूध का रंग क्या है?",
+    "red": "लाल", "blue": "नीला", "green": "हरा", "yellow": "पीला",
+    "circle": "वृत्त", "square": "वर्ग", "triangle": "त्रिभुज", "star": "तारा",
+    "white": "सफेद", "dog": "कुत्ता", "elephant": "हाथी"
+  };
+
+  for (let key in dict) {
+    if (t.includes(key)) {
+      return dict[key];
+    }
+  }
+  return text; // fallback
+}
+
+// --- TEXT TO SPEECH (ORIGINAL LANGUAGE -> THEN HINDI TRANSLATION) ---
 function readQuestionAndOptions() {
   if (!('speechSynthesis' in window)) {
     alert("Speech Synthesis not supported in this browser!");
     return;
   }
   
-  window.speechSynthesis.cancel(); // Stop any ongoing speech
+  window.speechSynthesis.cancel(); // Stop ongoing speech
 
   if (!currentLoadedQuestions.length || currentQIndex >= currentLoadedQuestions.length) return;
 
   let qObj = currentLoadedQuestions[currentQIndex];
-  let textToRead = "";
-
-  // Clean Question Text (Remove Emojis for clear pronunciation)
   let cleanQ = qObj.q.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-  textToRead += `Question ${currentQIndex + 1}. ${cleanQ}. ... `;
-
   let opts = qObj.shuffledOptions || qObj.options || [];
-  let labels = ["Option A", "Option B", "Option C", "Option D"];
-
-  opts.forEach((opt, idx) => {
-    let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-    textToRead += `${labels[idx] || 'Option'}: ${cleanOpt}. ... `;
-  });
-
-  let utterance = new SpeechSynthesisUtterance(textToRead);
-  
-  // Detect language: Hindi or English
-  let isHindi = /[\u0900-\u097F]/.test(textToRead);
-  utterance.lang = isHindi ? 'hi-IN' : 'en-US';
-  utterance.rate = 0.9; // Slightly slower for kids
 
   let speechBtn = document.getElementById('speechBtn');
   if (speechBtn) speechBtn.innerText = '🔊 ...';
 
-  utterance.onend = function() {
-    if (speechBtn) speechBtn.innerText = '🔊';
+  // Step 1: Speak Original Language
+  let originalText = `Question ${currentQIndex + 1}. ${cleanQ}. `;
+  opts.forEach((opt, idx) => {
+    let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+    originalText += `Option ${idx + 1}: ${cleanOpt}. `;
+  });
+
+  let utterOriginal = new SpeechSynthesisUtterance(originalText);
+  utterOriginal.lang = 'en-US';
+  utterOriginal.rate = 0.9;
+
+  // Step 2: Speak Hindi Translation after original finishes
+  utterOriginal.onend = function() {
+    let hindiQ = getHindiTranslation(cleanQ);
+    let hindiText = `हिंदी अनुवाद: प्रश्न ${currentQIndex + 1}. ${hindiQ}. `;
+    opts.forEach((opt, idx) => {
+      let hindiOpt = getHindiTranslation(opt);
+      hindiText += `विकल्प ${idx + 1}: ${hindiOpt}. `;
+    });
+
+    let utterHindi = new SpeechSynthesisUtterance(hindiText);
+    utterHindi.lang = 'hi-IN';
+    utterHindi.rate = 0.9;
+
+    utterHindi.onend = function() {
+      if (speechBtn) speechBtn.innerText = '🔊';
+    };
+    utterHindi.onerror = function() {
+      if (speechBtn) speechBtn.innerText = '🔊';
+    };
+
+    window.speechSynthesis.speak(utterHindi);
   };
-  utterance.onerror = function() {
+
+  utterOriginal.onerror = function() {
     if (speechBtn) speechBtn.innerText = '🔊';
   };
 
-  window.speechSynthesis.speak(utterance);
+  window.speechSynthesis.speak(utterOriginal);
 }
 
 function showSuggestions(showAll = false) {
@@ -827,6 +877,15 @@ function renderQuestion() {
   currentLoadedQuestions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
   document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
 
+  // Check if student class is LKG, UKG, Class 1, Class 2, or Class 3 to show speaker button
+  let cls = currentActiveUser.class;
+  let speechBtn = document.getElementById('speechBtn');
+  if (cls === "LKG" || cls === "UKG" || cls === "Class 1" || cls === "Class 2" || cls === "Class 3") {
+    speechBtn.classList.remove('hidden');
+  } else {
+    speechBtn.classList.add('hidden');
+  }
+
   let nextDayBtn = document.getElementById('btnNextDay');
   let todayStr = getTodayString();
   let dayFinished = isDayCompleted(currentDay);
@@ -850,6 +909,7 @@ function renderQuestion() {
     optsBox.innerHTML = '';
     fill.style.width = '100%';
     document.getElementById('btnNextQuestion').disabled = true;
+    if (speechBtn) speechBtn.classList.add('hidden');
     return;
   }
 
