@@ -276,7 +276,7 @@
       </button>
 
       <div id="studentMgmtCollapsibleBox" class="hidden">
-        <div id="adminUsersList" style="max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;"></div>
+        <div id="adminUsersList" style="max-height: 290px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;"></div>
       </div>
 
       <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
@@ -320,9 +320,9 @@ auth.signInAnonymously().catch(function(err){
 
 // INSTANT LOCAL CACHE ENGINE FOR 0-SECOND LAUNCH
 let globalUsersList = JSON.parse(localStorage.getItem('cached_users_data')) || [
-  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
-  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
-  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" }
+  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
+  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 },
+  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 }
 ];
 
 let audioCtx = null;
@@ -440,6 +440,7 @@ function initCloudSync() {
           let workspace = document.getElementById('practiceWorkspace');
           if (workspace && !workspace.classList.contains('hidden')) {
             refreshStatsUI();
+            renderQuestion(); // Re-render in case unlock state changed
           }
         }
       }
@@ -494,6 +495,7 @@ function handleStudentLogin() {
     currentActiveUser = found;
     if (!currentActiveUser.userAnswers) currentActiveUser.userAnswers = {};
     if (!currentActiveUser.dayResetSeeds) currentActiveUser.dayResetSeeds = {};
+    if (currentActiveUser.manualUnlockTillDay === undefined) currentActiveUser.manualUnlockTillDay = 0;
     
     // AUTO-ADVANCE LOGIC: Open first uncompleted day
     let autoDay = 1;
@@ -737,7 +739,13 @@ function handleOptionClick(selectedOpt, correctAns) {
     currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
     currentActiveUser.lastCompletedDate = getTodayString();
     setTimeout(() => {
-      alert("🎉 Fantastic! Day " + currentDay + " Complete! Next Day will unlock tomorrow!");
+      let targetDay = currentDay + 1;
+      let isManuallyUnlocked = currentActiveUser.manualUnlockTillDay && targetDay <= currentActiveUser.manualUnlockTillDay;
+      if(isManuallyUnlocked) {
+        alert("🎉 Excellent! Day " + currentDay + " Complete! You can immediately start Day " + targetDay + "!");
+      } else {
+        alert("🎉 Fantastic! Day " + currentDay + " Complete! Next Day will unlock tomorrow!");
+      }
     }, 200);
   }
 
@@ -757,8 +765,9 @@ function renderQuestion() {
   let todayStr = getTodayString();
   let dayFinished = isDayCompleted(currentDay);
   let isNewDateAvailable = currentActiveUser.lastCompletedDate !== todayStr;
+  let isManuallyUnlocked = currentActiveUser.manualUnlockTillDay && (currentDay + 1) <= currentActiveUser.manualUnlockTillDay;
 
-  if (dayFinished && isNewDateAvailable) {
+  if (dayFinished && (isNewDateAvailable || isManuallyUnlocked)) {
     nextDayBtn.disabled = false;
     nextDayBtn.style.opacity = "1";
   } else {
@@ -843,9 +852,13 @@ function changeDay(delta) {
       alert("🔒 Complete all 20 questions of Day " + currentDay + " first!");
       return;
     }
+    
+    let targetDay = currentDay + 1;
     let todayStr = getTodayString();
-    if (currentActiveUser.lastCompletedDate === todayStr) {
-      let overridePin = prompt("🔒 Day " + (currentDay + 1) + " unlocks tomorrow!\n\nEnter Admin PIN to unlock early:");
+    let isManuallyUnlocked = currentActiveUser.manualUnlockTillDay && targetDay <= currentActiveUser.manualUnlockTillDay;
+
+    if (currentActiveUser.lastCompletedDate === todayStr && !isManuallyUnlocked) {
+      let overridePin = prompt("🔒 Day " + targetDay + " unlocks tomorrow!\n\nEnter Admin PIN to unlock early:");
       if (overridePin === getAdminPin()) {
         alert("🔓 Day Unlocked by Admin!");
       } else {
@@ -1008,7 +1021,7 @@ function renderAdminUsersList() {
       dayOptionsHTML = `<option value="">No Completed Days</option>`;
     }
 
-    // CLEAN STUDENT CARD - MIDDLE LINE REMOVED
+    // CLEAN STUDENT CARD WITH MANUAL UNLOCK SETTING
     row.innerHTML = `
       <div class="admin-student-header">
         <div>
@@ -1018,12 +1031,24 @@ function renderAdminUsersList() {
       </div>
 
       <div class="admin-student-actions">
+        <!-- Day Reset Row -->
         <div style="display:flex; align-items:center; gap:4px; margin-bottom:4px; width:100%;">
           <select id="resetDaySelect_${u.id.replace(/\s+/g, '_')}" style="padding:4px; font-size:0.75rem; border-radius:8px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border);" ${completedDays.length === 0 ? 'disabled' : ''}>
             ${dayOptionsHTML}
           </select>
           <button class="btn btn-secondary" onclick="resetSpecificDay('${u.id}')" style="padding:4px 8px; font-size:0.75rem;" ${completedDays.length === 0 ? 'disabled' : ''}>🔄 Reset Day</button>
         </div>
+
+        <!-- Multi-Day Unlock Limit Row -->
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; width: 100%; border-bottom: 1px dashed var(--border); padding-bottom: 6px; margin-bottom: 4px;">
+          <div style="display:flex; gap:4px; align-items:center;">
+            <span style="font-size:0.75rem; color:var(--text-muted);">Multi-Day Unlock:</span>
+            <input type="number" id="unlockTill_${u.id.replace(/\s+/g, '_')}" placeholder="Day #" style="width:60px; padding:4px; font-size:0.75rem; border-radius:8px; background:var(--card-bg); border:1px solid var(--border); color:var(--text-main);" value="${u.manualUnlockTillDay || ''}" min="1">
+            <button class="btn btn-secondary" onclick="setManualUnlock('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">🔓 Set</button>
+          </div>
+        </div>
+
+        <!-- Other Actions Row -->
         <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">🔄 All Reset</button>
         <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">✏️ PIN</button>
         <div style="display:flex; align-items:center; gap:4px;">
@@ -1038,6 +1063,40 @@ function renderAdminUsersList() {
     `;
     list.appendChild(row);
   });
+}
+
+function setManualUnlock(id) {
+  let u = globalUsersList.find(x => x.id === id);
+  if (!u) return;
+  
+  let val = document.getElementById(`unlockTill_${id.replace(/\s+/g, '_')}`).value;
+  let targetDay = parseInt(val, 10);
+  
+  if (isNaN(targetDay) || targetDay <= 0) {
+    if (confirm(`Remove multi-day unlock limit for ${id}? (They will return to 1 day/day mode)`)) {
+      u.manualUnlockTillDay = 0;
+    } else {
+      return;
+    }
+  } else {
+    u.manualUnlockTillDay = targetDay;
+  }
+
+  let dbKey = id.replace(/\s+/g, '_');
+  try { db.ref('users/' + dbKey).set(u); } catch(e){}
+  localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
+
+  if (u.manualUnlockTillDay > 0) {
+    alert(`🔓 ${id} can now solve back-to-back manually up to Day ${u.manualUnlockTillDay}!`);
+  } else {
+    alert(`🔒 Multi-day unlock removed for ${id}. They will follow the normal 1-day rule.`);
+  }
+  
+  renderAdminUsersList();
+  
+  if (currentActiveUser && currentActiveUser.id === id) {
+    renderQuestion();
+  }
 }
 
 function resetSpecificDay(id) {
@@ -1089,6 +1148,7 @@ function resetUserProgress(id) {
       u.userAnswers = {};
       u.dayResetSeeds = {};
       u.lastCompletedDate = "";
+      u.manualUnlockTillDay = 0;
       let dbKey = id.replace(/\s+/g, '_');
       try { db.ref('users/' + dbKey).set(u); } catch(e){}
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
@@ -1145,7 +1205,7 @@ function addNewStudent() {
 
   let newUser = { 
     id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, gender: gender,
-    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" 
+    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "", manualUnlockTillDay: 0 
   };
 
   globalUsersList.push(newUser);
