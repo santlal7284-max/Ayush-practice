@@ -1,1188 +1,682 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduPortal 2026 - Performance Dashboard & Fast Workspace</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
-  
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <style>
-    :root {
-      --bg-gradient: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #311042 100%);
-      --card-bg: rgba(30, 41, 59, 0.88);
-      --text-main: #F8FAFC;
-      --text-muted: #94A3B8;
-      --primary: #6366F1;
-      --accent-gold: #F59E0B;
-      --border: #334155;
-      --success: #10B981;
-      --danger: #EF4444;
-      --input-bg: #0F172A;
-    }
-
-    [data-theme="light"] {
-      --bg-gradient: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 50%, #F3E8FF 100%);
-      --card-bg: rgba(255, 255, 255, 0.92);
-      --text-main: #1E293B;
-      --text-muted: #64748B;
-      --primary: #4F46E5;
-      --border: #CBD5E1;
-      --input-bg: #FFFFFF;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background 0.3s, color 0.3s; }
-    body { background: var(--bg-gradient); color: var(--text-main); min-height: 100vh; padding: 12px; display: flex; justify-content: center; align-items: flex-start; -webkit-tap-highlight-color: transparent; }
-    .app-container { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; position: relative; }
-    
-    .top-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; }
-    .theme-btn { background: var(--card-bg); border: 1.5px solid var(--border); padding: 8px 12px; border-radius: 20px; font-size: 1.1rem; cursor: pointer; color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-    
-    .card { background: var(--card-bg); backdrop-filter: blur(12px); border-radius: 22px; padding: 20px; border: 2px solid var(--border); box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.3); }
-    .login-box { text-align: center; }
-    .kids-badge { display: inline-block; background: linear-gradient(90deg, #F59E0B, #EC4899); color: white; padding: 4px 12px; border-radius: 12px; font-weight: 800; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; }
-    
-    .autocomplete-wrapper { position: relative; width: 100%; text-align: left; }
-    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 14px; max-height: 200px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    .suggestion-item { padding: 12px 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--text-main); }
-    .suggestion-item:active, .suggestion-item:hover { background: var(--primary); color: white; }
-
-    .input-field { width: 100%; padding: 14px 16px; margin: 8px 0; border: 2px solid var(--border); border-radius: 14px; font-size: 1.1rem; font-weight: 600; background: var(--input-bg); color: var(--text-main); outline: none; }
-    
-    /* VIBRANT BUTTONS STYLING */
-    .btn { padding: 12px 18px; border: none; border-radius: 16px; background: linear-gradient(135deg, #6366F1 0%, #4338CA 100%); color: white; font-weight: 800; font-size: 1.05rem; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35); }
-    .btn:active { transform: scale(0.96); }
-    .btn:disabled { opacity: 0.35 !important; cursor: not-allowed !important; background: var(--border) !important; color: var(--text-muted) !important; transform: none !important; box-shadow: none !important; }
-    
-    .btn-prev-day { background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%); border: 1px solid #60A5FA; color: #FFF; box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3); }
-    .btn-next-day { background: linear-gradient(135deg, #10B981 0%, #047857 100%); border: 1px solid #34D399; color: #FFF; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3); }
-    .btn-back-q { background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); border: 1px solid #A78BFA; color: #FFF; box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3); }
-    .btn-next-q { background: linear-gradient(135deg, #EC4899 0%, #BE185D 100%); border: 1px solid #F472B6; color: #FFF; box-shadow: 0 6px 16px rgba(236, 72, 153, 0.3); }
-    
-    .btn-secondary { background: var(--card-bg); border: 1.5px solid var(--border); color: var(--text-main); }
-    .btn-danger { background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%); color: white; }
-
-    .profile-banner { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); color: white; border: none; padding: 18px; border-radius: 20px; box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3); }
-    
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-    .stat-card { background: var(--input-bg); padding: 8px 4px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
-    .stat-card .val { font-size: 1.1rem; font-weight: 800; color: var(--accent-gold); }
-    .stat-card .lbl { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
-
-    .day-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .progress-bar-bg { width: 100%; height: 10px; background: var(--border); border-radius: 10px; overflow: hidden; margin: 8px 0 14px 0; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #10B981, #059669); width: 0%; transition: width 0.3s; }
-    
-    .passage-box { background: var(--input-bg); border-left: 5px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; }
-    .question-box { font-size: 1.3rem; font-weight: 800; margin: 12px 0 16px 0; text-align: center; min-height: 60px; display: flex; align-items: center; justify-content: center; line-height: 1.4; }
-    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    
-    .option-btn { padding: 16px 12px; border: 2px solid var(--border); border-radius: 16px; background: linear-gradient(145deg, var(--input-bg) 0%, rgba(30, 41, 59, 0.5) 100%); font-size: 1.05rem; font-weight: 700; color: var(--text-main); cursor: pointer; touch-action: manipulation; transition: all 0.2s ease; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    .option-btn:hover:not(:disabled) { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(99, 102, 241, 0.25); }
-    .option-btn:disabled { cursor: not-allowed; }
-    
-    .option-btn.selected-correct { border-color: var(--success) !important; background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.35) 100%) !important; color: #34D399 !important; font-weight: 900 !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4) !important; }
-    .option-btn.selected-wrong { border-color: var(--danger) !important; background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(185, 28, 28, 0.35) 100%) !important; color: #F87171 !important; font-weight: 900 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important; }
-    .option-btn.show-actual-correct { border-color: var(--success) !important; background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.25) 100%) !important; color: #34D399 !important; font-weight: 900 !important; }
-
-    /* CLICKABLE DASHBOARD METRIC BUTTONS */
-    .admin-dashboard-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-    .dash-btn { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%); padding: 12px 8px; border-radius: 14px; border: 1.5px solid var(--border); text-align: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    .dash-btn:active, .dash-btn:hover { border-color: var(--primary); transform: translateY(-2px); background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(30, 41, 59, 0.95) 100%); }
-    .dash-btn .num { font-size: 1.25rem; font-weight: 900; color: var(--accent-gold); }
-    .dash-btn .label { font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; margin-top: 2px; }
-
-    .dash-detail-panel { background: var(--input-bg); border: 1px solid var(--primary); padding: 12px; border-radius: 14px; margin-bottom: 14px; font-size: 0.85rem; }
-    .dash-detail-panel h5 { color: var(--accent-gold); margin-bottom: 6px; font-size: 0.9rem; }
-    .dash-detail-list { max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-right: 4px; }
-    .dash-detail-item { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding: 4px 0; }
-
-    .admin-student-card { background: var(--input-bg); padding: 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border); }
-    .admin-student-header { display: flex; justify-content: space-between; align-items: center; }
-    .admin-student-actions { display: flex; align-items: center; justify-content: space-between; gap: 6px; border-top: 1px dashed var(--border); padding-top: 8px; flex-wrap: wrap; }
-
-    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--danger); transition: .3s; border-radius: 24px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-    input:checked + .slider { background-color: var(--success); }
-    input:checked + .slider:before { transform: translateX(20px); }
-
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-card { background: var(--card-bg); padding: 22px; border-radius: 22px; width: 92%; max-width: 440px; border: 2px solid var(--border); max-height: 85vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .hidden { display: none !important; }
-    .badge { background: rgba(99, 102, 241, 0.2); color: var(--primary); padding: 3px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; }
-
-    .toast-msg { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: #1E293B; color: #FFF; padding: 10px 20px; border-radius: 25px; font-size: 0.85rem; font-weight: 700; border: 1.5px solid var(--primary); z-index: 9999; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
-
-    .sparkle-particle { position: fixed; pointer-events: none; z-index: 99999; animation: floatUp 0.8s ease-out forwards; font-size: 1.5rem; }
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translate(0, 0) scale(0.5); }
-      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.5); }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Ayush - JNV Entrance Practice Pro</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#174a7e">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+body{margin:0;background:#f2f5f8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#222}
+header{background:#174a7e;color:#fff;text-align:center;padding:16px 10px}
+header div.sub{font-size:13px;opacity:.9;margin-top:2px}
+.stats-bar{display:flex;justify-content:space-around;background:rgba(255,255,255,0.15);margin-top:10px;padding:6px;border-radius:10px;font-size:12px;font-weight:bold}
+.wrap{max-width:760px;margin:auto;padding:12px 12px 40px}
+.panel,.q{background:#fff;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 2px 8px #0001}
+select,button,input{font-size:15px;padding:10px;border-radius:9px;border:1px solid #bbb;box-sizing:border-box}
+select{width:100%;margin:5px 0}
+button{background:#174a7e;color:white;border:0;margin:4px 4px 4px 0;cursor:pointer}
+button.secondary{background:#5b7a9a}
+button.danger{background:#c0392b}
+.option{display:block;background:#f3f6f9;margin:7px 0;padding:11px;border-radius:9px}
+.option input{margin-right:8px;transform:scale(1.15)}
+.correct{background:#dff4e5!important;border:2px solid #2e8b57}
+.wrong{background:#fde1e1!important;border:2px solid #c0392b}
+.small{font-size:13px;color:#666}
+.badge{display:inline-block;font-size:11px;font-weight:bold;color:#fff;border-radius:6px;padding:3px 8px;margin-bottom:6px}
+.badge-MAT{background:#174a7e}
+.badge-ARITH{background:#2e8b57}
+.badge-LANG{background:#b8860b}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.tabs button{flex:1;min-width:90px;background:#e5ecf3;color:#174a7e}
+.tabs button.active{background:#174a7e;color:#fff}
+.row2{display:flex;gap:8px}
+.row2>*{flex:1}
+.custom-item{border:1px solid #ddd;border-radius:9px;padding:8px;margin:6px 0;font-size:14px}
+details{background:#fff;border-radius:14px;padding:12px;margin:12px 0;box-shadow:0 2px 8px #0001}
+summary{font-weight:bold;color:#174a7e;cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+td,th{border:1px solid #ddd;padding:6px;text-align:center}
+th{background:#eef3f8}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center}
+.modal-box{background:#fff;border-radius:16px;padding:24px 20px;max-width:300px;width:85%;text-align:center;box-shadow:0 8px 30px #0004}
+.modal-box h3{margin:0 0 14px;color:#174a7e;font-size:20px}
+.pin-input{width:100%;text-align:center;font-size:26px;letter-spacing:10px;padding:12px 8px}
+.modal-error{color:#c0392b;font-size:13px;min-height:18px;margin-top:8px}
+.modal-actions{margin-top:14px;display:flex;gap:8px}
+.modal-actions button{flex:1;margin:0}
+</style>
 </head>
 <body>
+<header>
+<h1>📚 Ayush Practice</h1>
+<div class="sub">JNV Selection Test — 6 Month Practice Plan</div>
+<div class="stats-bar">
+ <span>🔥 Streak: <span id="statStreak">0</span> Days</span>
+ <span>⭐ Points: <span id="statPoints">0</span></span>
+ <span>📊 Accuracy: <span id="statAccuracy">0%</span></span>
+</div>
+</header>
+<div class="wrap">
 
-<div class="app-container">
-
-  <div class="top-header">
-    <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal <span id="syncStatus" style="font-size:0.7rem; color:var(--success);">• Ready</span></div>
-    <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
-  </div>
-
-  <div id="loginScreen" class="card login-box">
-    <span class="kids-badge">🌟 Learn & Play</span>
-    <h2 style="font-size: 1.6rem; margin-bottom: 4px;">Welcome Champ! 🎓</h2>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Tap username box to select your name</p>
-
-    <div class="autocomplete-wrapper">
-      <input type="text" id="loginUsername" class="input-field" placeholder="Select or Type Username" autocomplete="off" onclick="showSuggestions(true)" oninput="showSuggestions(false)" onfocus="showSuggestions(true)" />
-      <div id="suggestionsBox" class="suggestions-list hidden"></div>
-    </div>
-
-    <!-- NUMERIC KEYPAD ENABLED FOR FAST PIN ENTERING -->
-    <input type="password" id="loginPin" class="input-field" placeholder="4-Digit Student PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
-    
-    <button class="btn" onclick="handleStudentLogin()" style="width: 100%; margin-top: 10px;">Let's Start Practice 🚀</button>
-    
-    <div style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 12px;">
-      <button class="btn btn-secondary" onclick="openAdminModal()" style="font-size: 0.85rem; padding: 8px 14px;">🔑 Admin Portal</button>
-    </div>
-  </div>
-
-  <div id="practiceWorkspace" class="hidden">
-    <div class="card profile-banner">
-      <div class="user-info">
-        <h1 id="userDisplayName">Ayush 01 🎓</h1>
-        <p><span id="userClassBadge" class="badge" style="background:rgba(255,255,255,0.2); color:white;">Class 4</span></p>
-      </div>
-      <button class="btn btn-secondary" onclick="logoutStudent()" style="font-size: 0.8rem; padding: 6px 12px;">Logout</button>
-    </div>
-
-    <div class="card" style="margin-top: 10px;">
-      <div class="stats-grid">
-        <div class="stat-card"><div class="val">🔥 <span id="streakCount">0</span></div><div class="lbl">Streak</div></div>
-        <div class="stat-card"><div class="val">⭐ <span id="totalPoints">0</span></div><div class="lbl">Points</div></div>
-        <div class="stat-card"><div class="val">❌ <span id="wrongCount">0</span></div><div class="lbl">Wrong</div></div>
-        <div class="stat-card"><div class="val">📊 <span id="reportPercent">0%</span></div><div class="lbl">Accuracy</div></div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top: 10px;">
-      <div class="day-nav">
-        <button class="btn btn-prev-day" id="btnPrevDay" onclick="changeDay(-1)">← Prev Day</button>
-        <span id="currentDayLabel" style="font-size: 1.1rem; font-weight: 800;">Day 1</span>
-        <button class="btn btn-next-day" id="btnNextDay" onclick="changeDay(1)">Next Day →</button>
-      </div>
-
-      <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
-      <div id="passageContainer" class="passage-box hidden"></div>
-      <div class="question-box" id="questionText">Loading...</div>
-      <div class="options-grid" id="optionsContainer"></div>
-
-      <div style="margin-top: 16px; display: flex; justify-content: space-between;">
-        <button class="btn btn-back-q" id="btnBackQuestion" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 10px 14px;">← Back Question</button>
-        <button class="btn btn-next-q" id="btnNextQuestion" onclick="navigateQuestion(1)" style="font-size: 0.85rem; padding: 10px 14px;">Next Question →</button>
-      </div>
-    </div>
-  </div>
-
+<div class="panel" style="display:flex;justify-content:flex-end;padding:8px 14px">
+<button class="secondary" style="margin:0;padding:8px 14px" onclick="document.getElementById('manageBox').open=!document.getElementById('manageBox').open;document.getElementById('manageBox').scrollIntoView({behavior:'smooth'})">⚙️ Manage Syllabus</button>
 </div>
 
-<div id="adminModal" class="modal-overlay hidden">
-  <div class="modal-card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
-      <h3>📊 Master Admin & Analytics</h3>
-      <button style="background:none; border:none; color:var(--text-main); font-size:1.5rem; cursor:pointer;" onclick="closeAdminModal()">&times;</button>
-    </div>
+<details>
+<summary>ℹ️ JNVST Exam Pattern (Navodaya Selection Test)</summary>
+<table>
+<tr><th>Section</th><th>Questions</th><th>Marks</th><th>Qualifying</th></tr>
+<tr><td>Mental Ability</td><td>40</td><td>50</td><td>14</td></tr>
+<tr><td>Arithmetic</td><td>20</td><td>25</td><td>07</td></tr>
+<tr><td>Language</td><td>20</td><td>25</td><td>07</td></tr>
+</table>
+<p class="small">Total: 80 questions, 100 marks, 2 hours. There's no negative marking, but each section needs its own minimum qualifying marks — that's why this app gives you practice in all three sections every day.</p>
+</details>
 
-    <div id="adminAuthBox">
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">Enter Admin Security PIN</p>
-      <!-- NUMERIC KEYPAD FOR ADMIN PIN -->
-      <input type="password" id="adminPinInput" class="input-field" placeholder="Admin PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="text-align: center; letter-spacing: 4px;" />
-      <button class="btn" onclick="verifyAdminPin()" style="width: 100%; margin-top: 8px;">Access Admin Dashboard</button>
-    </div>
-
-    <div id="adminContentBox" class="hidden">
-      <!-- DASHBOARD CLICKABLE METRIC BUTTONS -->
-      <div class="admin-dashboard-summary">
-        <div class="dash-btn" onclick="toggleDashMetricDetail('students')">
-          <div class="num" id="dashTotalStudents">0</div>
-          <div class="label">Students 🔍</div>
-        </div>
-        <div class="dash-btn" onclick="toggleDashMetricDetail('points')">
-          <div class="num" id="dashTotalPoints">0</div>
-          <div class="label">Points 🏆</div>
-        </div>
-        <div class="dash-btn" onclick="toggleDashMetricDetail('solved')">
-          <div class="num" id="dashTotalAttempted">0</div>
-          <div class="label">Solved 📝</div>
-        </div>
-        <div class="dash-btn" onclick="toggleDashMetricDetail('accuracy')">
-          <div class="num" id="dashAvgAccuracy">0%</div>
-          <div class="label">Accuracy 🎯</div>
-        </div>
-      </div>
-
-      <!-- DYNAMIC METRIC DETAILS EXPANDABLE PANEL -->
-      <div id="dashMetricDetailBox" class="dash-detail-panel hidden">
-        <h5 id="dashDetailTitle">Metric Breakdown</h5>
-        <div id="dashDetailContent" class="dash-detail-list"></div>
-      </div>
-
-      <!-- COLLAPSIBLE ADD STUDENT BUTTON & FORM -->
-      <button class="btn btn-secondary" onclick="toggleAddStudentForm()" style="width: 100%; margin-bottom: 10px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
-        <span>➕ Add New Student</span>
-        <span id="addStudentArrow">▼</span>
-      </button>
-
-      <div id="addStudentCollapsibleForm" class="hidden" style="background: var(--input-bg); padding: 12px; border-radius: 14px; margin-bottom: 14px; border: 1px solid var(--border);">
-        <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 6px;">New Student Details</h4>
-        <input type="text" id="newStudentName" class="input-field" placeholder="Student Name (e.g. Rohan)" />
-        
-        <select id="newStudentGender" class="input-field">
-          <option value="Boy">👦 Boy</option>
-          <option value="Girl">👧 Girl</option>
-        </select>
-
-        <select id="newStudentClass" class="input-field">
-          <option value="LKG">LKG</option>
-          <option value="UKG">UKG</option>
-          <option value="Class 1">Class 1</option>
-          <option value="Class 2">Class 2</option>
-          <option value="Class 3">Class 3</option>
-          <option value="Class 4" selected>Class 4 (JNVST Prep)</option>
-          <option value="Class 5">Class 5 (JNVST Prep)</option>
-          <option value="Class 6">Class 6</option>
-          <option value="Class 7">Class 7</option>
-          <option value="Class 8">Class 8</option>
-          <option value="Class 9">Class 9</option>
-          <option value="Class 10">Class 10</option>
-          <option value="Class 11">Class 11</option>
-          <option value="Class 12">Class 12</option>
-        </select>
-        <button class="btn" onclick="addNewStudent()" style="width: 100%; margin-top: 6px; font-size: 0.85rem;">Auto-Generate Student ID & PIN</button>
-      </div>
-
-      <!-- COLLAPSIBLE STUDENT MANAGEMENT BUTTON -->
-      <button class="btn btn-secondary" onclick="toggleStudentManagementForm()" style="width: 100%; margin-bottom: 12px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
-        <span>🎓 Student Management & Reports</span>
-        <span id="studentMgmtArrow">▼</span>
-      </button>
-
-      <div id="studentMgmtCollapsibleBox" class="hidden">
-        <div id="adminUsersList" style="max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;"></div>
-      </div>
-
-      <div style="margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px;">
-        <h4 style="font-size: 0.85rem; margin-bottom: 4px;">🔑 Change Master Admin PIN</h4>
-        <input type="password" id="changeAdminPinVal" class="input-field" placeholder="New Master PIN" maxlength="6" inputmode="numeric" pattern="[0-9]*" />
-        <button class="btn btn-secondary" onclick="updateAdminPin()" style="width: 100%; font-size: 0.8rem; margin-top: 4px;">Update Master PIN</button>
-      </div>
-    </div>
-  </div>
+<div class="panel">
+<div class="row2">
+<select id="month"></select>
+<select id="day"></select>
+</div>
+<button onclick="check()">✅ Check</button>
+<button class="secondary" onclick="clearDay()">↺ Clear</button>
+<div id="progress" class="small" style="margin-top:8px"></div>
 </div>
 
+<div id="app"></div>
+
+<details id="manageBox">
+<summary>⚙️ Manage Syllabus & Parent Control</summary>
+<div style="margin-top:10px">
+<p class="small">Add new questions here yourself — no need to rebuild the app. New questions are included in the practice mix from the next day onward.</p>
+<select id="cSection">
+<option value="MAT">Mental Ability</option>
+<option value="ARITH">Arithmetic</option>
+<option value="LANG">Language</option>
+</select>
+<input id="cCategory" placeholder="Topic name (e.g. Series, Fractions, Grammar)">
+<input id="cQ" placeholder="Enter the question">
+<input id="cA" placeholder="Option A">
+<input id="cB" placeholder="Option B">
+<input id="cC" placeholder="Option C">
+<input id="cD" placeholder="Option D">
+<select id="cAns">
+<option value="A">Correct answer: A</option>
+<option value="B">Correct answer: B</option>
+<option value="C">Correct answer: C</option>
+<option value="D">Correct answer: D</option>
+</select>
+<button onclick="addCustom()">➕ Add Question</button>
+<div id="customList" style="margin-top:10px"></div>
+
+<div style="margin-top:16px;border-top:1px solid #eee;padding-top:10px">
+<p class="small"><b>🔄 Reset Specific Completed Day</b></p>
+<div class="row2">
+ <select id="resetDaySelect"><option value="">Select Completed Day</option></select>
+ <button class="secondary" onclick="resetSelectedDay()">Reset Day</button>
+</div>
+</div>
+
+<div style="margin-top:16px;border-top:1px solid #eee;padding-top:10px">
+<p class="small"><b>🔒 Parent PIN</b> — this PIN is required to open days that haven't arrived yet. Default PIN is <b>1234</b>. To set a new PIN:</p>
+<!-- Dedicated Numeric Keypad Inputs -->
+<input id="pinOld" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Current PIN">
+<input id="pinNew" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="New PIN (at least 4 digits)">
+<button onclick="changePin()">🔒 Change PIN</button>
+</div>
+</div>
+</details>
+
+<div class="modal-overlay" id="pinModal">
+<div class="modal-box">
+<h3>Enter PIN</h3>
+<!-- Dedicated Numeric Keypad Input -->
+<input class="pin-input" id="pinModalInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" onkeydown="if(event.key==='Enter')pinModalSubmit()">
+<div class="modal-error" id="pinModalError"></div>
+<div class="modal-actions">
+<button class="secondary" onclick="pinModalCancel()">Cancel</button>
+<button onclick="pinModalSubmit()">Unlock</button>
+</div>
+</div>
+</div>
+
+</div>
 <script>
-// --- FIREBASE CONFIGURATION ---
-const firebaseConfig = {
-  apiKey: "AIzaSyC5Nga075aed2qmzAmRHKoAFNW_9nPBxZE",
-  authDomain: "eduportal-2026-app.firebaseapp.com",
-  projectId: "eduportal-2026-app",
-  storageBucket: "eduportal-2026-app.firebasestorage.app",
-  messagingSenderId: "652509933432",
-  appId: "1:652509933432:web:7a7a4671873e0c9ecb628d",
-  databaseURL: "https://eduportal-2026-app-default-rtdb.firebaseio.com"
+// =====================================================================
+// SYLLABUS / QUESTION BANK — organized by JNVST section & topic.
+// =====================================================================
+var BANK = {
+ MAT: {
+  odd_one_out: {label:"Odd One Out", items:[
+   ["Apple, Mango, Carrot, Banana — अलग कौन?","Apple|Mango|Carrot|Banana","Carrot"],
+   ["Circle, Square, Triangle, Red — अलग कौन?","Circle|Square|Triangle|Red","Red"],
+   ["Delhi, Mumbai, Chennai, India — अलग कौन?","Delhi|Mumbai|Chennai|India","India"],
+   ["Cow, Goat, Dog, Chair — अलग कौन?","Cow|Goat|Dog|Chair","Chair"],
+   ["Pen, Pencil, Eraser, Shirt — अलग कौन?","Pen|Pencil|Eraser|Shirt","Shirt"],
+   ["4, 9, 16, 20 — अलग कौन?","4|9|16|20","20"],
+   ["Rose, Lotus, Jasmine, Thorn — अलग कौन?","Rose|Lotus|Jasmine|Thorn","Thorn"],
+   ["January, March, Monday, July — अलग कौन?","January|March|Monday|July","Monday"]
+  ]},
+  series_number: {label:"Number Series", items:[
+   ["3, 6, 9, 12, ?","14|15|16|18","15"],
+   ["5, 10, 20, 40, ?","60|70|80|90","80"],
+   ["1, 4, 9, 16, ?","20|24|25|30","25"],
+   ["2, 5, 8, 11, ?","12|13|14|15","14"],
+   ["100, 90, 80, 70, ?","50|60|65|75","60"],
+   ["1, 2, 4, 7, 11, ?","14|15|16|18","16"],
+   ["7, 14, 21, 28, ?","32|35|36|42","35"],
+   ["81, 27, 9, 3, ?","0|1|2|9","1"]
+  ]},
+  series_letter: {label:"Letter Series", items:[
+   ["A, C, E, G, ?","H|I|J|K","I"],
+   ["B, D, F, H, ?","I|J|K|L","J"],
+   ["Z, Y, X, W, ?","U|V|T|S","V"],
+   ["A, D, G, J, ?","K|L|M|N","M"],
+   ["K, L, M, N, ?","O|P|Q|R","O"],
+   ["P, R, T, V, ?","W|X|Y|Z","X"],
+   ["M, N, O, P, ?","Q|R|S|T","Q"],
+   ["C, F, I, L, ?","M|N|O|P","O"]
+  ]},
+  analogy: {label:"Analogy", items:[
+   ["Sun : Day :: Moon : ?","Night|Star|Sky|Light","Night"],
+   ["Fish : Water :: Bird : ?","Sky|Nest|Tree|Water","Sky"],
+   ["Doctor : Hospital :: Teacher : ?","School|Home|Shop|Park","School"],
+   ["Cow : Calf :: Dog : ?","Puppy|Kitten|Cub|Kid","Puppy"],
+   ["Pen : Write :: Knife : ?","Cut|Draw|Read|Break","Cut"],
+   ["India : Delhi :: Japan : ?","Tokyo|Beijing|Seoul|Bangkok","Tokyo"],
+   ["Eye : See :: Ear : ?","Hear|Smell|Taste|Touch","Hear"],
+   ["Rain : Umbrella :: Sun : ?","Hat|Coat|Shoe|Bag","Hat"]
+  ]},
+  coding_decoding: {label:"Coding-Decoding", items:[
+   ["Agar CAT ko DBU likha jaata hai, to DOG kaise lighenge?","EPH|EPI|FPH|EQH","EPH"],
+   ["Agar A=1, B=2, C=3 ho, to 'BAD' ka code kya hoga?","124|214|421|241","214"],
+   ["Ek code mein RAIN ko SBJO likha jaata hai. SUN kaise likhenge?","TVO|TUO|SVO|TVN","TVO"],
+   ["Agar BOOK ko CPPL likha jaata hai, to PEN kaise likhenge?","QFO|QFN|PFO|QEO","QFO"],
+   ["Agar 5+3=53, 2+7=27, to 4+6=?","64|46|10|24","46"],
+   ["Agar MANGO ko NBOHP likha jaata hai, to APPLE kaise likhenge?","BQQMF|BQQLF|AQQMF|BPQMF","BQQMF"],
+   ["Ek code mein DOG='456', CAT='789' (D=4,O=5,G=6,C=7,A=8,T=9). DOC ka code?","476|457|467|475","457"],
+   ["Agar PLANT ko QMBOU likha jaata hai, to FLOWER kaise likhenge?","GMPXFS|GMPXES|FMPXFS|GNPXFS","GMPXFS"]
+  ]},
+  number_pattern: {label:"Number Properties", items:[
+   ["In mein prime number kaun-sa hai?","15|21|23|27","23"],
+   ["In mein even number kaun-sa hai?","33|46|51|77","46"],
+   ["In mein 5 ka multiple kaun-sa hai?","22|35|43|58","35"],
+   ["In mein 3 ka multiple kaun-sa hai?","20|22|24|26","24"],
+   ["In mein odd number kaun-sa hai?","42|53|64|76","53"],
+   ["In mein 12 ka factor kaun-sa hai?","5|7|4|9","4"],
+   ["Sabse chhota prime number kaun-sa hai?","0|1|2|3","2"],
+   ["Kaun-sa number 2 aur 3 dono se divide hota hai?","9|10|12|14","12"]
+  ]},
+  ranking_order: {label:"Ranking / Ordering", items:[
+   ["Ravi, Mohan se lamba hai. Mohan, Suresh se lamba hai. Sabse chhota kaun hai?","Ravi|Mohan|Suresh|Pata nahi","Suresh"],
+   ["Race mein Amit, Rohit se pehle par Sunil ke baad aaya. Sabse pehle kaun aaya?","Amit|Rohit|Sunil|Sab saath","Sunil"],
+   ["Priya, Neha se chhoti hai lekin Kavita se badi hai. Sabse chhoti kaun hai?","Priya|Neha|Kavita|Pata nahi","Kavita"],
+   ["5 ladke line mein hain. Raj left se 3rd hai. Right se uski position kya hogi?","1st|2nd|3rd|4th","3rd"],
+   ["Queue mein Meena front se 5th aur back se 8th hai. Queue mein kitne log hain?","10|11|12|13","12"],
+   ["A, B se lamba hai. C, A se lamba hai. D, B se chhota hai. Sabse lamba kaun hai?","A|B|C|D","C"],
+   ["Ram, Shyam se zyada marks laaya. Shyam, Gopal se zyada laaya. Sabse kam kisne laaya?","Ram|Shyam|Gopal|Sab barabar","Gopal"],
+   ["Agar Monday pehla din hai, to 5va din kaun-sa hoga?","Thursday|Friday|Saturday|Sunday","Friday"]
+  ]},
+  direction_sense: {label:"Direction Sense", items:[
+   ["Ravi North mein 5 km chalta hai, phir right mudke 3 km chalta hai. Ab uska face kis disha mein hai?","North|South|East|West","East"],
+   ["Agar aap North face karke 90° clockwise ghumein, to kis disha mein face hoga?","East|West|South|North","East"],
+   ["Ek aadmi South chalta hai, left mudta hai. Ab wo kis disha mein ja raha hai?","East|West|North|South","East"],
+   ["Suraj (sunrise) kis disha mein dikhta hai?","East|West|North|South","East"],
+   ["Agar aap South face karke 180° ghumein, to kis disha mein face hoga?","North|South|East|West","North"],
+   ["School, Rita ke ghar ke North mein hai. School se Rita ka ghar kis disha mein hai?","North|South|East|West","South"],
+   ["West ke opposite kaun-si disha hai?","North|South|East|None","East"],
+   ["Ek ladka 4 km East, phir 3 km North chalta hai. Wo shuruaat se kis general disha mein hai?","North-East|South-East|North-West|South-West","North-East"]
+  ]},
+  blood_relations: {label:"Blood Relations", items:[
+   ["Ravi apne pita ka ikalauta beta hai. Ravi apne pita ka kya hai?","Beta|Bhai|Chacha|Bhatija","Beta"],
+   ["A, B ki mother hai. B, C ka father hai. A, C ki kya lagti hai?","Mother|Grandmother|Sister|Aunt","Grandmother"],
+   ["Priya, Rahul ki behen hai. Rahul, Aman ka bhai hai. Priya, Aman ki kya lagti hai?","Behen|Cousin|Chachi|Bhabhi","Behen"],
+   ["Mohan ki mother, Sunita ki ikalauti beti hai. Sunita, Mohan ki kya lagti hai?","Mother|Grandmother|Aunt|Sister","Grandmother"],
+   ["Ek mahila bolti hai 'Wo mere ikalaute bhai ka beta hai.' Wo ladka mahila ka kya lagta hai?","Beta|Bhatija|Bhai|Chacha","Bhatija"],
+   ["A, B ka father hai. B, C ka father hai. A, C ka kya lagta hai?","Father|Grandfather|Uncle|Brother","Grandfather"],
+   ["Sita, Geeta ki beti hai. Geeta, Ram ki wife hai. Sita, Ram ki kya lagti hai?","Beti|Bahu|Behen|Bhatiji","Beti"],
+   ["Do ladkon ka father same hai lekin mother alag-alag hai. Unka relation kya hai?","Half-brothers|Cousins|Twins|Strangers","Half-brothers"]
+  ]},
+  missing_number: {label:"Missing Number / Pattern", items:[
+   ["3, 6, 12, 24, ?","36|42|48|30","48"],
+   ["2, 4, 8, 16, ?","20|24|30|32","32"],
+   ["10, 20, 15, 30, 25, ?","35|40|45|50","50"],
+   ["1, 1, 2, 3, 5, ?","6|7|8|9","8"],
+   ["64, 32, 16, ?","8|4|12|10","8"],
+   ["5, 11, 17, 23, ?","27|28|29|30","29"],
+   ["2, 6, 18, 54, ?","108|144|162|180","162"],
+   ["12, 24, 36, 48, ?","54|56|60|72","60"]
+  ]}
+ },
+ ARITH: {
+  number_system: {label:"Number System", items:[
+   ["4728 mein 7 ki place value kya hai?","70|700|7000|7","700"],
+   ["999 ka successor kya hai?","998|1000|1001|900","1000"],
+   ["5000 ka predecessor kya hai?","4998|4999|5001|4990","4999"],
+   ["40 ka Roman numeral kya hai?","XXXX|XL|LX|IL","XL"],
+   ["Sabse chhota 4-digit number kaun-sa hai?","999|1000|1001|9999","1000"],
+   ["Sabse bada 3-digit number kaun-sa hai?","900|990|999|1000","999"],
+   ["5000+300+20+7 ko numeral mein likhein","5327|5237|5372|5273","5327"],
+   ["1 lakh (1,00,000) mein kitne zero hote hain?","3|4|5|6","5"]
+  ]},
+  fractions_decimals: {label:"Fractions & Decimals", items:[
+   ["1/2 + 1/4 = ?","2/4|3/4|1/4|1","3/4"],
+   ["Bada kaun hai: 1/2 ya 1/3?","1/2|1/3|Barabar|Pata nahi","1/2"],
+   ["0.5 ko fraction mein likhein","1/4|1/2|1/5|2/5","1/2"],
+   ["3/4 - 1/4 = ?","1/4|1/2|2/4|1","1/2"],
+   ["20 ka 2/5 = ?","4|6|8|10","8"],
+   ["0.25 + 0.25 = ?","0.25|0.5|0.75|1","0.5"],
+   ["Sabse chhota kaun hai: 1/4, 1/2, 1/8?","1/4|1/2|1/8|Barabar","1/8"],
+   ["1 whole mein kitne quarters hote hain?","2|3|4|5","4"]
+  ]},
+  lcm_hcf: {label:"LCM & HCF", items:[
+   ["4 aur 6 ka LCM kya hai?","10|12|24|8","12"],
+   ["8 aur 12 ka HCF kya hai?","2|4|6|8","4"],
+   ["3 aur 5 ka LCM kya hai?","8|10|15|20","15"],
+   ["15 aur 20 ka HCF kya hai?","3|5|10|15","5"],
+   ["2, 3, 4 ka LCM kya hai?","6|8|12|24","12"],
+   ["24 aur 36 ka HCF kya hai?","6|8|12|18","12"],
+   ["6 aur 8 ka LCM kya hai?","16|20|24|48","24"],
+   ["9 aur 27 ka HCF kya hai?","3|9|27|1","9"]
+  ]},
+  time_speed_work: {label:"Time, Speed & Work", items:[
+   ["Ek train 1 ghante mein 60 km chalti hai. Uski speed kya hai?","50 km/h|55 km/h|60 km/h|70 km/h","60 km/h"],
+   ["Agar ek car 2 ghante mein 120 km chalti hai, uski speed kya hai?","50 km/h|55 km/h|60 km/h|65 km/h","60 km/h"],
+   ["Ek mazdoor deewar 6 din mein banata hai. 2 mazdoor (same speed) mein kitne din lagenge?","2 din|3 din|4 din|6 din","3 din"],
+   ["Ghadi 3:00 dikhati hai. 2 ghante baad kya time hoga?","4:00|5:00|6:00|3:30","5:00"],
+   ["2 ghante mein kitne minute hote hain?","60|90|120|150","120"],
+   ["1 minute mein kitne second hote hain?","30|60|90|100","60"],
+   ["Agar bus 9:00 AM ko chalti hai aur 3 ghante lagte hain, to kab pahunchegi?","11:00 AM|12:00 PM|1:00 PM|12:30 PM","12:00 PM"],
+   ["Leap year mein kitne din hote hain?","364|365|366|360","366"]
+  ]},
+  profit_loss: {label:"Profit, Loss & Interest", items:[
+   ["Pen ₹10 mein khareedi, ₹12 mein becha. Profit = ?","₹1|₹2|₹3|₹22","₹2"],
+   ["Khilona ₹50 mein khareeda, ₹45 mein becha. Loss = ?","₹3|₹4|₹5|₹95","₹5"],
+   ["Cost price ₹100, sold at ₹120. Profit % = ?","10%|15%|20%|25%","20%"],
+   ["Cost ₹80 hai aur profit ₹20 hai, to selling price = ?","₹90|₹100|₹110|₹60","₹100"],
+   ["CP=₹50, SP=₹40. Loss % = ?","10%|15%|20%|25%","20%"],
+   ["₹100 par 5% simple interest 1 saal ke liye = ?","₹1|₹5|₹10|₹50","₹5"],
+   ["₹200 par 10% simple interest 1 saal ke liye = ?","₹10|₹20|₹30|₹40","₹20"],
+   ["Agar SP, CP se zyada ho to use kya kehte hain?","Profit|Loss|Discount|Interest","Profit"]
+  ]},
+  measurement: {label:"Measurement", items:[
+   ["1 km mein kitne metre hote hain?","10|100|1000|10000","1000"],
+   ["1 kg mein kitne gram hote hain?","10|100|1000|10000","1000"],
+   ["1 litre mein kitne millilitre hote hain?","10|100|1000|10000","1000"],
+   ["1 metre mein kitne centimetre hote hain?","10|50|100|1000","100"],
+   ["Bhaari kaun hai: 1 kg ya 500 g?","1 kg|500 g|Barabar|Pata nahi","1 kg"],
+   ["5000 g mein kitne kg hote hain?","3|4|5|6","5"],
+   ["2 litre mein kitne ml hote hain?","200|2000|20|20000","2000"],
+   ["1 ghante mein kitne minute hote hain?","30|45|60|90","60"]
+  ]},
+  geometry: {label:"Geometry (Perimeter/Area)", items:[
+   ["5 cm side wale square ka perimeter = ?","10 cm|15 cm|20 cm|25 cm","20 cm"],
+   ["6 cm length aur 4 cm breadth wale rectangle ka perimeter = ?","10 cm|16 cm|20 cm|24 cm","20 cm"],
+   ["4 cm side wale square ka area = ?","8 sq cm|12 sq cm|16 sq cm|20 sq cm","16 sq cm"],
+   ["5 cm length aur 3 cm breadth wale rectangle ka area = ?","8 sq cm|15 sq cm|16 sq cm|20 sq cm","15 sq cm"],
+   ["Triangle ke kitne sides hote hain?","2|3|4|5","3"],
+   ["Hexagon ke kitne sides hote hain?","5|6|7|8","6"],
+   ["Square ke kitne equal sides hote hain?","2|3|4|5","4"],
+   ["3, 4, 5 cm sides wale triangle ka perimeter = ?","10 cm|11 cm|12 cm|15 cm","12 cm"]
+  ]},
+  average_percent_ratio: {label:"Average, Percentage & Ratio", items:[
+   ["10, 20, 30 ka average = ?","15|20|25|30","20"],
+   ["4, 6, 8, 10 ka average = ?","6|7|8|9","7"],
+   ["200 ka 50% = ?","50|100|150|200","100"],
+   ["80 ka 25% = ?","10|15|20|25","20"],
+   ["4 aur 8 ka simplest ratio = ?","1:2|2:1|1:4|4:1","1:2"],
+   ["100 ka 10% = ?","1|5|10|100","10"],
+   ["5 aur 15 ka average = ?","5|10|15|20","10"],
+   ["6 aur 9 ka simplest ratio = ?","1:2|2:3|3:2|1:3","2:3"]
+  ]}
+ },
+ LANG: {
+  parts_of_speech: {label:"Parts of Speech", items:[
+   ["'She sings sweetly.' — verb kaun-sa hai?","She|sings|sweetly|none","sings"],
+   ["'The tall boy is my friend.' — adjective kaun-sa hai?","tall|boy|friend|is","tall"],
+   ["'He is my brother.' — pronoun kaun-sa hai?","He|is|my|brother","He"],
+   ["'Wow! What a beautiful day.' — interjection kaun-sa hai?","Wow|What|beautiful|day","Wow"],
+   ["'The cat sat on the mat.' — preposition kaun-sa hai?","cat|sat|on|mat","on"],
+   ["'Rita and Sita are friends.' — conjunction kaun-sa hai?","Rita|and|Sita|friends","and"],
+   ["'The dog barks loudly.' — adverb kaun-sa hai?","dog|barks|loudly|the","loudly"],
+   ["In mein proper noun kaun-sa hai?","india|boy|Delhi|city","Delhi"]
+  ]},
+  tense: {label:"Tense / Fill in the Blanks", items:[
+   ["She ___ to school every day.","go|goes|going|gone","goes"],
+   ["They ___ playing football now.","is|are|was|were","are"],
+   ["Yesterday, I ___ my homework.","do|does|did|doing","did"],
+   ["He ___ a letter tomorrow.","write|wrote|will write|writes","will write"],
+   ["The sun ___ in the east.","rise|rises|rose|rising","rises"],
+   ["We ___ to the park last Sunday.","go|goes|went|going","went"],
+   ["She ___ her homework already.","has done|have done|do|did","has done"],
+   ["I ___ eating my lunch right now.","am|is|are|was","am"]
+  ]},
+  vocabulary: {label:"Vocabulary (Synonym/Antonym)", items:[
+   ["'happy' ka synonym kya hai?","glad|sad|angry|slow","glad"],
+   ["'big' ka opposite kya hai?","small|tall|wide|huge","small"],
+   ["'quick' ka synonym kya hai?","slow|fast|late|lazy","fast"],
+   ["'hot' ka opposite kya hai?","warm|cold|dry|wet","cold"],
+   ["'beautiful' ka synonym kya hai?","ugly|pretty|dull|plain","pretty"],
+   ["'strong' ka opposite kya hai?","weak|tall|hard|firm","weak"],
+   ["'small' ka synonym kya hai?","big|huge|tiny|wide","tiny"],
+   ["'day' ka opposite kya hai?","light|night|sun|noon","night"]
+  ]},
+  comprehension: {label:"Reading Comprehension", items:[
+   ["\"Ravi has a pet dog named Tommy. Tommy is brown and loves to play in the garden.\" — Ravi ke dog ka naam kya hai?","Tommy|Ravi|Brownie|Rex","Tommy"],
+   ["\"Meena went to the market to buy vegetables. She bought potatoes, onions, and tomatoes.\" — Meena ne kya khareeda?","Fruits|Vegetables|Toys|Books","Vegetables"],
+   ["\"The sun rises in the east and sets in the west every day.\" — Suraj kahan udta hai?","East|West|North|South","East"],
+   ["\"Rohan likes to read story books before sleeping.\" — Rohan sone se pehle kya karta hai?","Play games|Read story books|Watch TV|Eat food","Read story books"],
+   ["\"It was raining heavily, so the children played indoors.\" — Bachche andar kyun khele?","It was hot|It was raining|It was late|They were tired","It was raining"],
+   ["\"Anita's school starts at 8 AM and ends at 2 PM.\" — Anita ka school kab shuru hota hai?","7 AM|8 AM|9 AM|2 PM","8 AM"],
+   ["\"The farmer grows wheat and rice in his fields.\" — Kisan kya ugata hai?","Fruits|Flowers|Wheat and rice|Vegetables","Wheat and rice"],
+   ["\"Sam's birthday is in the month of July.\" — Sam ka birthday kis mahine mein hai?","June|July|August|May","July"]
+  ]},
+  spelling_grammar: {label:"Spelling & Usage", items:[
+   ["Sahi spelling chunein:","Skool|School|Schoool|Schol","School"],
+   ["Sahi spelling chunein:","Freind|Friend|Frend|Friennd","Friend"],
+   ["Sahi spelling chunein:","Bicycal|Bycicle|Bicycle|Bisicle","Bicycle"],
+   ["Sahi spelling chunein:","Beutiful|Beautiful|Beautifull|Beautifull","Beautiful"],
+   ["I have ___ apple.","a|an|the|some","an"],
+   ["There ___ two books on the table.","is|are|was|am","are"],
+   ["Sahi spelling chunein:","Elephant|Elefant|Elephent|Elephint","Elephant"],
+   ["This is ___ umbrella.","a|an|the|some","an"]
+  ]}
+ }
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+var TOTAL_DAYS = 180; // 6 months
+var PER_DAY = {MAT:6, ARITH:3, LANG:3};
+var storeKey = "ayush_jnv_practice_v2";
+var customKey = "ayush_jnv_custom_v2";
+var startDateKey = "ayush_jnv_startdate_v2";
+var pinKey = "ayush_jnv_pin_v2";
+var lastValidDay = 1;
 
-// INSTANT LOCAL CACHE ENGINE FOR 0-SECOND LAUNCH
-let globalUsersList = JSON.parse(localStorage.getItem('cached_users_data')) || [
-  { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
-  { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" },
-  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" }
-];
+function saved(){try{return JSON.parse(localStorage.getItem(storeKey)||"{}")}catch(e){return {}}}
+function save(x){try{localStorage.setItem(storeKey,JSON.stringify(x))}catch(e){}}
+function customQs(){try{return JSON.parse(localStorage.getItem(customKey)||"[]")}catch(e){return []}}
+function saveCustom(x){try{localStorage.setItem(customKey,JSON.stringify(x))}catch(e){}}
 
-let audioCtx = null;
-function playSound(type) {
-  try {
-    if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-    if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+// ---- Date-based day locking ----
+function getStartDate(){
+ var s=localStorage.getItem(startDateKey);
+ if(!s){ s=new Date().toISOString().slice(0,10); try{localStorage.setItem(startDateKey,s)}catch(e){} }
+ return s;
+}
+function getTodayAllowedDay(){
+ var start=new Date(getStartDate()+"T00:00:00");
+ var today=new Date(); today.setHours(0,0,0,0);
+ var diff=Math.floor((today-start)/86400000);
+ var d=diff+1;
+ if(d<1) d=1;
+ if(d>TOTAL_DAYS) d=TOTAL_DAYS;
+ return d;
+}
+function getPin(){ return localStorage.getItem(pinKey)||"1234"; }
+function setPin(p){ try{localStorage.setItem(pinKey,p)}catch(e){} }
 
-    if (type === 'correct') {
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(523, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.15);
-    } else {
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-      osc.start(); osc.stop(audioCtx.currentTime + 0.15);
-    }
-  } catch(e) {}
+var pinModalCallback=null;
+function showPinModal(callback){
+ pinModalCallback=callback;
+ document.getElementById("pinModalInput").value="";
+ document.getElementById("pinModalError").textContent="";
+ var modal=document.getElementById("pinModal");
+ modal.style.display="flex";
+ setTimeout(function(){document.getElementById("pinModalInput").focus()},50);
+}
+function hidePinModal(){
+ document.getElementById("pinModal").style.display="none";
+ pinModalCallback=null;
+}
+function pinModalSubmit(){
+ var entered=document.getElementById("pinModalInput").value;
+ var cb=pinModalCallback;
+ if(entered===getPin()){
+  hidePinModal();
+  if(cb) cb(true);
+ } else {
+  document.getElementById("pinModalError").textContent="Incorrect PIN, try again";
+  document.getElementById("pinModalInput").value="";
+  document.getElementById("pinModalInput").focus();
+ }
+}
+function pinModalCancel(){
+ var cb=pinModalCallback;
+ hidePinModal();
+ if(cb) cb(false);
 }
 
-function triggerSparkleBurst() {
-  const emojis = ['✨', '⭐', '🎉', '🌟', '👏'];
-  for (let i = 0; i < 15; i++) {
-    const p = document.createElement('div');
-    p.className = 'sparkle-particle';
-    p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-    p.style.left = (window.innerWidth / 2 + (Math.random() * 160 - 80)) + 'px';
-    p.style.top = (window.innerHeight / 2 + (Math.random() * 160 - 80)) + 'px';
-    p.style.setProperty('--dx', (Math.random() * 200 - 100) + 'px');
-    p.style.setProperty('--dy', (Math.random() * -250 - 50) + 'px');
-    document.body.appendChild(p);
-    setTimeout(() => p.remove(), 800);
+function changePin(){
+ var oldP=document.getElementById("pinOld").value;
+ var newP=document.getElementById("pinNew").value.trim();
+ if(oldP!==getPin()){alert("Current PIN is incorrect.");return}
+ if(!newP||newP.length<4){alert("New PIN must be at least 4 digits.");return}
+ setPin(newP);
+ document.getElementById("pinOld").value="";
+ document.getElementById("pinNew").value="";
+ alert("PIN updated successfully!");
+}
+
+// Simple deterministic shuffle (mulberry32)
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function seededShuffle(arr, seed){
+ var r=mulberry32(seed), a=arr.slice();
+ for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp}
+ return a;
+}
+
+function buildPool(section){
+ var pool=[];
+ var cats=BANK[section];
+ for(var key in cats){
+  cats[key].items.forEach(function(it){pool.push({cat:cats[key].label, section:section, q:it[0], opts:it[1].split("|"), ans:it[2]})});
+ }
+ customQs().filter(function(c){return c.section===section}).forEach(function(c){
+  pool.push({cat:c.category+" (Custom)", section:section, q:c.q, opts:c.opts, ans:c.ans});
+ });
+ return seededShuffle(pool, section==="MAT"?11:section==="ARITH"?22:33);
+}
+
+var POOLS={MAT:buildPool("MAT"),ARITH:buildPool("ARITH"),LANG:buildPool("LANG")};
+
+function questionsForDay(d){
+ var out=[];
+ ["MAT","ARITH","LANG"].forEach(function(sec){
+  var pool=POOLS[sec], count=PER_DAY[sec];
+  if(pool.length===0) return;
+  var start=((d-1)*count)%pool.length;
+  for(var i=0;i<count;i++){
+   out.push(pool[(start+i)%pool.length]);
   }
+ });
+ return out;
 }
 
-function shuffleArray(arr, seed) {
-  let array = [...arr];
-  let m = array.length, t, i;
-  while (m) {
-    i = Math.floor(Math.abs(Math.sin(seed++)) * m--);
-    t = array[m]; array[m] = array[i]; array[i] = t;
-  }
-  return array;
+function fillDaysForMonth(mo){
+ var dsel=document.getElementById("day");
+ dsel.innerHTML="";
+ var startDay=(mo-1)*30+1;
+ for(var i=0;i<30;i++){
+  var dayNum=startDay+i;
+  var o=document.createElement("option");o.value=dayNum;o.textContent="Day "+dayNum;dsel.appendChild(o);
+ }
 }
-
-const BOY_AVATARS = ["👦", "🧑‍🚀", "🦸‍♂️", "🦁", "🐯", "🤖"];
-const GIRL_AVATARS = ["👧", "👩‍🚀", "🦸‍♀️", "🦄", "🦊", "🐼"];
-
-let currentActiveUser = null;
-let currentQIndex = 0;
-let currentDay = 1;
-let backPressTime = 0;
-let activeDashMetricType = null;
-
-function showToast(msg) {
-  let existing = document.querySelector('.toast-msg');
-  if (existing) existing.remove();
-  let toast = document.createElement('div');
-  toast.className = 'toast-msg';
-  toast.innerText = msg;
-  document.body.appendChild(toast);
-  setTimeout(() => { if (toast) toast.remove(); }, 2000);
+function syncSelectorsToDay(d){
+ var mo=Math.ceil(d/30);
+ document.getElementById("month").value=mo;
+ fillDaysForMonth(mo);
+ document.getElementById("day").value=d;
 }
-
-function getTodayString() {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-}
-
-function getRandomAvatar(gender, num) {
-  let list = gender === "Girl" ? GIRL_AVATARS : BOY_AVATARS;
-  return list[(num || 1) % list.length];
-}
-
-function toggleTheme() {
-  let body = document.body;
-  let current = body.getAttribute('data-theme');
-  let btn = document.getElementById('themeIconBtn');
-  if (current === 'light') {
-    body.setAttribute('data-theme', 'dark');
-    btn.innerText = '🌙';
-    localStorage.setItem('app_theme', 'dark');
-  } else {
-    body.setAttribute('data-theme', 'light');
-    btn.innerText = '☀️';
-    localStorage.setItem('app_theme', 'light');
-  }
-}
-
-function initCloudSync() {
-  try {
-    db.ref('users').on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        globalUsersList = Object.keys(data).map(key => data[key]);
-        localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
-        let syncText = document.getElementById('syncStatus');
-        if (syncText) syncText.innerText = '• Live Cloud';
-      }
-      if (currentActiveUser) {
-        let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
-        if (updated) currentActiveUser = updated;
-      }
-      if (document.getElementById('adminModal') && !document.getElementById('adminContentBox').classList.contains('hidden')) {
-        renderAdminDashboardSummary();
-        renderAdminUsersList();
-      }
-    });
-  } catch(e) {}
-}
-
-function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
-
-function showSuggestions(showAll = false) {
-  let val = document.getElementById('loginUsername').value.trim().toLowerCase();
-  let box = document.getElementById('suggestionsBox');
-
-  let matches = showAll || !val 
-    ? globalUsersList 
-    : globalUsersList.filter(u => u.name.toLowerCase().startsWith(val) || u.id.toLowerCase().startsWith(val));
-
-  if (!matches.length) { box.classList.add('hidden'); return; }
-
-  box.innerHTML = '';
-  matches.forEach(m => {
-    let item = document.createElement('div');
-    item.className = 'suggestion-item';
-    item.innerHTML = `<span>${m.avatar || '🎓'} ${m.id}</span> <span class="badge">${m.class}</span>`;
-    item.onmousedown = function(e) {
-      e.preventDefault();
-      document.getElementById('loginUsername').value = m.id;
-      box.classList.add('hidden');
-      document.getElementById('loginPin').focus();
-    };
-    box.appendChild(item);
+function tryGoToDay(newDay){
+ var allowed=getTodayAllowedDay();
+ if(newDay>allowed){
+  showPinModal(function(ok){
+   if(ok){
+    lastValidDay=newDay;
+    syncSelectorsToDay(newDay);
+    show(newDay);
+   } else {
+    syncSelectorsToDay(lastValidDay);
+   }
   });
-  box.classList.remove('hidden');
+  return;
+ }
+ lastValidDay=newDay;
+ syncSelectorsToDay(newDay);
+ show(newDay);
 }
 
-function handleStudentLogin() {
-  let uName = document.getElementById('loginUsername').value.trim();
-  let uPin = document.getElementById('loginPin').value.trim();
+function init(){
+ var m=document.getElementById("month"), dsel=document.getElementById("day");
+ for(var mo=1;mo<=6;mo++){var o=document.createElement("option");o.value=mo;o.textContent="Month "+mo;m.appendChild(o)}
+ m.onchange=function(){ fillDaysForMonth(+m.value); tryGoToDay(+document.getElementById("day").value); };
+ dsel.onchange=function(){ tryGoToDay(+dsel.value); };
 
-  let found = globalUsersList.find(u => u.id.toLowerCase() === uName.toLowerCase() && u.pin === uPin);
-  
-  if (found) {
-    if (found.active === false) {
-      alert("❌ Account Deactivated! Contact Admin.");
-      return;
-    }
-    currentActiveUser = found;
-    if (!currentActiveUser.userAnswers) currentActiveUser.userAnswers = {};
-    if (!currentActiveUser.dayResetSeeds) currentActiveUser.dayResetSeeds = {};
-    
-    // AUTO-ADVANCE LOGIC: Open first uncompleted day
-    let autoDay = 1;
-    while (isDayCompletedForUser(currentActiveUser, autoDay)) {
-      autoDay++;
-    }
-    currentDay = autoDay;
-
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('practiceWorkspace').classList.remove('hidden');
-    history.pushState({ page: 'workspace' }, '');
-    loadUserWorkspace();
-  } else {
-    alert("Invalid Username or PIN!");
-  }
+ var todayDay=getTodayAllowedDay();
+ lastValidDay=todayDay;
+ syncSelectorsToDay(todayDay);
+ show(todayDay);
+ renderCustomList();
+ updateResetDropdown();
 }
 
-function isDayCompletedForUser(user, day) {
-  if (!user || !user.userAnswers) return false;
-  let count = 0;
-  for (let i = 0; i < 20; i++) {
-    if (user.userAnswers[`D${day}_Q${i}`]) count++;
+function show(d){
+ var a=questionsForDay(d), old=saved(), ans=old[d]||{};
+ var out="<div class='panel'><h2>Day "+d+" / "+TOTAL_DAYS+"</h2><p class='small'>Answer the questions first, then tap Check.</p></div>";
+ for(var i=0;i<a.length;i++){
+  var x=a[i];
+  out+="<div class='q' id='q"+i+"'><span class='badge badge-"+x.section+"'>"+x.cat+"</span><br><b>"+(i+1)+". "+x.q+"</b>";
+  for(var j=0;j<x.opts.length;j++){
+   var checked=ans[i]===x.opts[j]?" checked":"";
+   out+="<label class='option'><input type='radio' name='q"+i+"' value='"+x.opts[j].replace(/'/g,"&#39;")+"'"+checked+">"+String.fromCharCode(65+j)+". "+x.opts[j]+"</label>";
   }
-  return count === 20;
+  out+="</div>";
+ }
+ out+="<div class='panel' id='score'>"+(old[d+"_score"]?"Last score: "+old[d+"_score"]:"")+"</div>";
+ document.getElementById("app").innerHTML=out;
+ progress();
 }
 
-function getCompletedDaysArray(user) {
-  let completed = [];
-  for(let d = 1; d <= 30; d++) {
-    if (isDayCompletedForUser(user, d)) {
-      completed.push(d);
-    }
-  }
-  return completed;
+function check(){
+ var d=+document.getElementById("day").value, a=questionsForDay(d), s=saved(), score=0;
+ for(var i=0;i<a.length;i++){
+  var box=document.getElementById("q"+i), sel=box.querySelector("input:checked");
+  box.classList.remove("correct","wrong");
+  if(sel){s[d]=s[d]||{};s[d][i]=sel.value;if(sel.value===a[i].ans){score++;box.classList.add("correct")}else box.classList.add("wrong")}
+  else box.classList.add("wrong");
+ }
+ s[d+"_score"]=score+"/"+a.length;
+ if(score===a.length){s[d+"_done"]=true}
+ save(s);
+ document.getElementById("score").innerHTML="<h2>🎯 Score: "+score+" / "+a.length+"</h2>"+(score===a.length?"<b>🎉 Day complete!</b>":"Try the wrong ones again.");
+ progress();
+ updateResetDropdown();
 }
 
-function logoutStudent() {
-  currentActiveUser = null;
-  document.getElementById('loginUsername').value = '';
-  document.getElementById('loginPin').value = '';
-  document.getElementById('practiceWorkspace').classList.add('hidden');
-  document.getElementById('loginScreen').classList.remove('hidden');
+function clearDay(){
+ var d=+document.getElementById("day").value, s=saved();
+ delete s[d]; delete s[d+"_score"]; delete s[d+"_done"]; save(s); show(d); updateResetDropdown();
 }
 
-function loadUserWorkspace() {
-  document.getElementById('userDisplayName').innerText = `${currentActiveUser.avatar || '🎓'} ${currentActiveUser.id}`;
-  document.getElementById('userClassBadge').innerText = currentActiveUser.class;
-  currentQIndex = 0;
-  refreshStatsUI();
-  renderQuestion();
+function progress(){
+ var s=saved(), n=0, totalPoints=0, totalAttempted=0, totalCorrect=0;
+ for(var i=1;i<=TOTAL_DAYS;i++){
+  if(s[i+"_done"]) n++;
+  if(s[i+"_score"]){
+   var parts=s[i+"_score"].split("/");
+   var sc=parseInt(parts[0]), tot=parseInt(parts[1]);
+   totalCorrect+=sc; totalAttempted+=tot;
+   totalPoints+=(sc*10);
+  }
+ }
+ var acc=totalAttempted>0?Math.round((totalCorrect/totalAttempted)*100):0;
+ document.getElementById("statStreak").innerText=n;
+ document.getElementById("statPoints").innerText=totalPoints;
+ document.getElementById("statAccuracy").innerText=acc+"%";
+ document.getElementById("progress").innerHTML="<b>Progress: "+n+" / "+TOTAL_DAYS+" days complete</b> (6-month plan)<br>Today's day (by calendar): <b>Day "+getTodayAllowedDay()+"</b> — days beyond this need the PIN to unlock.";
 }
 
-function refreshStatsUI() {
-  if(!currentActiveUser) return;
-  document.getElementById('streakCount').innerText = currentActiveUser.streak || 0;
-  document.getElementById('totalPoints').innerText = currentActiveUser.points || 0;
-  document.getElementById('wrongCount').innerText = currentActiveUser.wrong || 0;
-  
-  let totalAttempted = (currentActiveUser.points / 10) + currentActiveUser.wrong;
-  let accuracy = totalAttempted > 0 ? Math.round(((currentActiveUser.points / 10) / totalAttempted) * 100) : 0;
-  document.getElementById('reportPercent').innerText = `${accuracy}%`;
+function updateResetDropdown(){
+ var s=saved(), rSel=document.getElementById("resetDaySelect");
+ if(!rSel) return;
+ rSel.innerHTML="<option value=''>Select Completed Day</option>";
+ for(var i=1;i<=TOTAL_DAYS;i++){
+  if(s[i+"_done"]){
+   var o=document.createElement("option"); o.value=i; o.textContent="Day "+i; rSel.appendChild(o);
+  }
+ }
 }
 
-// 100% ZERO OVERLAP CLASS-SPECIFIC QUESTION GENERATOR
-function generateAdaptiveQuestions(userClass, day) {
-  let questions = [];
-
-  const classSeedMap = {
-    "LKG": 1001, "UKG": 1002, "Class 1": 1003, "Class 2": 1004, "Class 3": 1005,
-    "Class 4": 1006, "Class 5": 1007, "Class 6": 1008, "Class 7": 1009, "Class 8": 1010,
-    "Class 9": 1011, "Class 10": 1012, "Class 11": 1013, "Class 12": 1014
-  };
-  let classUniqueCode = classSeedMap[userClass] || 2000;
-
-  if (userClass === "LKG" || userClass === "UKG") {
-    const visualBank = [
-      { q: "Which color is 🔴?", options: ["Red", "Blue", "Green", "Yellow"], ans: "Red" },
-      { q: "Which color is 🟢?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green" },
-      { q: "Which color is 🟡?", options: ["Yellow", "Pink", "Orange", "Purple"], ans: "Yellow" },
-      { q: "Identify Shape: ⭕", options: ["Circle", "Square", "Triangle", "Star"], ans: "Circle" },
-      { q: "Identify Shape: ⬛", options: ["Square", "Circle", "Rectangle", "Oval"], ans: "Square" },
-      { q: "Identify Shape: ⭐", options: ["Star", "Square", "Circle", "Heart"], ans: "Star" },
-      { q: "Count Apple: 🍎", options: ["1", "2", "3", "4"], ans: "1" },
-      { q: "Count Apples: 🍎 🍎 🍎", options: ["3", "2", "4", "5"], ans: "3" },
-      { q: "Count Stars: ⭐ ⭐", options: ["2", "1", "3", "4"], ans: "2" },
-      { q: "Find Dog 🐶", options: ["Dog", "Cat", "Lion", "Tiger"], ans: "Dog" },
-      { q: "Find Elephant 🐘", options: ["Elephant", "Monkey", "Dog", "Bird"], ans: "Elephant" },
-      { q: "What comes after 'A'?", options: ["B", "C", "D", "E"], ans: "B" },
-      { q: "What comes after 'C'?", options: ["D", "E", "F", "G"], ans: "D" },
-      { q: "Count: 1 + 1 = ?", options: ["2", "3", "4", "1"], ans: "2" },
-      { q: "Which one is Sun ☀️?", options: ["Sun", "Moon", "Cloud", "Rain"], ans: "Sun" },
-      { q: "Which one is Ice-Cream 🍦?", options: ["Ice-Cream", "Cake", "Pizza", "Apple"], ans: "Ice-Cream" },
-      { q: "Count Balloons: 🎈 🎈 🎈 🎈", options: ["4", "3", "5", "2"], ans: "4" },
-      { q: "Which shape is Triangle 🔺?", options: ["Triangle", "Circle", "Square", "Star"], ans: "Triangle" },
-      { q: "What comes after '1'?", options: ["2", "3", "4", "5"], ans: "2" },
-      { q: "What color is Milk 🥛?", options: ["White", "Black", "Red", "Green"], ans: "White" }
-    ];
-    questions = visualBank;
-  } 
-  else if (userClass === "Class 1" || userClass === "Class 2" || userClass === "Class 3") {
-    let multiplier = userClass === "Class 1" ? 2 : (userClass === "Class 2" ? 3 : 5);
-    for(let i = 1; i <= 10; i++) {
-      let a = i * multiplier + day;
-      let b = i + 2;
-      questions.push({ q: `CBSE Math (${userClass}): ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b+2}`, `${a+b-1}`, `${a+b+4}`], ans: `${a+b}` });
-    }
-    const primaryEng = [
-      { q: "Plural of 'Cat' is?", options: ["Cats", "Cates", "Caties", "Catss"], ans: "Cats" },
-      { q: "Which one is a Vowel?", options: ["E", "B", "C", "D"], ans: "E" },
-      { q: "Opposite of 'Big' is?", options: ["Small", "Tall", "Heavy", "Huge"], ans: "Small" },
-      { q: "A house of a Dog is called?", options: ["Kennel", "Shed", "Stable", "Den"], ans: "Kennel" },
-      { q: "Select the Noun: 'Rohan is reading.'", options: ["Rohan", "Reading", "Is", "A"], ans: "Rohan" },
-      { q: "Opposite of 'Day' is?", options: ["Night", "Morning", "Noon", "Sun"], ans: "Night" },
-      { q: "Which animal gives us milk?", options: ["Cow", "Lion", "Tiger", "Fox"], ans: "Cow" },
-      { q: "How many days are in a week?", options: ["7", "5", "6", "8"], ans: "7" },
-      { q: "The color of grass is?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green" },
-      { q: "Rhyming word for 'Sun' is?", options: ["Fun", "Bat", "Pin", "Dog"], ans: "Fun" }
-    ];
-    questions.push(...primaryEng);
-  } 
-  else if (userClass === "Class 4" || userClass === "Class 5") {
-    let pText = day % 2 === 1 
-      ? `📖 **JNVST अपठित गद्यांश (Day ${day}):** जवाहर नवोदय विद्यालय में प्रवेश पाने के लिए मानसिक योग्यता, गणित और भाषा परीक्षण की तैयारी महत्वपूर्ण है। समय का सदुपयोग करने वाले छात्र परीक्षा में सफलता प्राप्त करते हैं।`
-      : `📖 **JNVST Passage (Day ${day}):** Navodaya Vidyalayas provide quality education to talented children. Regular self-assessment and mental ability practice help students crack JNVST easily.`;
-
-    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय प्रवेश परीक्षा में सफलता के लिए क्या आवश्यक है?" : "What helps students crack JNVST easily?", options: ["समय का सदुपयोग", "आलस्य", "देर तक सोना", "TV देखना"], ans: day % 2 === 1 ? "समय का सदुपयोग" : "Regular self-assessment" });
-    questions.push({ passage: pText, q: day % 2 === 1 ? "गद्यांश में किस परीक्षा की चर्चा है?" : "Which school entrance exam is mentioned?", options: ["जवाहर नवोदय विद्यालय", "सैनिक स्कूल", "केंद्रीय विद्यालय", "बोर्ड परीक्षा"], ans: day % 2 === 1 ? "जवाहर नवोदय विद्यालय" : "Navodaya Vidyalayas" });
-
-    const jnvBank = [
-      { q: "JNVST Logic: Find the odd one out (असंगत पद चुनें):", options: ["Circle (वृत्त)", "Square (वर्ग)", "Triangle (त्रिभुज)", "Apple (सेब)"], ans: "Apple (सेब)" },
-      { q: "JNVST Math: L.C.M of 12 and 16 is?", options: ["48", "32", "24", "16"], ans: "48" },
-      { q: "JNVST Math: H.C.F of 20 and 30 is?", options: ["10", "5", "15", "20"], ans: "10" },
-      { q: "JNVST Math: Value of 0.5 + 0.25 is?", options: ["0.75", "0.50", "0.85", "0.30"], ans: "0.75" },
-      { q: "JNVST Reasoning: 4, 8, 12, 16, ?", options: ["20", "22", "18", "24"], ans: "20" },
-      { q: "JNVST Math: First 5 prime numbers sum is?", options: ["28", "26", "30", "25"], ans: "28" },
-      { q: "JNVST Mental Ability: 🔺, 🔻, 🔺, 🔻, ?", options: ["🔺", "🔻", "⭕", "⬛"], ans: "🔺" },
-      { q: "JNVST Hindi: 'सूर्य' का पर्यायवाची शब्द है?", options: ["दिनकर", "निशाकर", "सुधाकर", "जलद"], ans: "दिनकर" },
-      { q: "JNVST Math: Average of 10, 20, 30 is?", options: ["20", "15", "25", "30"], ans: "20" },
-      { q: "JNVST Math: 25% of 400 is?", options: ["100", "50", "150", "200"], ans: "100" },
-      { q: "JNVST Math: Perimeter of Square with side 6cm is?", options: ["24 cm", "12 cm", "36 cm", "18 cm"], ans: "24 cm" },
-      { q: "JNVST Reasoning: Mirror Image of 'P' looks like?", options: ["q", "P", "b", "d"], ans: "q" },
-      { q: "JNVST Hindi: 'सफल' का विलोम शब्द है?", options: ["असफल", "विफल", "कुफल", "निष्फल"], ans: "असफल" },
-      { q: "JNVST Math: Write 3/5 as decimal:", options: ["0.6", "0.5", "0.3", "0.8"], ans: "0.6" },
-      { q: "JNVST Reasoning: Complete pattern: 1, 4, 9, 16, ?", options: ["25", "20", "24", "30"], ans: "25" },
-      { q: "JNVST Math: Simple Interest on ₹1000 at 5% for 2 years:", options: ["₹100", "₹50", "₹150", "₹200"], ans: "₹100" },
-      { q: "JNVST Hindi: 'जो पढ़ा-लिखा न हो' उसे कहते हैं?", options: ["अनपढ़", "विद्वान", "साक्षर", "ज्ञानी"], ans: "अनपढ़" },
-      { q: "JNVST Reasoning: Water Image of 'M' looks like?", options: ["W", "M", "E", "3"], ans: "W" }
-    ];
-
-    questions.push(...jnvBank);
-  } 
-  else if (userClass === "Class 6" || userClass === "Class 7" || userClass === "Class 8") {
-    const cbseMiddleBank = [
-      { q: "CBSE Science: Green pigment in leaves is called?", options: ["Chlorophyll", "Stomata", "Xylem", "Phloem"], ans: "Chlorophyll" },
-      { q: "CBSE Science: SI unit of Speed is?", options: ["m/s", "km/h", "meter", "second"], ans: "m/s" },
-      { q: "CBSE SST: Capital of India is?", options: ["New Delhi", "Mumbai", "Kolkata", "Chennai"], ans: "New Delhi" },
-      { q: "CBSE English: Antonym of 'BRAVE' is?", options: ["Coward", "Hero", "Bold", "Strong"], ans: "Coward" },
-      { q: "CBSE Science: Gas released during photosynthesis?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], ans: "Oxygen" },
-      { q: "CBSE SST: Which is the longest river in India?", options: ["Ganga", "Yamuna", "Godavari", "Narmada"], ans: "Ganga" },
-      { q: "CBSE Science: Chemical formula of Water is?", options: ["H2O", "CO2", "NaCl", "O2"], ans: "H2O" },
-      { q: "CBSE English: Identify Pronoun: 'She is a doctor.'", options: ["She", "Is", "Doctor", "A"], ans: "She" },
-      { q: "CBSE SST: Planet known as the 'Red Planet'?", options: ["Mars", "Venus", "Jupiter", "Saturn"], ans: "Mars" },
-      { q: "CBSE Science: Vitamin D deficiency causes?", options: ["Rickets", "Scurvy", "Beri-Beri", "Goitre"], ans: "Rickets" }
-    ];
-
-    for(let i = 1; i <= 10; i++) {
-      let xVal = i + (day % 3) + classUniqueCode % 5 + 2;
-      let coeff = (i % 4) + 2;
-      let rhs = coeff * xVal + 3;
-      cbseMiddleBank.push({
-        q: `CBSE Math (${userClass}): Solve ${coeff}x + 3 = ${rhs}`,
-        options: [`${xVal}`, `${xVal+2}`, `${xVal-1}`, `${xVal+3}`],
-        ans: `${xVal}`
-      });
-    }
-
-    questions = cbseMiddleBank;
-  }
-  else {
-    const cbseHighBank = [
-      { q: "CBSE Physics: Acceleration due to gravity (g) on Earth is approx?", options: ["9.8 m/s²", "8.9 m/s²", "10.8 m/s²", "9.0 m/s²"], ans: "9.8 m/s²" },
-      { q: "CBSE Chemistry: Atomic number of Carbon is?", options: ["6", "12", "8", "14"], ans: "6" },
-      { q: "CBSE Biology: Powerhouse of the cell is?", options: ["Mitochondria", "Nucleus", "Ribosome", "Golgi Body"], ans: "Mitochondria" },
-      { q: "CBSE English: Author of 'Hamlet' is?", options: ["William Shakespeare", "Charles Dickens", "Mark Twain", "Leo Tolstoy"], ans: "William Shakespeare" },
-      { q: "CBSE Economics: Currency of USA is?", options: ["Dollar", "Euro", "Yen", "Pound"], ans: "Dollar" },
-      { q: "CBSE Physics: Unit of Electric Current is?", options: ["Ampere", "Volt", "Ohm", "Watt"], ans: "Ampere" },
-      { q: "CBSE Chemistry: pH of pure water at 25°C is?", options: ["7", "0", "14", "5.6"], ans: "7" },
-      { q: "CBSE Math: Value of sin(90°) is?", options: ["1", "0", "1/2", "√3/2"], ans: "1" },
-      { q: "CBSE Biology: Universal blood donor group is?", options: ["O negative", "AB positive", "A positive", "B negative"], ans: "O negative" },
-      { q: "CBSE SST: Fundamental Rights are in which Part of Indian Constitution?", options: ["Part III", "Part IV", "Part II", "Part I"], ans: "Part III" }
-    ];
-
-    for(let i = 1; i <= 10; i++) {
-      let xVal = i + day + (classUniqueCode % 7) + 1;
-      cbseHighBank.push({
-        q: `CBSE Math (${userClass}): Solve x² - ${xVal * xVal} = 0 (positive x):`,
-        options: [`${xVal}`, `${xVal + 3}`, `${xVal - 1}`, `${xVal * 2}`],
-        ans: `${xVal}`
-      });
-    }
-
-    questions = cbseHighBank;
-  }
-
-  let dayResetSeed = (currentActiveUser && currentActiveUser.dayResetSeeds && currentActiveUser.dayResetSeeds[`D${day}`]) || 0;
-  let userSeed = currentActiveUser ? (currentActiveUser.num || 1) * 100 + day * 10 + classUniqueCode + dayResetSeed * 777 : day * 5;
-  
-  let randomizedQuestions = shuffleArray(questions.slice(0, 20), userSeed);
-
-  randomizedQuestions = randomizedQuestions.map((qItem, idx) => {
-    let optSeed = userSeed + idx * 7;
-    return {
-      ...qItem,
-      shuffledOptions: shuffleArray(qItem.options, optSeed)
-    };
-  });
-
-  return randomizedQuestions;
+function resetSelectedDay(){
+ var rSel=document.getElementById("resetDaySelect");
+ if(!rSel||!rSel.value){alert("Please select a completed day to reset.");return}
+ var d=+rSel.value;
+ if(confirm("Are you sure you want to reset Day "+d+"?")){
+  var s=saved();
+  delete s[d]; delete s[d+"_score"]; delete s[d+"_done"];
+  save(s);
+  alert("Day "+d+" has been reset!");
+  updateResetDropdown();
+  if(+document.getElementById("day").value===d) show(d);
+ }
 }
 
-function isDayCompleted(day) {
-  return isDayCompletedForUser(currentActiveUser, day);
+function addCustom(){
+ var section=document.getElementById("cSection").value;
+ var category=document.getElementById("cCategory").value.trim()||"Custom Topic";
+ var q=document.getElementById("cQ").value.trim();
+ var A=document.getElementById("cA").value.trim();
+ var B=document.getElementById("cB").value.trim();
+ var C=document.getElementById("cC").value.trim();
+ var D=document.getElementById("cD").value.trim();
+ var ansLetter=document.getElementById("cAns").value;
+ if(!q||!A||!B||!C||!D){alert("Please fill in the question and all four options.");return}
+ var opts=[A,B,C,D];
+ var ans=opts[{A:0,B:1,C:2,D:3}[ansLetter]];
+ var list=customQs();
+ list.push({section:section,category:category,q:q,opts:opts,ans:ans});
+ saveCustom(list);
+ POOLS[section]=buildPool(section);
+ document.getElementById("cCategory").value="";
+ document.getElementById("cQ").value="";
+ document.getElementById("cA").value="";
+ document.getElementById("cB").value="";
+ document.getElementById("cC").value="";
+ document.getElementById("cD").value="";
+ renderCustomList();
+ alert("Question added! It's now included in the practice mix.");
 }
 
-function handleOptionClick(selectedOpt, correctAns) {
-  let qKey = `D${currentDay}_Q${currentQIndex}`;
-  if (currentActiveUser.userAnswers[qKey]) return;
-
-  currentActiveUser.userAnswers[qKey] = selectedOpt;
-
-  if (selectedOpt === correctAns) {
-    currentActiveUser.points = (currentActiveUser.points || 0) + 10;
-    playSound('correct');
-    triggerSparkleBurst();
-  } else {
-    currentActiveUser.wrong = (currentActiveUser.wrong || 0) + 1;
-    playSound('wrong');
-  }
-
-  if (currentQIndex === 19) {
-    currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
-    currentActiveUser.lastCompletedDate = getTodayString();
-    setTimeout(() => {
-      alert("🎉 Fantastic! Day " + currentDay + " Complete! Next Day will unlock tomorrow!");
-    }, 200);
-  }
-
-  let dbKey = currentActiveUser.id.replace(/\s+/g, '_');
-  try { db.ref('users/' + dbKey).set(currentActiveUser); } catch(e){}
-
-  refreshStatsUI();
-  renderQuestion();
+function deleteCustom(idx){
+ var list=customQs();
+ var removed=list.splice(idx,1)[0];
+ saveCustom(list);
+ if(removed) POOLS[removed.section]=buildPool(removed.section);
+ renderCustomList();
 }
 
-function renderQuestion() {
-  if (!currentActiveUser) return;
-  let questions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
-  document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
+function renderCustomList(){
+ var list=customQs();
+ var box=document.getElementById("customList");
+ if(list.length===0){box.innerHTML="<p class='small'>No custom questions added yet.</p>";return}
+ var html="<p class='small'><b>Your added questions ("+list.length+"):</b></p>";
+ list.forEach(function(c,idx){
+  html+="<div class='custom-item'><span class='badge badge-"+c.section+"'>"+c.category+"</span><br>"+c.q+" <button class='danger' style='padding:4px 8px;font-size:12px' onclick='deleteCustom("+idx+")'>Delete</button></div>";
+ });
+ box.innerHTML=html;
+}
 
-  let nextDayBtn = document.getElementById('btnNextDay');
-  let todayStr = getTodayString();
-  let dayFinished = isDayCompleted(currentDay);
-  let isNewDateAvailable = currentActiveUser.lastCompletedDate !== todayStr;
-
-  if (dayFinished && isNewDateAvailable) {
-    nextDayBtn.disabled = false;
-    nextDayBtn.style.opacity = "1";
-  } else {
-    nextDayBtn.disabled = true;
-    nextDayBtn.style.opacity = "0.5";
-  }
-
-  let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
-  let fill = document.getElementById('progressFill');
-
-  if (currentQIndex >= questions.length) {
-    passageBox.classList.add('hidden');
-    qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
-    optsBox.innerHTML = '';
-    fill.style.width = '100%';
-    document.getElementById('btnNextQuestion').disabled = true;
-    return;
-  }
-
-  fill.style.width = `${Math.round((currentQIndex / questions.length) * 100)}%`;
-  let q = questions[currentQIndex];
-
-  if (q.passage) { passageBox.innerHTML = q.passage; passageBox.classList.remove('hidden'); }
-  else { passageBox.classList.add('hidden'); }
-
-  qBox.innerText = `Q${currentQIndex + 1}. ${q.q}`;
-  optsBox.innerHTML = '';
-
-  let qKey = `D${currentDay}_Q${currentQIndex}`;
-  let alreadyAnswered = currentActiveUser.userAnswers && currentActiveUser.userAnswers[qKey];
-
-  let btnBackQ = document.getElementById('btnBackQuestion');
-  let btnNextQ = document.getElementById('btnNextQuestion');
-
-  btnBackQ.disabled = (currentQIndex === 0);
-
-  if (alreadyAnswered) {
-    btnNextQ.disabled = (currentQIndex >= 19);
-  } else {
-    btnNextQ.disabled = true;
-  }
-
-  let displayOpts = q.shuffledOptions || q.options;
-
-  displayOpts.forEach(opt => {
-    let btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.innerText = opt;
-    
-    if (alreadyAnswered) {
-      btn.disabled = true;
-      if (opt === alreadyAnswered) {
-        if (opt === q.ans) {
-          btn.classList.add('selected-correct');
-          btn.innerText = opt + "  ✅ (Your Choice)";
-        } else {
-          btn.classList.add('selected-wrong');
-          btn.innerText = opt + "  ❌ (Your Choice)";
-        }
-      } else if (opt === q.ans) {
-        btn.classList.add('show-actual-correct');
-        btn.innerText = opt + "  ⭐ (Correct Answer)";
-      }
-    } else {
-      btn.onclick = function() { handleOptionClick(opt, q.ans); };
-    }
-    optsBox.appendChild(btn);
+init();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("service-worker.js").catch(function(){});
   });
 }
-
-function navigateQuestion(delta) {
-  let target = currentQIndex + delta;
-  if (target >= 0 && target < 20) {
-    currentQIndex = target;
-    renderQuestion();
-  }
-}
-
-function changeDay(delta) {
-  if (delta > 0) {
-    if (!isDayCompleted(currentDay)) {
-      alert("🔒 Complete all 20 questions of Day " + currentDay + " first!");
-      return;
-    }
-    let todayStr = getTodayString();
-    if (currentActiveUser.lastCompletedDate === todayStr) {
-      let overridePin = prompt("🔒 Day " + (currentDay + 1) + " unlocks tomorrow!\n\nEnter Admin PIN to unlock early:");
-      if (overridePin === getAdminPin()) {
-        alert("🔓 Day Unlocked by Admin!");
-      } else {
-        if(overridePin) alert("Incorrect Admin PIN!");
-        return;
-      }
-    }
-  }
-  if (currentDay + delta >= 1) {
-    currentDay += delta;
-    currentQIndex = 0;
-    renderQuestion();
-  }
-}
-
-function openAdminModal() {
-  document.getElementById('adminPinInput').value = '';
-  document.getElementById('adminAuthBox').classList.remove('hidden');
-  document.getElementById('adminContentBox').classList.add('hidden');
-  document.getElementById('adminModal').classList.remove('hidden');
-  history.pushState({ page: 'admin' }, '');
-}
-
-function closeAdminModal() { 
-  document.getElementById('adminModal').classList.add('hidden'); 
-}
-
-function verifyAdminPin() {
-  if (document.getElementById('adminPinInput').value === getAdminPin()) {
-    document.getElementById('adminAuthBox').classList.add('hidden');
-    document.getElementById('adminContentBox').classList.remove('hidden');
-    renderAdminDashboardSummary();
-    renderAdminUsersList();
-  } else { alert("Incorrect Master Admin PIN!"); }
-}
-
-function toggleAddStudentForm() {
-  let formBox = document.getElementById('addStudentCollapsibleForm');
-  let arrow = document.getElementById('addStudentArrow');
-  if (formBox.classList.contains('hidden')) {
-    formBox.classList.remove('hidden');
-    arrow.innerText = '▲';
-  } else {
-    formBox.classList.add('hidden');
-    arrow.innerText = '▼';
-  }
-}
-
-function toggleStudentManagementForm() {
-  let mgmtBox = document.getElementById('studentMgmtCollapsibleBox');
-  let arrow = document.getElementById('studentMgmtArrow');
-  if (mgmtBox.classList.contains('hidden')) {
-    mgmtBox.classList.remove('hidden');
-    arrow.innerText = '▲';
-  } else {
-    mgmtBox.classList.add('hidden');
-    arrow.innerText = '▼';
-  }
-}
-
-// EXPANDABLE METRIC DETAILS ON CLICKING DASHBOARD CARDS
-function toggleDashMetricDetail(type) {
-  let detailBox = document.getElementById('dashMetricDetailBox');
-  let title = document.getElementById('dashDetailTitle');
-  let content = document.getElementById('dashDetailContent');
-
-  if (activeDashMetricType === type && !detailBox.classList.contains('hidden')) {
-    detailBox.classList.add('hidden');
-    activeDashMetricType = null;
-    return;
-  }
-
-  activeDashMetricType = type;
-  detailBox.classList.remove('hidden');
-  content.innerHTML = '';
-
-  if (type === 'students') {
-    title.innerText = "🏫 Class-wise Student Distribution";
-    let classCounts = {};
-    globalUsersList.forEach(u => {
-      let cName = u.class || 'Unassigned';
-      classCounts[cName] = (classCounts[cName] || 0) + 1;
-    });
-    Object.keys(classCounts).forEach(c => {
-      content.innerHTML += `<div class="dash-detail-item"><span>${c}</span><strong>${classCounts[c]} Student(s)</strong></div>`;
-    });
-  } 
-  else if (type === 'points') {
-    title.innerText = "🏆 Top Performing Leaderboard";
-    let sortedUsers = [...globalUsersList].sort((a,b) => (b.points || 0) - (a.points || 0));
-    sortedUsers.forEach((u, idx) => {
-      content.innerHTML += `<div class="dash-detail-item"><span>#${idx+1} ${u.avatar || '🎓'} ${u.id}</span><strong>⭐ ${u.points || 0} pts</strong></div>`;
-    });
-  } 
-  else if (type === 'solved') {
-    title.innerText = "📝 Total Solved Questions Breakdown";
-    globalUsersList.forEach(u => {
-      let solved = ((u.points || 0) / 10) + (u.wrong || 0);
-      content.innerHTML += `<div class="dash-detail-item"><span>${u.id} (${u.class})</span><strong>${solved} Qs Solved</strong></div>`;
-    });
-  } 
-  else if (type === 'accuracy') {
-    title.innerText = "🎯 Student Accuracy Rates";
-    globalUsersList.forEach(u => {
-      let totalSolved = ((u.points || 0) / 10) + (u.wrong || 0);
-      let acc = totalSolved > 0 ? Math.round((((u.points || 0) / 10) / totalSolved) * 100) : 0;
-      content.innerHTML += `<div class="dash-detail-item"><span>${u.id}</span><strong>${acc}% Acc</strong></div>`;
-    });
-  }
-}
-
-function renderAdminDashboardSummary() {
-  let activeStudents = globalUsersList.filter(u => u.active !== false).length;
-  let totalPts = 0;
-  let totalWrong = 0;
-
-  globalUsersList.forEach(u => {
-    totalPts += (u.points || 0);
-    totalWrong += (u.wrong || 0);
-  });
-
-  let totalSolved = (totalPts / 10) + totalWrong;
-  let avgAccuracy = totalSolved > 0 ? Math.round(((totalPts / 10) / totalSolved) * 100) : 0;
-
-  document.getElementById('dashTotalStudents').innerText = activeStudents;
-  document.getElementById('dashTotalPoints').innerText = totalPts;
-  document.getElementById('dashTotalAttempted').innerText = totalSolved;
-  document.getElementById('dashAvgAccuracy').innerText = `${avgAccuracy}%`;
-}
-
-function renderAdminUsersList() {
-  let list = document.getElementById('adminUsersList');
-  list.innerHTML = '';
-  globalUsersList.forEach((u) => {
-    let row = document.createElement('div');
-    row.className = 'admin-student-card';
-    let isChecked = u.active !== false ? 'checked' : '';
-    
-    let completedDays = getCompletedDaysArray(u);
-    let dayOptionsHTML = '';
-    
-    if (completedDays.length > 0) {
-      completedDays.forEach(dNum => {
-        dayOptionsHTML += `<option value="${dNum}">Day ${dNum}</option>`;
-      });
-    } else {
-      dayOptionsHTML = `<option value="">No Completed Days</option>`;
-    }
-
-    // CLEAN STUDENT CARD - MIDDLE LINE REMOVED
-    row.innerHTML = `
-      <div class="admin-student-header">
-        <div>
-          <strong>${u.avatar || '🎓'} ${u.id}</strong> <span class="badge">${u.class}</span>
-        </div>
-        <small style="color:var(--text-muted)">PIN: <strong>${u.pin}</strong></small>
-      </div>
-
-      <div class="admin-student-actions">
-        <div style="display:flex; align-items:center; gap:4px; margin-bottom:4px; width:100%;">
-          <select id="resetDaySelect_${u.id.replace(/\s+/g, '_')}" style="padding:4px; font-size:0.75rem; border-radius:8px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border);" ${completedDays.length === 0 ? 'disabled' : ''}>
-            ${dayOptionsHTML}
-          </select>
-          <button class="btn btn-secondary" onclick="resetSpecificDay('${u.id}')" style="padding:4px 8px; font-size:0.75rem;" ${completedDays.length === 0 ? 'disabled' : ''}>🔄 Reset Day</button>
-        </div>
-        <button class="btn btn-secondary" onclick="resetUserProgress('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">🔄 All Reset</button>
-        <button class="btn btn-secondary" onclick="resetStudentPin('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">✏️ PIN</button>
-        <div style="display:flex; align-items:center; gap:4px;">
-          <small style="font-size:0.7rem; color:var(--text-muted)">Active:</small>
-          <label class="switch">
-            <input type="checkbox" ${isChecked} onchange="toggleUserActiveStatus('${u.id}', this.checked)">
-            <span class="slider"></span>
-          </label>
-        </div>
-        ${u.id !== "Ayush 01" ? `<button class="btn btn-danger" onclick="deleteStudent('${u.id}')" style="padding:5px 8px; font-size:0.75rem;">🗑️ Del</button>` : ''}
-      </div>
-    `;
-    list.appendChild(row);
-  });
-}
-
-function resetSpecificDay(id) {
-  let u = globalUsersList.find(x => x.id === id);
-  if (!u) return;
-  
-  let selectElem = document.getElementById(`resetDaySelect_${id.replace(/\s+/g, '_')}`);
-  if (!selectElem || !selectElem.value) {
-    alert("No completed day selected!");
-    return;
-  }
-
-  let targetDay = parseInt(selectElem.value, 10);
-
-  if (confirm(`Restart Day ${targetDay} for ${id} with NEW Questions?`)) {
-    if (!u.userAnswers) u.userAnswers = {};
-    if (!u.dayResetSeeds) u.dayResetSeeds = {};
-
-    for (let i = 0; i < 20; i++) {
-      delete u.userAnswers[`D${targetDay}_Q${i}`];
-    }
-
-    u.dayResetSeeds[`D${targetDay}`] = (u.dayResetSeeds[`D${targetDay}`] || 0) + 1;
-
-    let dbKey = id.replace(/\s+/g, '_');
-    try { db.ref('users/' + dbKey).set(u); } catch(e){}
-    localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
-
-    alert(`Day ${targetDay} successfully restarted with NEW questions for ${id}!`);
-    renderAdminDashboardSummary();
-    renderAdminUsersList();
-
-    if (currentActiveUser && currentActiveUser.id === id) {
-      currentDay = targetDay;
-      currentQIndex = 0;
-      renderQuestion();
-    }
-  }
-}
-
-function resetUserProgress(id) {
-  let u = globalUsersList.find(x => x.id === id);
-  if (u) {
-    if (confirm(`Reset all practice progress for ${id}? They will start from Day 1 Question 1.`)) {
-      u.points = 0;
-      u.wrong = 0;
-      u.streak = 0;
-      u.userAnswers = {};
-      u.dayResetSeeds = {};
-      u.lastCompletedDate = "";
-      let dbKey = id.replace(/\s+/g, '_');
-      try { db.ref('users/' + dbKey).set(u); } catch(e){}
-      localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
-      alert(`Progress reset for ${id}!`);
-      renderAdminDashboardSummary();
-      renderAdminUsersList();
-      if (currentActiveUser && currentActiveUser.id === id) {
-        currentDay = 1;
-        currentQIndex = 0;
-        loadUserWorkspace();
-      }
-    }
-  }
-}
-
-function resetStudentPin(id) {
-  let u = globalUsersList.find(x => x.id === id);
-  if (u) {
-    let newPin = prompt(`Enter new 4-digit PIN for ${id}:`, u.pin);
-    if (newPin && newPin.length === 4) {
-      u.pin = newPin;
-      let dbKey = id.replace(/\s+/g, '_');
-      try { db.ref('users/' + dbKey).set(u); } catch(e){}
-      localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
-      alert(`PIN Updated for ${id}! New PIN: ${newPin}`);
-      renderAdminUsersList();
-    } else if(newPin) { alert("PIN must be 4 digits!"); }
-  }
-}
-
-function toggleUserActiveStatus(id, isActive) {
-  let u = globalUsersList.find(x => x.id === id);
-  if(u) {
-    u.active = isActive;
-    let dbKey = id.replace(/\s+/g, '_');
-    try { db.ref('users/' + dbKey).set(u); } catch(e){}
-    localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
-    renderAdminDashboardSummary();
-  }
-}
-
-function addNewStudent() {
-  let name = document.getElementById('newStudentName').value.trim();
-  let gender = document.getElementById('newStudentGender').value;
-  let cls = document.getElementById('newStudentClass').value;
-  if (!name) { alert("Enter Student Name!"); return; }
-
-  let nextNum = globalUsersList.length + 1;
-  let formattedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
-  let generatedID = `${name} ${formattedNum}`;
-  let randomPin = Math.floor(1000 + Math.random() * 9000).toString();
-  let avatar = getRandomAvatar(gender, nextNum);
-
-  let newUser = { 
-    id: generatedID, name: name, num: nextNum, pin: randomPin, class: cls, gender: gender,
-    avatar: avatar, active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, lastCompletedDate: "" 
-  };
-
-  globalUsersList.push(newUser);
-  let dbKey = generatedID.replace(/\s+/g, '_');
-  try { db.ref('users/' + dbKey).set(newUser); } catch(e){}
-  localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
-
-  alert(`Student Created!\n\nUsername: ${generatedID}\nPIN: ${randomPin}`);
-  document.getElementById('newStudentName').value = '';
-  toggleAddStudentForm();
-  renderAdminDashboardSummary();
-  renderAdminUsersList();
-}
-
-function deleteStudent(id) {
-  if (confirm(`Delete student ${id}?`)) {
-    globalUsersList = globalUsersList.filter(u => u.id !== id);
-    let dbKey = id.replace(/\s+/g, '_');
-    try { db.ref('users/' + dbKey).remove(); } catch(e){}
-    localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
-    renderAdminDashboardSummary();
-    renderAdminUsersList();
-  }
-}
-
-function updateAdminPin() {
-  let p = document.getElementById('changeAdminPinVal').value.trim();
-  if (p.length >= 4) {
-    localStorage.setItem('app_master_pin', p);
-    alert("Master Admin PIN Updated!");
-    closeAdminModal();
-  } else { alert("PIN must be at least 4 digits."); }
-}
-
-window.onpopstate = function(e) {
-  let adminModal = document.getElementById('adminModal');
-  if (adminModal && !adminModal.classList.contains('hidden')) {
-    adminModal.classList.add('hidden');
-    return;
-  }
-
-  let practiceWorkspace = document.getElementById('practiceWorkspace');
-  if (practiceWorkspace && !practiceWorkspace.classList.contains('hidden')) {
-    if (confirm("Logout current student?")) {
-      logoutStudent();
-    } else {
-      history.pushState({ page: 'workspace' }, '');
-    }
-    return;
-  }
-
-  let now = new Date().getTime();
-  if (now - backPressTime < 2000) {
-    return;
-  } else {
-    backPressTime = now;
-    showToast("Press back again to exit");
-    history.pushState({ page: 'login' }, '');
-  }
-};
-
-document.addEventListener('click', function(e) {
-  let wrapper = document.querySelector('.autocomplete-wrapper');
-  if (wrapper && !wrapper.contains(e.target)) {
-    let box = document.getElementById('suggestionsBox');
-    if(box) box.classList.add('hidden');
-  }
-});
-
-window.onload = function() {
-  let savedTheme = localStorage.getItem('app_theme') || 'dark';
-  document.body.setAttribute('data-theme', savedTheme);
-  document.getElementById('themeIconBtn').innerText = savedTheme === 'light' ? '☀️' : '🌙';
-  history.pushState({ page: 'login' }, '');
-  initCloudSync();
-};
 </script>
 </body>
 </html>
