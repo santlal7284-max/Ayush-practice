@@ -189,10 +189,10 @@
       <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
       <div id="passageContainer" class="passage-box hidden"></div>
       
-      <!-- QUESTION HEADER WITH SPEAKER READ-ALOUD BUTTON (VISIBLE LKG TO CLASS 3) -->
+      <!-- QUESTION HEADER WITH SPEAKER READ-ALOUD BUTTON (VISIBLE ONLY FOR LKG-CLASS 3) -->
       <div class="question-header">
         <div class="question-box" id="questionText">Loading...</div>
-        <button class="speech-btn hidden" id="speechBtn" onclick="readQuestionAndOptions()" title="Listen Question & Options">🔊</button>
+        <button class="speech-btn hidden" id="speechBtn" onclick="readQuestionAndOptionsWithTranslation()" title="Listen Question & Options with Hindi Translation">🔊</button>
       </div>
 
       <div class="options-grid" id="optionsContainer"></div>
@@ -471,100 +471,69 @@ function initCloudSync() {
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
-// --- SIMPLE OFFLINE TRANSLATION MAPPER FOR VOICE READER ---
-function getHindiTranslation(text) {
-  let t = text.toLowerCase();
-  const dict = {
-    "which color is red": "यह कौन सा रंग है? लाल",
-    "which color is green": "यह कौन सा रंग है? हरा",
-    "which color is yellow": "यह कौन सा रंग है? पीला",
-    "identify shape: circle": "आकार पहचानिए: वृत्त",
-    "identify shape: square": "आकार पहचानिए: वर्ग",
-    "identify shape: star": "आकार पहचानिए: तारा",
-    "count apple": "सेब की गिनती कीजिए",
-    "count apples": "सेबों की गिनती कीजिए",
-    "count stars": "तारों की गिनती कीजिए",
-    "find dog": "कुत्ता खोजिए",
-    "find elephant": "हाथी खोजिए",
-    "what comes after letter 'a'": "अक्षर ए के बाद क्या आता है?",
-    "what comes after letter 'c'": "अक्षर सी के बाद क्या आता है?",
-    "count: 1 plus 1 equals": "गिनती कीजिए: 1 जमा 1 कितने होते हैं?",
-    "which one is sun": "सूरज कौन सा है?",
-    "which one is ice-cream": "आइसक्रीम कौन सी है?",
-    "count balloons": "गुब्बारों की गिनती कीजिए",
-    "which shape is triangle": "त्रिभुज आकार कौन सा है?",
-    "what comes after number '1'": "संख्या 1 के बाद क्या आता है?",
-    "what color is milk": "दूध का रंग क्या है?",
-    "red": "लाल", "blue": "नीला", "green": "हरा", "yellow": "पीला",
-    "circle": "वृत्त", "square": "वर्ग", "triangle": "त्रिभुज", "star": "तारा",
-    "white": "सफेद", "dog": "कुत्ता", "elephant": "हाथी"
-  };
+// --- SIMPLE BASIC HINDI TRANSLATION DICTIONARY FOR LKG-CLASS 3 VOICE ---
+const basicHindiMap = {
+  "red": "लाल", "blue": "नीला", "green": "हरा", "yellow": "पीला",
+  "circle": "गोलाकार वृत्त", "square": "वर्ग", "triangle": "त्रिभुज", "star": "तारा",
+  "apple": "सेब", "dog": "कुत्ता", "elephant": "हाथी", "sun": "सूरज", "milk": "दूध",
+  "ice-cream": "आइसक्रीम", "cats": "बिल्लियां", "small": "छोटा", "kennel": "कुत्ते का घर",
+  "night": "रात", "cow": "गाय", "fun": "मज़ा", "white": "सफेद"
+};
 
-  for (let key in dict) {
-    if (t.includes(key)) {
-      return dict[key];
+function translateToHindiVoiceText(text) {
+  let lower = text.toLowerCase();
+  for (let eng in basicHindiMap) {
+    if (lower.includes(eng)) {
+      return `यानी हिंदी में: ${basicHindiMap[eng]}`;
     }
   }
-  return text; // fallback
+  return "";
 }
 
-// --- TEXT TO SPEECH (ORIGINAL LANGUAGE -> THEN HINDI TRANSLATION) ---
-function readQuestionAndOptions() {
+// --- TEXT TO SPEECH (ORIGINAL LANGUAGE + HINDI TRANSLATION) ---
+function readQuestionAndOptionsWithTranslation() {
   if (!('speechSynthesis' in window)) {
     alert("Speech Synthesis not supported in this browser!");
     return;
   }
   
-  window.speechSynthesis.cancel(); // Stop ongoing speech
+  window.speechSynthesis.cancel(); // Stop any ongoing speech
 
   if (!currentLoadedQuestions.length || currentQIndex >= currentLoadedQuestions.length) return;
 
   let qObj = currentLoadedQuestions[currentQIndex];
   let cleanQ = qObj.q.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+  
+  let hindiTransQ = translateToHindiVoiceText(cleanQ);
+
+  let fullSpeechText = `Question: ${cleanQ}. `;
+  if (hindiTransQ) fullSpeechText += `${hindiTransQ}. `;
+
   let opts = qObj.shuffledOptions || qObj.options || [];
+  let labels = ["Option A", "Option B", "Option C", "Option D"];
+
+  opts.forEach((opt, idx) => {
+    let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+    let hindiTransOpt = translateToHindiVoiceText(cleanOpt);
+    fullSpeechText += `${labels[idx]}: ${cleanOpt}. `;
+    if (hindiTransOpt) fullSpeechText += `${hindiTransOpt}. `;
+  });
+
+  let utterance = new SpeechSynthesisUtterance(fullSpeechText);
+  utterance.lang = 'en-US'; // Speaks original first, then Hindi words clearly
+  utterance.rate = 0.85;
 
   let speechBtn = document.getElementById('speechBtn');
   if (speechBtn) speechBtn.innerText = '🔊 ...';
 
-  // Step 1: Speak Original Language
-  let originalText = `Question ${currentQIndex + 1}. ${cleanQ}. `;
-  opts.forEach((opt, idx) => {
-    let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-    originalText += `Option ${idx + 1}: ${cleanOpt}. `;
-  });
-
-  let utterOriginal = new SpeechSynthesisUtterance(originalText);
-  utterOriginal.lang = 'en-US';
-  utterOriginal.rate = 0.9;
-
-  // Step 2: Speak Hindi Translation after original finishes
-  utterOriginal.onend = function() {
-    let hindiQ = getHindiTranslation(cleanQ);
-    let hindiText = `हिंदी अनुवाद: प्रश्न ${currentQIndex + 1}. ${hindiQ}. `;
-    opts.forEach((opt, idx) => {
-      let hindiOpt = getHindiTranslation(opt);
-      hindiText += `विकल्प ${idx + 1}: ${hindiOpt}. `;
-    });
-
-    let utterHindi = new SpeechSynthesisUtterance(hindiText);
-    utterHindi.lang = 'hi-IN';
-    utterHindi.rate = 0.9;
-
-    utterHindi.onend = function() {
-      if (speechBtn) speechBtn.innerText = '🔊';
-    };
-    utterHindi.onerror = function() {
-      if (speechBtn) speechBtn.innerText = '🔊';
-    };
-
-    window.speechSynthesis.speak(utterHindi);
+  utterance.onend = function() {
+    if (speechBtn) speechBtn.innerText = '🔊';
   };
-
-  utterOriginal.onerror = function() {
+  utterance.onerror = function() {
     if (speechBtn) speechBtn.innerText = '🔊';
   };
 
-  window.speechSynthesis.speak(utterOriginal);
+  window.speechSynthesis.speak(utterance);
 }
 
 function showSuggestions(showAll = false) {
@@ -655,6 +624,18 @@ function logoutStudent() {
 function loadUserWorkspace() {
   document.getElementById('userDisplayName').innerText = `${currentActiveUser.avatar || '🎓'} ${currentActiveUser.id}`;
   document.getElementById('userClassBadge').innerText = currentActiveUser.class;
+  
+  // SHOW/HIDE SPEAKER BUTTON BASED ON CLASS (LKG to Class 3 ONLY)
+  let speechBtn = document.getElementById('speechBtn');
+  let allowedClasses = ["LKG", "UKG", "Class 1", "Class 2", "Class 3"];
+  if (speechBtn) {
+    if (allowedClasses.includes(currentActiveUser.class)) {
+      speechBtn.classList.remove('hidden');
+    } else {
+      speechBtn.classList.add('hidden');
+    }
+  }
+
   currentQIndex = 0;
   refreshStatsUI();
   renderQuestion();
@@ -877,15 +858,6 @@ function renderQuestion() {
   currentLoadedQuestions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
   document.getElementById('currentDayLabel').innerText = `Day ${currentDay}`;
 
-  // Check if student class is LKG, UKG, Class 1, Class 2, or Class 3 to show speaker button
-  let cls = currentActiveUser.class;
-  let speechBtn = document.getElementById('speechBtn');
-  if (cls === "LKG" || cls === "UKG" || cls === "Class 1" || cls === "Class 2" || cls === "Class 3") {
-    speechBtn.classList.remove('hidden');
-  } else {
-    speechBtn.classList.add('hidden');
-  }
-
   let nextDayBtn = document.getElementById('btnNextDay');
   let todayStr = getTodayString();
   let dayFinished = isDayCompleted(currentDay);
@@ -909,7 +881,6 @@ function renderQuestion() {
     optsBox.innerHTML = '';
     fill.style.width = '100%';
     document.getElementById('btnNextQuestion').disabled = true;
-    if (speechBtn) speechBtn.classList.add('hidden');
     return;
   }
 
