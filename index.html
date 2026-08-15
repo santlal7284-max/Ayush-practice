@@ -78,6 +78,7 @@
     .progress-fill { height: 100%; background: linear-gradient(90deg, #10B981, #059669); width: 0%; transition: width 0.3s; }
     
     .passage-box { background: var(--input-bg); border-left: 5px solid var(--primary); padding: 14px; border-radius: 12px; font-size: 1.05rem; line-height: 1.5; margin-bottom: 14px; }
+    .tip-box { background: rgba(245, 158, 11, 0.15); border: 1px dashed var(--accent-gold); color: var(--accent-gold); padding: 10px 14px; border-radius: 12px; font-size: 0.9rem; font-weight: 700; margin-top: 14px; }
     
     .question-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0 16px 0; min-height: 60px; }
     .question-box { font-size: 1.25rem; font-weight: 800; text-align: left; line-height: 1.4; flex-grow: 1; }
@@ -195,6 +196,7 @@
       </div>
 
       <div class="options-grid" id="optionsContainer"></div>
+      <div id="tipContainer" class="tip-box hidden"></div>
 
       <div style="margin-top: 16px; display: flex; justify-content: space-between;">
         <button class="btn btn-back-q" id="btnBackQuestion" onclick="navigateQuestion(-1)" style="font-size: 0.85rem; padding: 10px 14px;">← Back Question</button>
@@ -330,7 +332,6 @@ function initFirebaseDeferred() {
     if (user) {
       firebaseAuthReady = true;
       initCloudSync();
-      // AUTOMATIC TRIGGER ON APP OPEN (Silent Sync)
       forceManualCloudSync(true); 
     }
   });
@@ -702,26 +703,26 @@ function generateAdaptiveQuestions(userClass, day) {
 
   if (userClass === "LKG" || userClass === "UKG") {
     const visualBank = [
-      { q: "Which of the following is Red?", options: ["Red 🔴", "Blue 🔵", "Green 🟢", "Yellow 🟡"], ans: "Red 🔴" },
-      { q: "Which of the following is Green?", options: ["Green 🟢", "Blue 🔵", "Red 🔴", "Yellow 🟡"], ans: "Green 🟢" },
-      { q: "Which of the following is Yellow?", options: ["Yellow 🟡", "Pink 🌸", "Orange 🍊", "Purple 🟣"], ans: "Yellow 🟡" },
-      { q: "Which of the following is a Circle?", options: ["Circle ⭕", "Square ⬛", "Triangle 🔺", "Star ⭐"], ans: "Circle ⭕" },
-      { q: "Which of the following is a Square?", options: ["Square ⬛", "Circle ⭕", "Rectangle 🟩", "Oval 🥚"], ans: "Square ⬛" },
-      { q: "Which of the following is a Star?", options: ["Star ⭐", "Square ⬛", "Circle ⭕", "Heart 💖"], ans: "Star ⭐" },
-      { q: "Count Apple: Which option shows 1?", options: ["1 🍎", "2 🍎🍎", "3 🍎🍎🍎", "4 🍎🍎🍎🍎"], ans: "1 🍎" },
-      { q: "Count Apples: Which option shows 3?", options: ["3 🍎🍎🍎", "2 🍎🍎", "4 🍎🍎🍎🍎", "5 🍎🍎🍎🍎🍎"], ans: "3 🍎🍎🍎" },
-      { q: "Count Stars: Which option shows 2?", options: ["2 ⭐⭐", "1 ⭐", "3 ⭐⭐⭐", "4 ⭐⭐⭐⭐"], ans: "2 ⭐⭐" },
-      { q: "Find the Dog in options:", options: ["Dog 🐶", "Cat 🐱", "Lion 🦁", "Tiger 🐯"], ans: "Dog 🐶" },
-      { q: "Find the Elephant in options:", options: ["Elephant 🐘", "Monkey 🐒", "Dog 🐶", "Bird 🐦"], ans: "Elephant 🐘" },
-      { q: "What comes after letter 'A'?", options: ["B", "C", "D", "E"], ans: "B" },
-      { q: "What comes after letter 'C'?", options: ["D", "E", "F", "G"], ans: "D" },
-      { q: "Count: 1 plus 1 equals?", options: ["2", "3", "4", "1"], ans: "2" },
-      { q: "Which one is Sun?", options: ["Sun ☀️", "Moon 🌙", "Cloud ☁️", "Rain 🌧️"], ans: "Sun ☀️" },
-      { q: "Which one is Ice-Cream?", options: ["Ice-Cream 🍦", "Cake 🎂", "Pizza 🍕", "Apple 🍎"], ans: "Ice-Cream 🍦" },
-      { q: "Count Balloons: Which option shows 4?", options: ["4 🎈🎈🎈🎈", "3 🎈🎈🎈", "5 🎈🎈🎈🎈🎈", "2 🎈🎈"], ans: "4 🎈🎈🎈🎈" },
-      { q: "Which of the following is a Triangle?", options: ["Triangle 🔺", "Circle ⭕", "Square ⬛", "Star ⭐"], ans: "Triangle 🔺" },
-      { q: "What comes after number '1'?", options: ["2", "3", "4", "5"], ans: "2" },
-      { q: "What color is Milk?", options: ["White 🥛", "Black 🖤", "Red 🔴", "Green 🟢"], ans: "White 🥛" }
+      { q: "Which of the following is Red?", options: ["Red 🔴", "Blue 🔵", "Green 🟢", "Yellow 🟡"], ans: "Red 🔴", tip: "💡 Tip: Red 🔴 is the color of apples and stop signs!" },
+      { q: "Which of the following is Green?", options: ["Green 🟢", "Blue 🔵", "Red 🔴", "Yellow 🟡"], ans: "Green 🟢", tip: "💡 Tip: Green 🟢 is the color of fresh leaves and grass!" },
+      { q: "Which of the following is Yellow?", options: ["Yellow 🟡", "Pink 🌸", "Orange 🍊", "Purple 🟣"], ans: "Yellow 🟡", tip: "💡 Tip: Yellow 🟡 is the bright color of the sun and bananas!" },
+      { q: "Which of the following is a Circle?", options: ["Circle ⭕", "Square ⬛", "Triangle 🔺", "Star ⭐"], ans: "Circle ⭕", tip: "💡 Tip: A circle ⭕ has no corners, it is completely round!" },
+      { q: "Which of the following is a Square?", options: ["Square ⬛", "Circle ⭕", "Rectangle 🟩", "Oval 🥚"], ans: "Square ⬛", tip: "💡 Tip: A square ⬛ has 4 equal sides and 4 corners!" },
+      { q: "Which of the following is a Star?", options: ["Star ⭐", "Square ⬛", "Circle ⭕", "Heart 💖"], ans: "Star ⭐", tip: "💡 Tip: Stars ⭐ twinkle brightly in the night sky!" },
+      { q: "Count Apple: Which option shows 1?", options: ["1 🍎", "2 🍎🍎", "3 🍎🍎🍎", "4 🍎🍎🍎🍎"], ans: "1 🍎", tip: "💡 Tip: Number 1 means a single item!" },
+      { q: "Count Apples: Which option shows 3?", options: ["3 🍎🍎🍎", "2 🍎🍎", "4 🍎🍎🍎🍎", "5 🍎🍎🍎🍎🍎"], ans: "3 🍎🍎🍎", tip: "💡 Tip: Count them one by one: 1, 2, 3!" },
+      { q: "Count Stars: Which option shows 2?", options: ["2 ⭐⭐", "1 ⭐", "3 ⭐⭐⭐", "4 ⭐⭐⭐⭐"], ans: "2 ⭐⭐", tip: "💡 Tip: Two stars make a lovely pair!" },
+      { q: "Find the Dog in options:", options: ["Dog 🐶", "Cat 🐱", "Lion 🦁", "Tiger 🐯"], ans: "Dog 🐶", tip: "💡 Tip: Dogs 🐶 are loyal pets that bark!" },
+      { q: "Find the Elephant in options:", options: ["Elephant 🐘", "Monkey 🐒", "Dog 🐶", "Bird 🐦"], ans: "Elephant 🐘", tip: "💡 Tip: Elephants 🐘 are massive animals with long trunks!" },
+      { q: "What comes after letter 'A'?", options: ["B", "C", "D", "E"], ans: "B", tip: "💡 Tip: Alphabet sequence starts as A, B, C..." },
+      { q: "What comes after letter 'C'?", options: ["D", "E", "F", "G"], ans: "D", tip: "💡 Tip: Follow the alphabet song: A, B, C, D!" },
+      { q: "Count: 1 plus 1 equals?", options: ["2", "3", "4", "1"], ans: "2", tip: "💡 Tip: 1 and 1 together make 2!" },
+      { q: "Which one is Sun?", options: ["Sun ☀️", "Moon 🌙", "Cloud ☁️", "Rain 🌧️"], ans: "Sun ☀️", tip: "💡 Tip: The Sun ☀️ gives us warm daylight!" },
+      { q: "Which one is Ice-Cream?", options: ["Ice-Cream 🍦", "Cake 🎂", "Pizza 🍕", "Apple 🍎"], ans: "Ice-Cream 🍦", tip: "💡 Tip: Ice-Cream 🍦 is a sweet, cold summer treat!" },
+      { q: "Count Balloons: Which option shows 4?", options: ["4 🎈🎈🎈🎈", "3 🎈🎈🎈", "5 🎈🎈🎈🎈🎈", "2 🎈🎈"], ans: "4 🎈🎈🎈🎈", tip: "💡 Tip: Count carefully up to 4 balloons!" },
+      { q: "Which of the following is a Triangle?", options: ["Triangle 🔺", "Circle ⭕", "Square ⬛", "Star ⭐"], ans: "Triangle 🔺", tip: "💡 Tip: A triangle 🔺 always has 3 sides and 3 corners!" },
+      { q: "What comes after number '1'?", options: ["2", "3", "4", "5"], ans: "2", tip: "💡 Tip: Counting order is 1, 2, 3, 4..." },
+      { q: "What color is Milk?", options: ["White 🥛", "Black 🖤", "Red 🔴", "Green 🟢"], ans: "White 🥛", tip: "💡 Tip: Fresh cow milk is pure white 🥛!" }
     ];
     questions = visualBank;
   } 
@@ -730,65 +731,82 @@ function generateAdaptiveQuestions(userClass, day) {
     for(let i = 1; i <= 10; i++) {
       let a = i * multiplier + day;
       let b = i + 2;
-      questions.push({ q: `CBSE Math (${userClass}): ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b+2}`, `${a+b-1}`, `${a+b+4}`], ans: `${a+b}` });
+      questions.push({ q: `CBSE Math (${userClass}): ${a} + ${b} = ?`, options: [`${a+b}`, `${a+b+2}`, `${a+b-1}`, `${a+b+4}`], ans: `${a+b}`, tip: `💡 Tip: Add units place first carefully: ${a} + ${b} = ${a+b}.` });
     }
     const primaryEng = [
-      { q: "Plural of 'Cat' is?", options: ["Cats", "Cates", "Caties", "Catss"], ans: "Cats" },
-      { q: "Which one is a Vowel?", options: ["E", "B", "C", "D"], ans: "E" },
-      { q: "Opposite of 'Big' is?", options: ["Small", "Tall", "Heavy", "Huge"], ans: "Small" },
-      { q: "A house of a Dog is called?", options: ["Kennel", "Shed", "Stable", "Den"], ans: "Kennel" },
-      { q: "Select the Noun: 'Rohan is reading.'", options: ["Rohan", "Reading", "Is", "A"], ans: "Rohan" },
-      { q: "Opposite of 'Day' is?", options: ["Night", "Morning", "Noon", "Sun"], ans: "Night" },
-      { q: "Which animal gives us milk?", options: ["Cow", "Lion", "Tiger", "Fox"], ans: "Cow" },
-      { q: "How many days are in a week?", options: ["7", "5", "6", "8"], ans: "7" },
-      { q: "The color of grass is?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green" },
-      { q: "Rhyming word for 'Sun' is?", options: ["Fun", "Bat", "Pin", "Dog"], ans: "Fun" }
+      { q: "Plural of 'Cat' is?", options: ["Cats", "Cates", "Caties", "Catss"], ans: "Cats", tip: "💡 Tip: Add an 's' at the end to make most nouns plural!" },
+      { q: "Which one is a Vowel?", options: ["E", "B", "C", "D"], ans: "E", tip: "💡 Tip: English vowels are A, E, I, O, U." },
+      { q: "Opposite of 'Big' is?", options: ["Small", "Tall", "Heavy", "Huge"], ans: "Small", tip: "💡 Tip: Big means large size, opposite is small." },
+      { q: "A house of a Dog is called?", options: ["Kennel", "Shed", "Stable", "Den"], ans: "Kennel", tip: "💡 Tip: Dogs live in a kennel, horses live in a stable!" },
+      { q: "Select the Noun: 'Rohan is reading.'", options: ["Rohan", "Reading", "Is", "A"], ans: "Rohan", tip: "💡 Tip: A noun is a naming word (like a person's name Rohan)." },
+      { q: "Opposite of 'Day' is?", options: ["Night", "Morning", "Noon", "Sun"], ans: "Night", tip: "💡 Tip: Day has bright sunlight, night has darkness." },
+      { q: "Which animal gives us milk?", options: ["Cow", "Lion", "Tiger", "Fox"], ans: "Cow", tip: "💡 Tip: Cows and buffaloes give us healthy milk." },
+      { q: "How many days are in a week?", options: ["7", "5", "6", "8"], ans: "7", tip: "💡 Tip: Monday to Sunday makes 7 days in total." },
+      { q: "The color of grass is?", options: ["Green", "Blue", "Red", "Yellow"], ans: "Green", tip: "💡 Tip: Healthy growing grass is always green." },
+      { q: "Rhyming word for 'Sun' is?", options: ["Fun", "Bat", "Pin", "Dog"], ans: "Fun", tip: "💡 Tip: Words that sound similar at the end rhyme (Sun & Fun)!" }
     ];
     questions.push(...primaryEng);
   } 
   else if (userClass === "Class 4" || userClass === "Class 5") {
-    let pText = day % 2 === 1 
+    let isHindi = (day % 2 === 1);
+    let pText = isHindi 
       ? `📖 **JNVST अपठित गद्यांश (Day ${day}):** जवाहर नवोदय विद्यालय में प्रवेश पाने के लिए मानसिक योग्यता, गणित और भाषा परीक्षण की तैयारी महत्वपूर्ण है। समय का सदुपयोग करने वाले छात्र परीक्षा में सफलता प्राप्त करते हैं।`
       : `📖 **JNVST Passage (Day ${day}):** Navodaya Vidyalayas provide quality education to talented children. Regular self-assessment and mental ability practice help students crack JNVST easily.`;
 
-    questions.push({ passage: pText, q: day % 2 === 1 ? "नवोदय प्रवेश परीक्षा में सफलता के लिए क्या आवश्यक है?" : "What helps students crack JNVST easily?", options: ["समय का सदुपयोग", "आलस्य", "देर तक सोना", "TV देखना"], ans: day % 2 === 1 ? "समय का सदुपयोग" : "Regular self-assessment" });
-    questions.push({ passage: pText, q: day % 2 === 1 ? "गद्यांश में किस परीक्षा की चर्चा है?" : "Which school entrance exam is mentioned?", options: ["जवाहर नवोदय विद्यालय", "सैनिक स्कूल", "केंद्रीय विद्यालय", "बोर्ड परीक्षा"], ans: day % 2 === 1 ? "जवाहर नवोदय विद्यालय" : "Navodaya Vidyalayas" });
+    let correctAnsQ1 = isHindi ? "समय का सदुपयोग" : "Regular self-assessment";
+    let correctAnsQ2 = isHindi ? "जवाहर नवोदय विद्यालय" : "Navodaya Vidyalayas";
+
+    questions.push({ 
+      passage: pText, 
+      q: isHindi ? "नवोदय प्रवेश परीक्षा में सफलता के लिए क्या आवश्यक है?" : "What helps students crack JNVST easily?", 
+      options: ["समय का सदुपयोग", "आलस्य", "देर तक सोना", "TV देखना"], 
+      ans: correctAnsQ1,
+      tip: isHindi ? "💡 Tip: गद्यांश के अनुसार समय का सदुपयोग सफलता की कुंजी है।" : "💡 Tip: Regular self-assessment is explicitly stated in the passage as key to success!"
+    });
+    
+    questions.push({ 
+      passage: pText, 
+      q: isHindi ? "गद्यांश में किस परीक्षा की चर्चा है?" : "Which school entrance exam is mentioned?", 
+      options: ["जवाहर नवोदय विद्यालय", "सैनिक स्कूल", "केंद्रीय विद्यालय", "बोर्ड परीक्षा"], 
+      ans: correctAnsQ2,
+      tip: isHindi ? "💡 Tip: गद्यांश जवाहर नवोदय विद्यालय प्रवेश परीक्षा पर आधारित है।" : "💡 Tip: The passage discusses Navodaya Vidyalayas entrance preparation."
+    });
 
     const jnvBank = [
-      { q: "JNVST Logic: Find the odd one out (असंगत पद चुनें):", options: ["Circle (वृत्त)", "Square (वर्ग)", "Triangle (त्रिभुज)", "Apple (सेब)"], ans: "Apple (सेब)" },
-      { q: "JNVST Math: L.C.M of 12 and 16 is?", options: ["48", "32", "24", "16"], ans: "48" },
-      { q: "JNVST Math: H.C.F of 20 and 30 is?", options: ["10", "5", "15", "20"], ans: "10" },
-      { q: "JNVST Math: Value of 0.5 + 0.25 is?", options: ["0.75", "0.50", "0.85", "0.30"], ans: "0.75" },
-      { q: "JNVST Reasoning: 4, 8, 12, 16, ?", options: ["20", "22", "18", "24"], ans: "20" },
-      { q: "JNVST Math: First 5 prime numbers sum is?", options: ["28", "26", "30", "25"], ans: "28" },
-      { q: "JNVST Mental Ability: Which comes next in pattern 🔺, 🔻, 🔺, 🔻, ?", options: ["🔺", "🔻", "⭕", "⬛"], ans: "🔺" },
-      { q: "JNVST Hindi: 'सूर्य' का पर्यायवाची शब्द है?", options: ["दिनकर", "निशाकर", "सुधाकर", "जलद"], ans: "दिनकर" },
-      { q: "JNVST Math: Average of 10, 20, 30 is?", options: ["20", "15", "25", "30"], ans: "20" },
-      { q: "JNVST Math: 25% of 400 is?", options: ["100", "50", "150", "200"], ans: "100" },
-      { q: "JNVST Math: Perimeter of Square with side 6cm is?", options: ["24 cm", "12 cm", "36 cm", "18 cm"], ans: "24 cm" },
-      { q: "JNVST Reasoning: Mirror Image of 'P' looks like?", options: ["q", "P", "b", "d"], ans: "q" },
-      { q: "JNVST Hindi: 'सफल' का विलोम शब्द है?", options: ["असफल", "विफल", "कुफल", "निष्फल"], ans: "असफल" },
-      { q: "JNVST Math: Write 3/5 as decimal:", options: ["0.6", "0.5", "0.3", "0.8"], ans: "0.6" },
-      { q: "JNVST Reasoning: Complete pattern: 1, 4, 9, 16, ?", options: ["25", "20", "24", "30"], ans: "25" },
-      { q: "JNVST Math: Simple Interest on ₹1000 at 5% for 2 years:", options: ["₹100", "₹50", "₹150", "₹200"], ans: "₹100" },
-      { q: "JNVST Hindi: 'जो पढ़ा-लिखा न हो' उसे कहते हैं?", options: ["अनपढ़", "विद्वान", "साक्षर", "ज्ञानी"], ans: "अनपढ़" },
-      { q: "JNVST Reasoning: Water Image of 'M' looks like?", options: ["W", "M", "E", "3"], ans: "W" }
+      { q: "JNVST Logic: Find the odd one out (असंगत पद चुनें):", options: ["Circle (वृत्त)", "Square (वर्ग)", "Triangle (त्रिभुज)", "Apple (सेब)"], ans: "Apple (सेब)", tip: "💡 Tip: Circle, Square and Triangle are geometric shapes, whereas Apple is a fruit!" },
+      { q: "JNVST Math: L.C.M of 12 and 16 is?", options: ["48", "32", "24", "16"], ans: "48", tip: "💡 Tip: Multiples of 12: 12,24,36,48... Multiples of 16: 16,32,48... LCM is 48." },
+      { q: "JNVST Math: H.C.F of 20 and 30 is?", options: ["10", "5", "15", "20"], ans: "10", tip: "💡 Tip: The highest common factor dividing both 20 and 30 perfectly is 10." },
+      { q: "JNVST Math: Value of 0.5 + 0.25 is?", options: ["0.75", "0.50", "0.85", "0.30"], ans: "0.75", tip: "💡 Tip: 0.5 can be written as 0.50. So 0.50 + 0.25 = 0.75." },
+      { q: "JNVST Reasoning: 4, 8, 12, 16, ?", options: ["20", "22", "18", "24"], ans: "20", tip: "💡 Tip: This is an arithmetic progression with a common difference of +4." },
+      { q: "JNVST Math: First 5 prime numbers sum is?", options: ["28", "26", "30", "25"], ans: "28", tip: "💡 Tip: First 5 primes are 2, 3, 5, 7, 11. Their sum is 2+3+5+7+11 = 28." },
+      { q: "JNVST Mental Ability: Which comes next in pattern 🔺, 🔻, 🔺, 🔻, ?", options: ["🔺", "🔻", "⭕", "⬛"], ans: "🔺", tip: "💡 Tip: The pattern alternates between 🔺 and 🔻." },
+      { q: "JNVST Hindi: 'सूर्य' का पर्यायवाची शब्द है?", options: ["दिनकर", "निशाकर", "सुधाकर", "जलद"], ans: "दिनकर", tip: "💡 Tip: दिनकर, भानु और भास्कर सूर्य के पर्यायवाची हैं।" },
+      { q: "JNVST Math: Average of 10, 20, 30 is?", options: ["20", "15", "25", "30"], ans: "20", tip: "💡 Tip: Average = Sum of observations / Total count = (10+20+30)/3 = 20." },
+      { q: "JNVST Math: 25% of 400 is?", options: ["100", "50", "150", "200"], ans: "100", tip: "💡 Tip: 25% means 1/4th. 400 / 4 = 100." },
+      { q: "JNVST Math: Perimeter of Square with side 6cm is?", options: ["24 cm", "12 cm", "36 cm", "18 cm"], ans: "24 cm", tip: "💡 Tip: Perimeter of a square = 4 × side = 4 × 6 = 24 cm." },
+      { q: "JNVST Reasoning: Mirror Image of 'P' looks like?", options: ["q", "P", "b", "d"], ans: "q", tip: "💡 Tip: In a mirror reflection, left becomes right, so P flips into q." },
+      { q: "JNVST Hindi: 'सफल' का विलोम शब्द है?", options: ["असफल", "विफल", "कुफल", "निष्फल"], ans: "असफल", tip: "💡 Tip: सफल का उल्टा असफल होता है।" },
+      { q: "JNVST Math: Write 3/5 as decimal:", options: ["0.6", "0.5", "0.3", "0.8"], ans: "0.6", tip: "💡 Tip: Multiply numerator and denominator by 2 to get 6/10 = 0.6." },
+      { q: "JNVST Reasoning: Complete pattern: 1, 4, 9, 16, ?", options: ["25", "20", "24", "30"], ans: "25", tip: "💡 Tip: These are squares of natural numbers: 1², 2², 3², 4², so next is 5² = 25." },
+      { q: "JNVST Math: Simple Interest on ₹1000 at 5% for 2 years:", options: ["₹100", "₹50", "₹150", "₹200"], ans: "₹100", tip: "💡 Tip: SI = (P × R × T) / 100 = (1000 × 5 × 2) / 100 = ₹100." },
+      { q: "JNVST Hindi: 'जो पढ़ा-लिखा न हो' उसे कहते हैं?", options: ["अनपढ़", "विद्वान", "साक्षर", "ज्ञानी"], ans: "अनपढ़", tip: "💡 Tip: जो पढ़ना लिखना न जानता हो उसे अनपढ़ (Illiterate) कहते हैं।" },
+      { q: "JNVST Reasoning: Water Image of 'M' looks like?", options: ["W", "M", "E", "3"], ans: "W", tip: "💡 Tip: In water reflection, top and bottom invert, so M turns into W." }
     ];
 
     questions.push(...jnvBank);
   } 
   else if (userClass === "Class 6" || userClass === "Class 7" || userClass === "Class 8") {
     const cbseMiddleBank = [
-      { q: "CBSE Science: Green pigment in leaves is called?", options: ["Chlorophyll", "Stomata", "Xylem", "Phloem"], ans: "Chlorophyll" },
-      { q: "CBSE Science: SI unit of Speed is?", options: ["m/s", "km/h", "meter", "second"], ans: "m/s" },
-      { q: "CBSE SST: Capital of India is?", options: ["New Delhi", "Mumbai", "Kolkata", "Chennai"], ans: "New Delhi" },
-      { q: "CBSE English: Antonym of 'BRAVE' is?", options: ["Coward", "Hero", "Bold", "Strong"], ans: "Coward" },
-      { q: "CBSE Science: Gas released during photosynthesis?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], ans: "Oxygen" },
-      { q: "CBSE SST: Which is the longest river in India?", options: ["Ganga", "Yamuna", "Godavari", "Narmada"], ans: "Ganga" },
-      { q: "CBSE Science: Chemical formula of Water is?", options: ["H2O", "CO2", "NaCl", "O2"], ans: "H2O" },
-      { q: "CBSE English: Identify Pronoun: 'She is a doctor.'", options: ["She", "Is", "Doctor", "A"], ans: "She" },
-      { q: "CBSE SST: Planet known as the 'Red Planet'?", options: ["Mars", "Venus", "Jupiter", "Saturn"], ans: "Mars" },
-      { q: "CBSE Science: Vitamin D deficiency causes?", options: ["Rickets", "Scurvy", "Beri-Beri", "Goitre"], ans: "Rickets" }
+      { q: "CBSE Science: Green pigment in leaves is called?", options: ["Chlorophyll", "Stomata", "Xylem", "Phloem"], ans: "Chlorophyll", tip: "💡 Tip: Chlorophyll traps sunlight required for photosynthesis." },
+      { q: "CBSE Science: SI unit of Speed is?", options: ["m/s", "km/h", "meter", "second"], ans: "m/s", tip: "💡 Tip: Standard International unit for speed is meters per second (m/s)." },
+      { q: "CBSE SST: Capital of India is?", options: ["New Delhi", "Mumbai", "Kolkata", "Chennai"], ans: "New Delhi", tip: "💡 Tip: New Delhi is the national political capital of India." },
+      { q: "CBSE English: Antonym of 'BRAVE' is?", options: ["Coward", "Hero", "Bold", "Strong"], ans: "Coward", tip: "💡 Tip: Brave means showing courage, opposite is cowardly." },
+      { q: "CBSE Science: Gas released during photosynthesis?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], ans: "Oxygen", tip: "💡 Tip: Plants absorb carbon dioxide and release life-supporting oxygen." },
+      { q: "CBSE SST: Which is the longest river in India?", options: ["Ganga", "Yamuna", "Godavari", "Narmada"], ans: "Ganga", tip: "💡 Tip: Ganga is culturally and geographically India's longest river." },
+      { q: "CBSE Science: Chemical formula of Water is?", options: ["H2O", "CO2", "NaCl", "O2"], ans: "H2O", tip: "💡 Tip: Each water molecule contains two Hydrogen atoms and one Oxygen atom." },
+      { q: "CBSE English: Identify Pronoun: 'She is a doctor.'", options: ["She", "Is", "Doctor", "A"], ans: "She", tip: "💡 Tip: Pronouns replace nouns (e.g., she, he, it, they)." },
+      { q: "CBSE SST: Planet known as the 'Red Planet'?", options: ["Mars", "Venus", "Jupiter", "Saturn"], ans: "Mars", tip: "💡 Tip: Mars appears red due to iron oxide (rust) on its surface." },
+      { q: "CBSE Science: Vitamin D deficiency causes?", options: ["Rickets", "Scurvy", "Beri-Beri", "Goitre"], ans: "Rickets", tip: "💡 Tip: Vitamin D helps bone strength; deficiency leads to weak bones (Rickets)." }
     ];
 
     for(let i = 1; i <= 10; i++) {
@@ -798,7 +816,8 @@ function generateAdaptiveQuestions(userClass, day) {
       cbseMiddleBank.push({
         q: `CBSE Math (${userClass}): Solve ${coeff}x + 3 = ${rhs}`,
         options: [`${xVal}`, `${xVal+2}`, `${xVal-1}`, `${xVal+3}`],
-        ans: `${xVal}`
+        ans: `${xVal}`,
+        tip: `💡 Tip: Subtract 3 from both sides: ${coeff}x = ${rhs - 3}, then divide by ${coeff} to get x = ${xVal}.`
       });
     }
 
@@ -806,16 +825,16 @@ function generateAdaptiveQuestions(userClass, day) {
   }
   else {
     const cbseHighBank = [
-      { q: "CBSE Physics: Acceleration due to gravity (g) on Earth is approx?", options: ["9.8 m/s²", "8.9 m/s²", "10.8 m/s²", "9.0 m/s²"], ans: "9.8 m/s²" },
-      { q: "CBSE Chemistry: Atomic number of Carbon is?", options: ["6", "12", "8", "14"], ans: "6" },
-      { q: "CBSE Biology: Powerhouse of the cell is?", options: ["Mitochondria", "Nucleus", "Ribosome", "Golgi Body"], ans: "Mitochondria" },
-      { q: "CBSE English: Author of 'Hamlet' is?", options: ["William Shakespeare", "Charles Dickens", "Mark Twain", "Leo Tolstoy"], ans: "William Shakespeare" },
-      { q: "CBSE Economics: Currency of USA is?", options: ["Dollar", "Euro", "Yen", "Pound"], ans: "Dollar" },
-      { q: "CBSE Physics: Unit of Electric Current is?", options: ["Ampere", "Volt", "Ohm", "Watt"], ans: "Ampere" },
-      { q: "CBSE Chemistry: pH of pure water at 25°C is?", options: ["7", "0", "14", "5.6"], ans: "7" },
-      { q: "CBSE Math: Value of sin(90°) is?", options: ["1", "0", "1/2", "√3/2"], ans: "1" },
-      { q: "CBSE Biology: Universal blood donor group is?", options: ["O negative", "AB positive", "A positive", "B negative"], ans: "O negative" },
-      { q: "CBSE SST: Fundamental Rights are in which Part of Indian Constitution?", options: ["Part III", "Part IV", "Part II", "Part I"], ans: "Part III" }
+      { q: "CBSE Physics: Acceleration due to gravity (g) on Earth is approx?", options: ["9.8 m/s²", "8.9 m/s²", "10.8 m/s²", "9.0 m/s²"], ans: "9.8 m/s²", tip: "💡 Tip: Standard free-fall acceleration near Earth surface is ~9.8 m/s²." },
+      { q: "CBSE Chemistry: Atomic number of Carbon is?", options: ["6", "12", "8", "14"], ans: "6", tip: "💡 Tip: Carbon has 6 protons in its nucleus, giving atomic number 6." },
+      { q: "CBSE Biology: Powerhouse of the cell is?", options: ["Mitochondria", "Nucleus", "Ribosome", "Golgi Body"], ans: "Mitochondria", tip: "💡 Tip: Mitochondria generate cellular chemical energy (ATP)." },
+      { q: "CBSE English: Author of 'Hamlet' is?", options: ["William Shakespeare", "Charles Dickens", "Mark Twain", "Leo Tolstoy"], ans: "William Shakespeare", tip: "💡 Tip: Hamlet is one of Shakespeare's most famous tragedy masterpieces." },
+      { q: "CBSE Economics: Currency of USA is?", options: ["Dollar", "Euro", "Yen", "Pound"], ans: "Dollar", tip: "💡 Tip: United States Dollar (USD) is the official currency of the USA." },
+      { q: "CBSE Physics: Unit of Electric Current is?", options: ["Ampere", "Volt", "Ohm", "Watt"], ans: "Ampere", tip: "💡 Tip: Electric current flow rate is measured in Amperes (A)." },
+      { q: "CBSE Chemistry: pH of pure water at 25°C is?", options: ["7", "0", "14", "5.6"], ans: "7", tip: "💡 Tip: A pH of 7 represents a completely neutral chemical solution." },
+      { q: "CBSE Math: Value of sin(90°) is?", options: ["1", "0", "1/2", "√3/2"], ans: "1", tip: "💡 Tip: In right-angled trigonometry, sin(90°) reaches its maximum value of 1." },
+      { q: "CBSE Biology: Universal blood donor group is?", options: ["O negative", "AB positive", "A positive", "B negative"], ans: "O negative", tip: "💡 Tip: O negative red blood cells lack major antigens, making them universally compatible." },
+      { q: "CBSE SST: Fundamental Rights are in which Part of Indian Constitution?", options: ["Part III", "Part IV", "Part II", "Part I"], ans: "Part III", tip: "💡 Tip: Part III (Articles 12-35) enshrines the Fundamental Rights of Indian citizens." }
     ];
 
     for(let i = 1; i <= 10; i++) {
@@ -823,7 +842,8 @@ function generateAdaptiveQuestions(userClass, day) {
       cbseHighBank.push({
         q: `CBSE Math (${userClass}): Solve x² - ${xVal * xVal} = 0 (positive x):`,
         options: [`${xVal}`, `${xVal + 3}`, `${xVal - 1}`, `${xVal * 2}`],
-        ans: `${xVal}`
+        ans: `${xVal}`,
+        tip: `💡 Tip: Rearrange to x² = ${xVal * xVal}, taking square root gives x = ${xVal}.`
       });
     }
 
@@ -909,11 +929,12 @@ function renderQuestion() {
     nextDayBtn.style.opacity = "0.5";
   }
 
-  let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer');
+  let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer'), tipBox = document.getElementById('tipContainer');
   let fill = document.getElementById('progressFill');
 
   if (currentQIndex >= currentLoadedQuestions.length) {
     passageBox.classList.add('hidden');
+    tipBox.classList.add('hidden');
     qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
     optsBox.innerHTML = '';
     fill.style.width = '100%';
@@ -940,8 +961,15 @@ function renderQuestion() {
 
   if (alreadyAnswered) {
     btnNextQ.disabled = (currentQIndex >= 19);
+    if (q.tip) {
+      tipBox.innerText = q.tip;
+      tipBox.classList.remove('hidden');
+    } else {
+      tipBox.classList.add('hidden');
+    }
   } else {
     btnNextQ.disabled = true;
+    tipBox.classList.add('hidden');
   }
 
   let displayOpts = q.shuffledOptions || q.options;
