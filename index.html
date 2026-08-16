@@ -2,10 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>EduPortal 2026 - JNVST & Multi-Subject Dashboard</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
+  <!-- Prevent Stale Cache & Force Auto-Update on App Open -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- iOS / iPhone PWA Web App Mode -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="EduPortal">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3426/3426653.png">
+
   <!-- Async Firebase SDKs for Instant Startup Speed -->
   <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -1567,6 +1578,21 @@ function updateAdminPin() {
     closeAdminModal();
   } else { alert("PIN must be at least 4 digits."); }
 }
+
+// AUTO-RESUME & SILENT AUTO-SYNC WHEN APP OPENS OR SWAPS FROM BACKGROUND
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    if (typeof forceManualCloudSync === 'function') {
+      forceManualCloudSync(true);
+    }
+  }
+});
+
+window.addEventListener('pageshow', function() {
+  if (typeof forceManualCloudSync === 'function') {
+    forceManualCloudSync(true);
+  }
+});
 
 window.onpopstate = function(e) {
   let adminModal = document.getElementById('adminModal');
