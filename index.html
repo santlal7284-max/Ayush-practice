@@ -582,24 +582,7 @@ function initCloudSync() {
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
-const basicHindiMap = {
-  "red": "लाल", "blue": "नीला", "green": "हरा", "yellow": "पीला",
-  "circle": "गोलाकार वृत्त", "square": "वर्ग", "triangle": "त्रिभुज", "star": "तारा",
-  "apple": "सेब", "dog": "कुत्ता", "elephant": "हाथी", "sun": "सूरज", "milk": "दूध",
-  "ice-cream": "आिसक्रीम", "cats": "बिल्लियां", "small": "छोटा", "kennel": "कुत्ते का घर",
-  "night": "रात", "cow": "गाय", "fun": "मज़ा", "white": "सफेद"
-};
-
-function translateToHindiVoiceText(text) {
-  let lower = text.toLowerCase();
-  for (let eng in basicHindiMap) {
-    if (lower.includes(eng)) {
-      return `यानी हिंदी में: ${basicHindiMap[eng]}`;
-    }
-  }
-  return "";
-}
-
+// --- FIXED VOICE SPEECH ENGINE WITH AUTO-HINDI SCRIPT DETECTION ---
 function readQuestionAndOptionsWithTranslation() {
   if (!('speechSynthesis' in window)) {
     alert("Speech Synthesis not supported in this browser!");
@@ -613,23 +596,35 @@ function readQuestionAndOptionsWithTranslation() {
   let qObj = currentLoadedQuestions[currentQIndex];
   let cleanQ = qObj.q.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
   
-  let hindiTransQ = translateToHindiVoiceText(cleanQ);
-
-  let fullSpeechText = `Question: ${cleanQ}. `;
-  if (hindiTransQ) fullSpeechText += `${hindiTransQ}. `;
-
   let opts = qObj.shuffledOptions || qObj.options || [];
-  let labels = ["Option A", "Option B", "Option C", "Option D"];
+  let labelsHindi = ["ऑप्शन A", "ऑप्शन B", "ऑप्शन C", "ऑप्शन D"];
+  let labelsEng = ["Option A", "Option B", "Option C", "Option D"];
+
+  let passageText = qObj.passage ? qObj.passage.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '') : "";
+  
+  // Detect Hindi Devanagari script (\u0900-\u097F) in Passage, Question or Options
+  let containsHindi = /[\u0900-\u097F]/.test(cleanQ) || /[\u0900-\u097F]/.test(passageText) || opts.some(o => /[\u0900-\u097F]/.test(o));
+
+  let fullSpeechText = "";
+  if (passageText) {
+    fullSpeechText += passageText + ". ";
+  }
+  fullSpeechText += cleanQ + ". ";
 
   opts.forEach((opt, idx) => {
     let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-    let hindiTransOpt = translateToHindiVoiceText(cleanOpt);
-    fullSpeechText += `${labels[idx]}: ${cleanOpt}. `;
-    if (hindiTransOpt) fullSpeechText += `${hindiTransOpt}. `;
+    let label = containsHindi ? labelsHindi[idx] : labelsEng[idx];
+    fullSpeechText += `${label}: ${cleanOpt}. `;
   });
 
   let utterance = new SpeechSynthesisUtterance(fullSpeechText);
-  utterance.lang = 'en-US';
+  
+  if (containsHindi) {
+    utterance.lang = 'hi-IN'; // Switches voice to Hindi Speech Engine
+  } else {
+    utterance.lang = 'en-US';
+  }
+
   utterance.rate = 0.85;
 
   let speechBtn = document.getElementById('speechBtn');
@@ -799,16 +794,14 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
   const currentYear = dObj.getFullYear();
   const dayOfYear = Math.floor((dObj - new Date(currentYear, 0, 0)) / (1000 * 60 * 60 * 24));
   
-  // Unique Seed incorporating Year, Day of Year, Class, Student ID, Day, Question Index & Offset
   let uniqueSeed = (currentYear * 100000) + (dayOfYear * 500) + (day * 30) + qIndex + (offset * 777);
   if (currentActiveUser) uniqueSeed += (currentActiveUser.num || 1) * 999;
 
   let resetSeed = (currentActiveUser && currentActiveUser.dayResetSeeds && currentActiveUser.dayResetSeeds[`D${day}`]) || 0;
   uniqueSeed += resetSeed * 333;
 
-  // Class 4 & 5: Heavily Focused on Jawahar Navodaya Vidyalaya Entrance (JNVST)
   if (userClass === "Class 4" || userClass === "Class 5") {
-    let mode = qIndex % 4; // 0: Passage, 1: Mental Ability, 2: JNVST Arithmetic, 3: Science/GK
+    let mode = qIndex % 4;
 
     if (mode === 0) {
       let isHindi = (day % 2 === 1);
@@ -839,7 +832,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
         tip: isHindi ? `💡 JNVST Tip: गद्यांश में '${sel.key}' पर बल दिया गया है।` : `💡 JNVST Tip: Focus on '${sel.key}' in the text.`
       };
     } 
-    else if (mode === 1) { // JNVST Mental Ability
+    else if (mode === 1) {
       let type = Math.abs(uniqueSeed) % 3;
       if (type === 0) {
         let step = (Math.abs(uniqueSeed) % 5) + 2;
@@ -877,7 +870,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
         };
       }
     } 
-    else if (mode === 2) { // JNVST Arithmetic
+    else if (mode === 2) {
       let type = Math.abs(uniqueSeed) % 3;
       if (type === 0) {
         let mult = (Math.abs(uniqueSeed) % 4) + 2;
@@ -912,7 +905,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
         };
       }
     } 
-    else { // JNVST Science / EVS / GK
+    else {
       let gkList = [
         { q: `Which gas is required by plants during Photosynthesis?`, ans: "Carbon Dioxide", opts: ["Carbon Dioxide", "Oxygen", "Nitrogen", "Helium"] },
         { q: `How many teeth does an adult human normally have?`, ans: "32", opts: ["32", "28", "30", "36"] },
@@ -928,7 +921,6 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
       };
     }
   } 
-  // LKG & UKG
   else if (userClass === "LKG" || userClass === "UKG") {
     let mode = qIndex % 4;
     if (mode === 0) {
@@ -960,10 +952,9 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
       };
     }
   }
-  // ALL OTHER CLASSES (Class 1-3, Class 6-12): EQUAL MULTI-SUBJECT PROCEDURAL GENERATION
   else {
     let mode = qIndex % 4;
-    if (mode === 0) { // Procedural Maths
+    if (mode === 0) {
       let a = ((Math.abs(uniqueSeed) % 15) + 2) * (qIndex + 1);
       let b = (Math.abs(uniqueSeed) % 9) + 3;
       let ans = a + b;
@@ -973,7 +964,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
         ans: `${ans}`,
         tip: `💡 Tip: Add ${a} and ${b}.`
       };
-    } else if (mode === 1) { // Science
+    } else if (mode === 1) {
       let sciList = [
         { q: `What is the SI unit of Electric Current?`, ans: "Ampere", opts: ["Ampere", "Volt", "Ohm", "Watt"] },
         { q: `Which blood cells fight infections in our body?`, ans: "WBCs", opts: ["WBCs", "RBCs", "Platelets", "Plasma"] },
@@ -987,7 +978,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
         ans: sel.ans,
         tip: `💡 Tip: Fundamental Science rule.`
       };
-    } else if (mode === 2) { // Social Science / GK
+    } else if (mode === 2) {
       let sstList = [
         { q: `Who is known as the Father of the Indian Constitution?`, ans: "Dr. B.R. Ambedkar", opts: ["Dr. B.R. Ambedkar", "Mahatma Gandhi", "Jawaharlal Nehru", "Sardar Patel"] },
         { q: `Which is the longest river in India?`, ans: "Ganga", opts: ["Ganga", "Yamuna", "Godavari", "Brahmaputra"] },
@@ -1000,7 +991,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
         ans: sel.ans,
         tip: `💡 Tip: General knowledge & History.`
       };
-    } else { // English / Hindi Grammar
+    } else {
       let engList = [
         { q: `Identify the Noun in: 'Rohan is going to school.'`, ans: "Rohan", opts: ["Rohan", "going", "is", "fast"] },
         { q: `Opposite word (Antonym) of 'ANCIENT':`, ans: "Modern", opts: ["Modern", "Old", "Past", "Historic"] },
@@ -1017,7 +1008,6 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
   }
 }
 
-// GUARANTEES ZERO REPETITION FOR LIFETIME BY CHECKING HASH HISTORY
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
   let targetQs = getQsPerDayForUser(currentActiveUser);
@@ -1033,7 +1023,6 @@ function generateAdaptiveQuestions(userClass, day) {
     let offset = 0;
     let qObj = generateProceduralSingleQuestion(userClass, day, i, offset);
     
-    // Auto-Regenerate if duplicate detected until a 100% brand new question is formed
     while (answeredHashes.has(qObj.q) && offset < 20) {
       offset++;
       qObj = generateProceduralSingleQuestion(userClass, day, i, offset);
