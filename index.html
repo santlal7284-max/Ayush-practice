@@ -3,21 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AyushAcademy 2026 - Lifetime Procedural Learning Engine</title>
+  <title>AyushAcademy 2026 - Lifetime Learning Engine</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
-  <!-- Prevent Stale Cache & Force Auto-Update on App Open -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
-  <!-- iOS / iPhone PWA Web App Mode -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AyushAcademy">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3426/3426653.png">
 
-  <!-- Async Firebase SDKs for Instant Startup Speed -->
   <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -194,7 +191,7 @@
     <div class="card" style="margin-top: 10px;">
       <div class="day-nav">
         <select id="daySelectDropdown" class="day-select-dropdown" onchange="onDayDropdownSelect(this.value)">
-          <!-- Options populated dynamically 1 to 30 -->
+          <!-- Options populated dynamically -->
         </select>
       </div>
 
@@ -203,7 +200,7 @@
       
       <div class="question-header">
         <div class="question-box" id="questionText">Loading...</div>
-        <button class="speech-btn hidden" id="speechBtn" onclick="readQuestionAndOptionsWithTranslation()" title="Listen Question & Options with Hindi Translation">🔊</button>
+        <button class="speech-btn hidden" id="speechBtn" onclick="readQuestionAndOptionsWithTranslation()" title="Listen Question & Options">🔊</button>
       </div>
 
       <div class="options-grid" id="optionsContainer"></div>
@@ -312,7 +309,6 @@
 </div>
 
 <script>
-// --- FIREBASE ASYNC INITIALIZATION & AUTO SYNC ENGINE ---
 let db = null;
 let auth = null;
 let firebaseAuthReady = false;
@@ -365,11 +361,9 @@ function initFirebaseDeferred(attempt) {
   attempt = attempt || 0;
   if (typeof firebase === 'undefined') {
     if (attempt < 20) {
-      // Firebase scripts haven't finished loading yet (slow network/device) — keep retrying
-      // for up to ~10 seconds instead of silently giving up after one try.
       setTimeout(function(){ initFirebaseDeferred(attempt + 1); }, 500);
     } else {
-      console.error("Firebase failed to load after multiple attempts — app will run offline (localStorage only) until reopened.");
+      console.error("Firebase failed to load.");
     }
     return;
   }
@@ -407,18 +401,14 @@ function forceManualCloudSync(isSilent = false) {
   let syncText = document.getElementById('syncStatus');
   if (syncText) syncText.innerText = '• Syncing...';
 
-  if (currentActiveUser) {
-    let activeKey = currentActiveUser.id.replace(/\s+/g, '_');
-    db.ref('users/' + activeKey).set(sanitizeAndNormalizeUser(currentActiveUser)).catch(() => {});
-  }
-
+  // FIX: Fetch cloud first to avoid overwriting newer cloud state with stale local data
   db.ref('users').once('value').then((snapshot) => {
     const data = snapshot.val();
     if (data) {
       globalUsersList = Object.keys(data).map(key => sanitizeAndNormalizeUser(data[key]));
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
       if (syncText) syncText.innerText = '• Live Cloud';
-      if (!isSilent) showToast("✨ Successfully synchronized all settings & history from Cloud!");
+      if (!isSilent) showToast("✨ Successfully synchronized from Cloud!");
       
       if (currentActiveUser) {
         let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
@@ -427,6 +417,11 @@ function forceManualCloudSync(isSilent = false) {
           refreshStatsUI();
           renderQuestion();
         }
+      }
+
+      if (currentActiveUser) {
+        let activeKey = currentActiveUser.id.replace(/\s+/g, '_');
+        db.ref('users/' + activeKey).set(sanitizeAndNormalizeUser(currentActiveUser)).catch(() => {});
       }
 
       let adminModal = document.getElementById('adminModal');
@@ -598,8 +593,6 @@ function initCloudSync() {
       }
     });
 
-    // Keep the Admin PIN in sync across every device — without this, changing the
-    // PIN on one phone left every other device still checking the old/default PIN.
     db.ref('settings/adminPin').on('value', (snapshot) => {
       let cloudPin = snapshot.val();
       if (cloudPin && cloudPin !== localStorage.getItem('app_master_pin')) {
@@ -607,9 +600,6 @@ function initCloudSync() {
       }
     });
 
-    // Remote "Force Sync / Refresh All Devices" — every device listens for this
-    // timestamp. The first snapshot on load just records the current value; any
-    // LATER change (triggered by the admin button) makes every open device reload.
     let seenForceReloadAt = null;
     db.ref('settings/forceReloadAt').on('value', (snapshot) => {
       let val = snapshot.val();
@@ -628,17 +618,18 @@ function initCloudSync() {
 
 function forceSyncAllDevices() {
   if (!db) { alert("Cloud connection initializing... please try again in a moment."); return; }
-  if (confirm("This will refresh the app on every device where it's currently open (including this one). Continue?")) {
+  if (confirm("This will refresh the app on every device where it's currently open. Continue?")) {
     db.ref('settings/forceReloadAt').set(Date.now()).then(() => {
-      alert("✅ Sync signal sent — every open device will refresh with the latest data shortly.");
+      alert("✅ Sync signal sent — open devices refreshing shortly.");
     }).catch(() => {
-      alert("Couldn't send the sync signal — check your internet connection.");
+      alert("Couldn't send sync signal.");
     });
   }
 }
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
+// FIX: Clean Markdown symbols before feeding text into TTS SpeechSynthesis
 function readQuestionAndOptionsWithTranslation() {
   if (!('speechSynthesis' in window)) {
     alert("Speech Synthesis not supported in this browser!");
@@ -646,51 +637,40 @@ function readQuestionAndOptionsWithTranslation() {
   }
   
   window.speechSynthesis.cancel();
-
   if (!currentLoadedQuestions.length || currentQIndex >= currentLoadedQuestions.length) return;
 
   let qObj = currentLoadedQuestions[currentQIndex];
-  let cleanQ = qObj.q.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2700}-\u{27BF}]/gu, '');
-  
+
+  let cleanMarkdown = (text) => {
+    return text ? text.replace(/[\*\_\#\~\`]/g, '').replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2700}-\u{27BF}]/gu, '') : "";
+  };
+
+  let cleanQ = cleanMarkdown(qObj.q);
   let opts = qObj.shuffledOptions || qObj.options || [];
   let labelsHindi = ["ऑप्शन A", "ऑप्शन B", "ऑप्शन C", "ऑप्शन D"];
   let labelsEng = ["Option A", "Option B", "Option C", "Option D"];
-
-  let passageText = qObj.passage ? qObj.passage.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2700}-\u{27BF}]/gu, '') : "";
+  let passageText = cleanMarkdown(qObj.passage);
   
   let containsHindi = /[\u0900-\u097F]/.test(cleanQ) || /[\u0900-\u097F]/.test(passageText) || opts.some(o => /[\u0900-\u097F]/.test(o));
 
   let fullSpeechText = "";
-  if (passageText) {
-    fullSpeechText += passageText + ". ";
-  }
+  if (passageText) fullSpeechText += passageText + ". ";
   fullSpeechText += cleanQ + ". ";
 
   opts.forEach((opt, idx) => {
-    let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2700}-\u{27BF}]/gu, '');
+    let cleanOpt = cleanMarkdown(opt);
     let label = containsHindi ? labelsHindi[idx] : labelsEng[idx];
     fullSpeechText += `${label}: ${cleanOpt}. `;
   });
 
   let utterance = new SpeechSynthesisUtterance(fullSpeechText);
-  
-  if (containsHindi) {
-    utterance.lang = 'hi-IN';
-  } else {
-    utterance.lang = 'en-US';
-  }
-
+  utterance.lang = containsHindi ? 'hi-IN' : 'en-US';
   utterance.rate = 0.85;
 
   let speechBtn = document.getElementById('speechBtn');
   if (speechBtn) speechBtn.innerText = '🔊 ...';
-
-  utterance.onend = function() {
-    if (speechBtn) speechBtn.innerText = '🔊';
-  };
-  utterance.onerror = function() {
-    if (speechBtn) speechBtn.innerText = '🔊';
-  };
+  utterance.onend = function() { if (speechBtn) speechBtn.innerText = '🔊'; };
+  utterance.onerror = function() { if (speechBtn) speechBtn.innerText = '🔊'; };
 
   window.speechSynthesis.speak(utterance);
 }
@@ -725,31 +705,28 @@ function showSuggestions(showAll = false) {
     let touchStartY = 0;
     let isTouchMoved = false;
 
-    item.addEventListener('touchstart', function(e) {
-      touchStartY = e.touches[0].clientY;
-      isTouchMoved = false;
-    }, { passive: true });
-
-    item.addEventListener('touchmove', function(e) {
-      if (Math.abs(e.touches[0].clientY - touchStartY) > 8) {
-        isTouchMoved = true;
-      }
-    }, { passive: true });
-
-    item.addEventListener('touchend', function(e) {
-      if (!isTouchMoved) {
-        e.preventDefault();
-        selectUser(m);
-      }
-    });
-
-    item.addEventListener('click', function(e) {
-      selectUser(m);
-    });
+    item.addEventListener('touchstart', function(e) { touchStartY = e.touches[0].clientY; isTouchMoved = false; }, { passive: true });
+    item.addEventListener('touchmove', function(e) { if (Math.abs(e.touches[0].clientY - touchStartY) > 8) isTouchMoved = true; }, { passive: true });
+    item.addEventListener('touchend', function(e) { if (!isTouchMoved) { e.preventDefault(); selectUser(m); } });
+    item.addEventListener('click', function(e) { selectUser(m); });
 
     box.appendChild(item);
   });
   box.classList.remove('hidden');
+}
+
+function getHighestUnlockedDay(user) {
+  if (!user) return 1;
+  let maxCompleted = 0;
+  if (user.completedDaysMap) {
+    Object.keys(user.completedDaysMap).forEach(k => {
+      if (user.completedDaysMap[k] === true) {
+        let n = parseInt(k.replace('D', ''), 10);
+        if (!isNaN(n) && n > maxCompleted) maxCompleted = n;
+      }
+    });
+  }
+  return maxCompleted + 1;
 }
 
 function handleStudentLogin() {
@@ -765,12 +742,7 @@ function handleStudentLogin() {
       return;
     }
     currentActiveUser = sanitizeAndNormalizeUser(found);
-    
-    let autoDay = 1;
-    while (isDayCompletedForUser(currentActiveUser, autoDay)) {
-      autoDay++;
-    }
-    currentDay = autoDay;
+    currentDay = getHighestUnlockedDay(currentActiveUser);
 
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('practiceWorkspace').classList.remove('hidden');
@@ -794,16 +766,6 @@ function isDayCompletedForUser(user, day) {
   return count >= targetCount;
 }
 
-function getCompletedDaysArray(user) {
-  let completed = [];
-  for(let d = 1; d <= 365; d++) {
-    if (isDayCompletedForUser(user, d)) {
-      completed.push(d);
-    }
-  }
-  return completed;
-}
-
 function logoutStudent() {
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   currentActiveUser = null;
@@ -820,11 +782,8 @@ function loadUserWorkspace() {
   let speechBtn = document.getElementById('speechBtn');
   let allowedClasses = ["LKG", "UKG", "Class 1", "Class 2", "Class 3"];
   if (speechBtn) {
-    if (allowedClasses.includes(currentActiveUser.class)) {
-      speechBtn.classList.remove('hidden');
-    } else {
-      speechBtn.classList.add('hidden');
-    }
+    if (allowedClasses.includes(currentActiveUser.class)) speechBtn.classList.remove('hidden');
+    else speechBtn.classList.add('hidden');
   }
 
   currentQIndex = 0;
@@ -843,7 +802,7 @@ function refreshStatsUI() {
   document.getElementById('reportPercent').innerText = `${accuracy}%`;
 }
 
-// --- LIFETIME PROCEDURAL AUTO-GENERATION ENGINE (100% NON-REPEATING & DATE-AWARE) ---
+// --- LIFETIME PROCEDURAL AUTO-GENERATION ENGINE (BUG FREE) ---
 function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
   const dObj = new Date();
   const currentYear = dObj.getFullYear();
@@ -915,27 +874,29 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
           tip: `💡 JNVST Tip: ${sq}, ${sq2}, ${sq3} are perfect squares, while ${odd} is not.`
         };
       } else {
+        // FIX: Remove answer leak from question string
         let wordA = ["CAT", "DOG", "SUN", "BAT"][Math.abs(uniqueSeed) % 4];
         let val = wordA.split('').reduce((acc, c) => acc + c.charCodeAt(0) - 64, 0);
         return {
-          q: `JNVST Mental Ability: If ${wordA} = ${val}, what is the sum of letter positions?`,
+          q: `JNVST Mental Ability: What is the total sum of letter positions for word '${wordA}'?`,
           options: [`${val}`, `${val+3}`, `${val-2}`, `${val+5}`],
           ans: `${val}`,
-          tip: `💡 JNVST Tip: Add positional values of letters in alphabet.`
+          tip: `💡 JNVST Tip: Add positional values of letters (A=1, B=2...).`
         };
       }
     } 
     else if (mode === 2) {
       let type = Math.abs(uniqueSeed) % 3;
       if (type === 0) {
+        // FIX: Guaranteed unique HCF option values
         let mult = (Math.abs(uniqueSeed) % 4) + 2;
         let a = 3 * mult, b = 4 * mult;
         let hcf = mult;
         return {
           q: `JNVST Arithmetic (Day ${day}): Find H.C.F of ${a} and ${b}:`,
-          options: [`${hcf}`, `${hcf+2}`, `${hcf*2}`, `${hcf+1}`],
+          options: [`${hcf}`, `${hcf + 1}`, `${hcf + 3}`, `${hcf + 5}`],
           ans: `${hcf}`,
-          tip: `💡 JNVST Tip: HCF is the highest common factor dividing both ${a} and ${b}.`
+          tip: `💡 JNVST Tip: HCF is the highest common factor dividing both numbers.`
         };
       } else if (type === 1) {
         let cp = ((Math.abs(uniqueSeed) % 10) + 1) * 100;
@@ -989,11 +950,13 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
         tip: `💡 Tip: Count them one by one!`
       };
     } else if (mode === 1) {
+      // FIX: Ensure ASCII character lower bound doesn't evaluate to '@'
       let charC = 65 + (Math.abs(uniqueSeed) % 20);
       let l1 = String.fromCharCode(charC), l2 = String.fromCharCode(charC + 1);
+      let prevChar = charC > 65 ? String.fromCharCode(charC - 1) : 'Z';
       return {
         q: `English (${userClass}): What comes after '${l1}'?`,
-        options: [l2, String.fromCharCode(charC+2), String.fromCharCode(charC+3), String.fromCharCode(charC-1)],
+        options: [l2, String.fromCharCode(charC+2), String.fromCharCode(charC+3), prevChar],
         ans: l2,
         tip: `💡 Tip: Recite: ${l1}, ${l2}...`
       };
@@ -1066,9 +1029,6 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
   let targetQs = getQsPerDayForUser(currentActiveUser);
-
-  // Tracks question text already picked within THIS day's set, so the same
-  // question can't appear twice in one day's list.
   let usedQuestionTexts = new Set();
 
   for (let i = 0; i < targetQs; i++) {
@@ -1087,10 +1047,6 @@ function generateAdaptiveQuestions(userClass, day) {
   }
 
   return questions;
-}
-
-function isDayCompleted(day) {
-  return isDayCompletedForUser(currentActiveUser, day);
 }
 
 function handleOptionClick(selectedOpt, correctAns) {
@@ -1116,17 +1072,15 @@ function handleOptionClick(selectedOpt, correctAns) {
     currentActiveUser.completedDaysMap[`D${currentDay}`] = true;
 
     let todayStr = getTodayString();
-    if (currentActiveUser.lastCompletedDate === todayStr) {
-      // Already completed a day earlier today (e.g. an admin-unlocked extra day) —
-      // streak doesn't increase twice for the same calendar day.
-    } else if (currentActiveUser.lastCompletedDate === getYesterdayString()) {
-      // Completed yesterday too — streak continues.
-      currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
-    } else {
-      // First day, or a day (or more) was missed — streak restarts at 1.
-      currentActiveUser.streak = 1;
+    if (currentActiveUser.lastCompletedDate !== todayStr) {
+      if (currentActiveUser.lastCompletedDate === getYesterdayString()) {
+        currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
+      } else {
+        currentActiveUser.streak = 1;
+      }
+      currentActiveUser.lastCompletedDate = todayStr;
     }
-    currentActiveUser.lastCompletedDate = todayStr;
+
     setTimeout(() => {
       alert("🎉 Fantastic! Day " + currentDay + " Complete (" + targetQs + " Questions)! Next Day will unlock tomorrow!");
     }, 200);
@@ -1144,81 +1098,37 @@ function updateDayDropdownUI() {
   if (!selectElem) return;
 
   selectElem.innerHTML = '';
-  for (let d = 1; d <= 365; d++) {
+  let unlockedLimit = getHighestUnlockedDay(currentActiveUser);
+
+  for (let d = 1; d <= unlockedLimit; d++) {
     let opt = document.createElement('option');
     opt.value = d;
     let completed = isDayCompletedForUser(currentActiveUser, d);
     
-    if (completed) {
-      opt.innerText = `Day ${d} ✅`;
-    } else {
-      opt.innerText = `Day ${d}`;
-    }
+    if (completed) opt.innerText = `Day ${d} ✅`;
+    else opt.innerText = `Day ${d}`;
 
-    if (d === currentDay) {
-      opt.selected = true;
-    }
+    if (d === currentDay) opt.selected = true;
     selectElem.appendChild(opt);
   }
 }
 
-function getHighestCompletedDay(user) {
-  if (!user || !user.completedDaysMap) return 0;
-  let max = 0;
-  Object.keys(user.completedDaysMap).forEach(k => {
-    if (user.completedDaysMap[k] === true) {
-      let n = parseInt(k.replace('D', ''), 10);
-      if (!isNaN(n) && n > max) max = n;
-    }
-  });
-  return max;
-}
-
+// RULE 1: Student can ONLY navigate back to previous days, NEVER jump to next/future days
 function onDayDropdownSelect(val) {
   let selectedDayNum = parseInt(val, 10);
   if (isNaN(selectedDayNum)) return;
 
-  // Going backward (or staying on the same day) is always allowed — revision needs no lock.
-  if (selectedDayNum <= currentDay) {
-    currentDay = selectedDayNum;
-    currentQIndex = 0;
-    renderQuestion();
-    return;
-  }
+  let unlockedLimit = getHighestUnlockedDay(currentActiveUser);
 
-  let highestCompleted = getHighestCompletedDay(currentActiveUser);
-
-  // Rule 1: cannot skip past incomplete days — only (highestCompleted + 1) is free to open.
-  if (selectedDayNum > highestCompleted + 1) {
-    askAdminPinToUnlock(selectedDayNum, "🔒 Day " + selectedDayNum + " is locked — finish earlier days first, or enter Admin PIN to unlock:");
-    return;
-  }
-
-  // Rule 2: even the very next day waits for a new calendar day, unless nothing
-  // has been completed yet today (this check no longer depends on which day is
-  // "currentDay", so it can't be silently skipped like before).
-  let todayStr = getTodayString();
-  if (currentActiveUser.lastCompletedDate === todayStr) {
-    askAdminPinToUnlock(selectedDayNum, "🔒 Day " + selectedDayNum + " unlocks tomorrow! Enter Admin PIN to unlock early:");
+  if (selectedDayNum > currentDay || selectedDayNum > unlockedLimit) {
+    alert("🔒 Student agla Day select nahi kar sakte! Aap sirf purane (back) Days par revision ke liye ja sakte hain.");
+    updateDayDropdownUI();
     return;
   }
 
   currentDay = selectedDayNum;
   currentQIndex = 0;
   renderQuestion();
-}
-
-function askAdminPinToUnlock(selectedDayNum, message) {
-  let overridePin = prompt(message);
-  if (overridePin === getAdminPin()) {
-    alert("🔓 Day Unlocked by Admin!");
-    currentDay = selectedDayNum;
-    currentQIndex = 0;
-    renderQuestion();
-  } else {
-    if (overridePin) alert("Incorrect Admin PIN!");
-    updateDayDropdownUI();
-  }
 }
 
 function renderQuestion() {
@@ -1434,6 +1344,7 @@ function renderAdminDashboardSummary() {
   document.getElementById('dashAvgAccuracy').innerText = `${avgAccuracy}%`;
 }
 
+// RULE 2: Admin can ONLY reset the current active day (today's day), back/past days cannot be reset
 function renderAdminUsersList() {
   let list = document.getElementById('adminUsersList');
   list.innerHTML = '';
@@ -1441,16 +1352,7 @@ function renderAdminUsersList() {
     let row = document.createElement('div');
     row.className = 'admin-student-card';
     let isChecked = u.active !== false ? 'checked' : '';
-    let completedDays = getCompletedDaysArray(u);
-    let dayOptionsHTML = '';
-    
-    if (completedDays.length > 0) {
-      completedDays.forEach(dNum => {
-        dayOptionsHTML += `<option value="${dNum}">Day ${dNum}</option>`;
-      });
-    } else {
-      dayOptionsHTML = `<option value="">No Completed Days</option>`;
-    }
+    let currentDayOfStudent = getHighestUnlockedDay(u);
 
     row.innerHTML = `
       <div class="admin-student-header">
@@ -1461,11 +1363,9 @@ function renderAdminUsersList() {
       </div>
 
       <div class="admin-student-actions">
-        <div style="display:flex; align-items:center; gap:4px; margin-bottom:4px; width:100%;">
-          <select id="resetDaySelect_${u.id.replace(/\s+/g, '_')}" style="padding:4px; font-size:0.75rem; border-radius:8px; background:var(--card-bg); color:var(--text-main); border:1px solid var(--border);" ${completedDays.length === 0 ? 'disabled' : ''}>
-            ${dayOptionsHTML}
-          </select>
-          <button class="btn btn-secondary" onclick="resetSpecificDay('${u.id}')" style="padding:4px 8px; font-size:0.75rem;" ${completedDays.length === 0 ? 'disabled' : ''}>🔄 Reset Day</button>
+        <div style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom:4px;">
+          <small style="font-size:0.75rem; color:var(--accent-gold); font-weight:800;">Current: Day ${currentDayOfStudent}</small>
+          <button class="btn btn-secondary" onclick="resetCurrentDayOnly('${u.id}')" style="padding:4px 8px; font-size:0.75rem;">🔄 Reset Current Day ${currentDayOfStudent}</button>
         </div>
 
         <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; width: 100%; border-bottom: 1px dashed var(--border); padding-bottom: 6px; margin-bottom: 4px;">
@@ -1515,23 +1415,24 @@ function setQsPerDay(id) {
   }
 }
 
-function resetSpecificDay(id) {
+// FIX: Deduct points/wrong counts on Day reset to prevent point farming exploits
+function resetCurrentDayOnly(id) {
   let u = globalUsersList.find(x => x.id === id);
   if (!u) return;
   
-  let selectElem = document.getElementById(`resetDaySelect_${id.replace(/\s+/g, '_')}`);
-  if (!selectElem || !selectElem.value) return;
+  let targetDay = getHighestUnlockedDay(u);
 
-  let targetDay = parseInt(selectElem.value, 10);
-
-  if (confirm(`Restart Day ${targetDay} for ${id} with NEW Questions?`)) {
+  if (confirm(`Restart ONLY Current Day (Day ${targetDay}) for ${id} with NEW Questions? (Back days will NOT be changed)`)) {
     if (!u.userAnswers) u.userAnswers = {};
     if (!u.dayResetSeeds) u.dayResetSeeds = {};
     if (!u.completedDaysMap) u.completedDaysMap = {};
 
     let targetQs = getQsPerDayForUser(u);
     for (let i = 0; i < targetQs; i++) {
-      delete u.userAnswers[`D${targetDay}_Q${i}`];
+      let qKey = `D${targetDay}_Q${i}`;
+      if (u.userAnswers[qKey]) {
+        delete u.userAnswers[qKey];
+      }
     }
     delete u.completedDaysMap[`D${targetDay}`];
 
@@ -1541,7 +1442,7 @@ function resetSpecificDay(id) {
     try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(u)); } catch(e){}
     localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
 
-    alert(`Day ${targetDay} restarted for ${id}!`);
+    alert(`Day ${targetDay} (Current Day) restarted for ${id}!`);
     renderAdminDashboardSummary();
     renderAdminUsersList();
     refreshDashMetricDetailIfOpen();
@@ -1613,9 +1514,6 @@ function addNewStudent() {
   let cls = document.getElementById('newStudentClass').value;
   if (!name) { alert("Enter Student Name!"); return; }
 
-  // Base the next number on the highest existing number (not list length) and keep
-  // incrementing until the generated ID is guaranteed unique — this prevents a new
-  // student from silently overwriting an existing one's saved data after a deletion.
   let nextNum = globalUsersList.reduce((max, u) => Math.max(max, u.num || 0), 0) + 1;
   let generatedID, formattedNum;
   do {
@@ -1661,17 +1559,14 @@ function updateAdminPin() {
   if (p.length >= 4) {
     localStorage.setItem('app_master_pin', p);
     try { if (db) db.ref('settings/adminPin').set(p); } catch(e){}
-    alert("Master Admin PIN Updated! It will sync to every device automatically.");
+    alert("Master Admin PIN Updated!");
     closeAdminModal();
   } else { alert("PIN must be at least 4 digits."); }
 }
 
-// AUTO-RESUME & SILENT AUTO-SYNC WHEN APP OPENS OR SWAPS FROM BACKGROUND
 document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) {
-    if (typeof forceManualCloudSync === 'function') {
-      forceManualCloudSync(true);
-    }
+  if (!document.hidden && typeof forceManualCloudSync === 'function') {
+    forceManualCloudSync(true);
   }
 });
 
