@@ -713,6 +713,7 @@ function showSuggestions(showAll = false) {
   box.classList.remove('hidden');
 }
 
+// STRICT DATE LOCK LOGIC: Next day only unlocks on the NEXT calendar date!
 function getHighestUnlockedDay(user) {
   if (!user) return 1;
   let maxCompleted = 0;
@@ -724,6 +725,14 @@ function getHighestUnlockedDay(user) {
       }
     });
   }
+
+  let todayStr = getTodayString();
+  // Agar student ne sabse aakhiri completed day AAJ complete kiya hai, toh Next Day (maxCompleted + 1) KAL unlock hoga.
+  if (maxCompleted > 0 && user.lastCompletedDate === todayStr) {
+    return maxCompleted; 
+  }
+
+  // Agar aaj abhi tak koi day complete nahi kiya hai (ya agla din aagaya hai), toh Next Day unlocked rahega.
   return maxCompleted + 1;
 }
 
@@ -1076,7 +1085,7 @@ function handleOptionClick(selectedOpt, correctAns) {
     }
 
     setTimeout(() => {
-      alert("🎉 Fantastic! Day " + currentDay + " Complete (" + targetQs + " Questions)! Next Day will unlock tomorrow!");
+      alert("🎉 Fantastic! Day " + currentDay + " Complete (" + targetQs + " Questions)! Next Day will unlock tomorrow (Next Date)!");
     }, 200);
   }
 
@@ -1107,7 +1116,6 @@ function updateDayDropdownUI() {
   }
 }
 
-// UPDATED LOGIC: Student can navigate back & forth across ANY unlocked day (1 to highestUnlockedDay), but CANNOT go past unlocked limit.
 function onDayDropdownSelect(val) {
   let selectedDayNum = parseInt(val, 10);
   if (isNaN(selectedDayNum)) return;
@@ -1115,7 +1123,7 @@ function onDayDropdownSelect(val) {
   let unlockedLimit = getHighestUnlockedDay(currentActiveUser);
 
   if (selectedDayNum > unlockedLimit) {
-    alert("🔒 Day " + selectedDayNum + " locked hai! Aap sirf unhi days tak ja sakte hain jo aapne complete kar liye hain ya unlocked hain.");
+    alert("🔒 Day " + selectedDayNum + " locked hai! Agla Day kal ki date ko hi unlock hoga.");
     updateDayDropdownUI();
     return;
   }
