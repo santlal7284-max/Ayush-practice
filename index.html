@@ -401,7 +401,6 @@ function forceManualCloudSync(isSilent = false) {
   let syncText = document.getElementById('syncStatus');
   if (syncText) syncText.innerText = '• Syncing...';
 
-  // FIX: Fetch cloud first to avoid overwriting newer cloud state with stale local data
   db.ref('users').once('value').then((snapshot) => {
     const data = snapshot.val();
     if (data) {
@@ -629,7 +628,6 @@ function forceSyncAllDevices() {
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
-// FIX: Clean Markdown symbols before feeding text into TTS SpeechSynthesis
 function readQuestionAndOptionsWithTranslation() {
   if (!('speechSynthesis' in window)) {
     alert("Speech Synthesis not supported in this browser!");
@@ -802,7 +800,6 @@ function refreshStatsUI() {
   document.getElementById('reportPercent').innerText = `${accuracy}%`;
 }
 
-// --- LIFETIME PROCEDURAL AUTO-GENERATION ENGINE (BUG FREE) ---
 function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
   const dObj = new Date();
   const currentYear = dObj.getFullYear();
@@ -874,7 +871,6 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
           tip: `💡 JNVST Tip: ${sq}, ${sq2}, ${sq3} are perfect squares, while ${odd} is not.`
         };
       } else {
-        // FIX: Remove answer leak from question string
         let wordA = ["CAT", "DOG", "SUN", "BAT"][Math.abs(uniqueSeed) % 4];
         let val = wordA.split('').reduce((acc, c) => acc + c.charCodeAt(0) - 64, 0);
         return {
@@ -888,7 +884,6 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
     else if (mode === 2) {
       let type = Math.abs(uniqueSeed) % 3;
       if (type === 0) {
-        // FIX: Guaranteed unique HCF option values
         let mult = (Math.abs(uniqueSeed) % 4) + 2;
         let a = 3 * mult, b = 4 * mult;
         let hcf = mult;
@@ -950,7 +945,6 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
         tip: `💡 Tip: Count them one by one!`
       };
     } else if (mode === 1) {
-      // FIX: Ensure ASCII character lower bound doesn't evaluate to '@'
       let charC = 65 + (Math.abs(uniqueSeed) % 20);
       let l1 = String.fromCharCode(charC), l2 = String.fromCharCode(charC + 1);
       let prevChar = charC > 65 ? String.fromCharCode(charC - 1) : 'Z';
@@ -1113,15 +1107,15 @@ function updateDayDropdownUI() {
   }
 }
 
-// RULE 1: Student can ONLY navigate back to previous days, NEVER jump to next/future days
+// UPDATED LOGIC: Student can navigate back & forth across ANY unlocked day (1 to highestUnlockedDay), but CANNOT go past unlocked limit.
 function onDayDropdownSelect(val) {
   let selectedDayNum = parseInt(val, 10);
   if (isNaN(selectedDayNum)) return;
 
   let unlockedLimit = getHighestUnlockedDay(currentActiveUser);
 
-  if (selectedDayNum > currentDay || selectedDayNum > unlockedLimit) {
-    alert("🔒 Student agla Day select nahi kar sakte! Aap sirf purane (back) Days par revision ke liye ja sakte hain.");
+  if (selectedDayNum > unlockedLimit) {
+    alert("🔒 Day " + selectedDayNum + " locked hai! Aap sirf unhi days tak ja sakte hain jo aapne complete kar liye hain ya unlocked hain.");
     updateDayDropdownUI();
     return;
   }
@@ -1344,7 +1338,6 @@ function renderAdminDashboardSummary() {
   document.getElementById('dashAvgAccuracy').innerText = `${avgAccuracy}%`;
 }
 
-// RULE 2: Admin can ONLY reset the current active day (today's day), back/past days cannot be reset
 function renderAdminUsersList() {
   let list = document.getElementById('adminUsersList');
   list.innerHTML = '';
@@ -1415,7 +1408,6 @@ function setQsPerDay(id) {
   }
 }
 
-// FIX: Deduct points/wrong counts on Day reset to prevent point farming exploits
 function resetCurrentDayOnly(id) {
   let u = globalUsersList.find(x => x.id === id);
   if (!u) return;
