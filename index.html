@@ -256,6 +256,10 @@
         <div id="dashDetailContent" class="dash-detail-list"></div>
       </div>
 
+      <button class="btn" onclick="forceSyncAllDevices()" style="width: 100%; margin-bottom: 10px; background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+        🔄 Force Sync / Refresh All Devices
+      </button>
+
       <button class="btn btn-secondary" onclick="toggleAddStudentForm()" style="width: 100%; margin-bottom: 10px; text-align: left; display: flex; justify-content: space-between; align-items: center;">
         <span>➕ Add New Student</span>
         <span id="addStudentArrow">▼</span>
@@ -357,8 +361,18 @@ try {
   globalUsersList = defaultFallbackUsers.map(sanitizeAndNormalizeUser);
 }
 
-function initFirebaseDeferred() {
-  if (typeof firebase === 'undefined') return;
+function initFirebaseDeferred(attempt) {
+  attempt = attempt || 0;
+  if (typeof firebase === 'undefined') {
+    if (attempt < 20) {
+      // Firebase scripts haven't finished loading yet (slow network/device) — keep retrying
+      // for up to ~10 seconds instead of silently giving up after one try.
+      setTimeout(function(){ initFirebaseDeferred(attempt + 1); }, 500);
+    } else {
+      console.error("Firebase failed to load after multiple attempts — app will run offline (localStorage only) until reopened.");
+    }
+    return;
+  }
   const firebaseConfig = {
     apiKey: "AIzaSyC5Nga075aed2qmzAmRHKoAFNW_9nPBxZE",
     authDomain: "eduportal-2026-app.firebaseapp.com",
@@ -519,6 +533,12 @@ function getTodayString() {
   return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
 }
 
+function getYesterdayString() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
 function getRandomAvatar(gender, num) {
   let list = gender === "Girl" ? GIRL_AVATARS : BOY_AVATARS;
   return list[(num || 1) % list.length];
@@ -577,7 +597,44 @@ function initCloudSync() {
         refreshDashMetricDetailIfOpen();
       }
     });
+
+    // Keep the Admin PIN in sync across every device — without this, changing the
+    // PIN on one phone left every other device still checking the old/default PIN.
+    db.ref('settings/adminPin').on('value', (snapshot) => {
+      let cloudPin = snapshot.val();
+      if (cloudPin && cloudPin !== localStorage.getItem('app_master_pin')) {
+        localStorage.setItem('app_master_pin', cloudPin);
+      }
+    });
+
+    // Remote "Force Sync / Refresh All Devices" — every device listens for this
+    // timestamp. The first snapshot on load just records the current value; any
+    // LATER change (triggered by the admin button) makes every open device reload.
+    let seenForceReloadAt = null;
+    db.ref('settings/forceReloadAt').on('value', (snapshot) => {
+      let val = snapshot.val();
+      if (val == null) return;
+      if (seenForceReloadAt === null) {
+        seenForceReloadAt = val;
+        return;
+      }
+      if (val !== seenForceReloadAt) {
+        seenForceReloadAt = val;
+        location.reload();
+      }
+    });
   } catch(e) {}
+}
+
+function forceSyncAllDevices() {
+  if (!db) { alert("Cloud connection initializing... please try again in a moment."); return; }
+  if (confirm("This will refresh the app on every device where it's currently open (including this one). Continue?")) {
+    db.ref('settings/forceReloadAt').set(Date.now()).then(() => {
+      alert("✅ Sync signal sent — every open device will refresh with the latest data shortly.");
+    }).catch(() => {
+      alert("Couldn't send the sync signal — check your internet connection.");
+    });
+  }
 }
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
@@ -739,7 +796,7 @@ function isDayCompletedForUser(user, day) {
 
 function getCompletedDaysArray(user) {
   let completed = [];
-  for(let d = 1; d <= 30; d++) {
+  for(let d = 1; d <= 365; d++) {
     if (isDayCompletedForUser(user, d)) {
       completed.push(d);
     }
@@ -1009,23 +1066,21 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
   let targetQs = getQsPerDayForUser(currentActiveUser);
-  
-  let answeredHashes = new Set();
-  if (currentActiveUser && currentActiveUser.userAnswers) {
-    Object.keys(currentActiveUser.userAnswers).forEach(k => {
-      answeredHashes.add(currentActiveUser.userAnswers[k]);
-    });
-  }
+
+  // Tracks question text already picked within THIS day's set, so the same
+  // question can't appear twice in one day's list.
+  let usedQuestionTexts = new Set();
 
   for (let i = 0; i < targetQs; i++) {
     let offset = 0;
     let qObj = generateProceduralSingleQuestion(userClass, day, i, offset);
-    
-    while (answeredHashes.has(qObj.q) && offset < 20) {
+
+    while (usedQuestionTexts.has(qObj.q) && offset < 20) {
       offset++;
       qObj = generateProceduralSingleQuestion(userClass, day, i, offset);
     }
-    
+    usedQuestionTexts.add(qObj.q);
+
     let optSeed = (day * 100) + i + (offset * 13);
     qObj.shuffledOptions = shuffleArray(qObj.options, optSeed);
     questions.push(qObj);
@@ -1060,8 +1115,18 @@ function handleOptionClick(selectedOpt, correctAns) {
     if (!currentActiveUser.completedDaysMap) currentActiveUser.completedDaysMap = {};
     currentActiveUser.completedDaysMap[`D${currentDay}`] = true;
 
-    currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
-    currentActiveUser.lastCompletedDate = getTodayString();
+    let todayStr = getTodayString();
+    if (currentActiveUser.lastCompletedDate === todayStr) {
+      // Already completed a day earlier today (e.g. an admin-unlocked extra day) —
+      // streak doesn't increase twice for the same calendar day.
+    } else if (currentActiveUser.lastCompletedDate === getYesterdayString()) {
+      // Completed yesterday too — streak continues.
+      currentActiveUser.streak = (currentActiveUser.streak || 0) + 1;
+    } else {
+      // First day, or a day (or more) was missed — streak restarts at 1.
+      currentActiveUser.streak = 1;
+    }
+    currentActiveUser.lastCompletedDate = todayStr;
     setTimeout(() => {
       alert("🎉 Fantastic! Day " + currentDay + " Complete (" + targetQs + " Questions)! Next Day will unlock tomorrow!");
     }, 200);
@@ -1079,7 +1144,7 @@ function updateDayDropdownUI() {
   if (!selectElem) return;
 
   selectElem.innerHTML = '';
-  for (let d = 1; d <= 30; d++) {
+  for (let d = 1; d <= 365; d++) {
     let opt = document.createElement('option');
     opt.value = d;
     let completed = isDayCompletedForUser(currentActiveUser, d);
@@ -1097,33 +1162,63 @@ function updateDayDropdownUI() {
   }
 }
 
+function getHighestCompletedDay(user) {
+  if (!user || !user.completedDaysMap) return 0;
+  let max = 0;
+  Object.keys(user.completedDaysMap).forEach(k => {
+    if (user.completedDaysMap[k] === true) {
+      let n = parseInt(k.replace('D', ''), 10);
+      if (!isNaN(n) && n > max) max = n;
+    }
+  });
+  return max;
+}
+
 function onDayDropdownSelect(val) {
   let selectedDayNum = parseInt(val, 10);
   if (isNaN(selectedDayNum)) return;
 
-  if (selectedDayNum > currentDay) {
-    if (!isDayCompleted(currentDay)) {
-      alert("🔒 Complete all questions of Day " + currentDay + " first!");
-      updateDayDropdownUI();
-      return;
-    }
+  // Going backward (or staying on the same day) is always allowed — revision needs no lock.
+  if (selectedDayNum <= currentDay) {
+    currentDay = selectedDayNum;
+    currentQIndex = 0;
+    renderQuestion();
+    return;
+  }
 
-    let todayStr = getTodayString();
-    if (currentActiveUser.lastCompletedDate === todayStr && selectedDayNum > currentDay) {
-      let overridePin = prompt("🔒 Day " + selectedDayNum + " unlocks tomorrow!\n\nEnter Admin PIN to unlock early:");
-      if (overridePin === getAdminPin()) {
-        alert("🔓 Day Unlocked by Admin!");
-      } else {
-        if(overridePin) alert("Incorrect Admin PIN!");
-        updateDayDropdownUI();
-        return;
-      }
-    }
+  let highestCompleted = getHighestCompletedDay(currentActiveUser);
+
+  // Rule 1: cannot skip past incomplete days — only (highestCompleted + 1) is free to open.
+  if (selectedDayNum > highestCompleted + 1) {
+    askAdminPinToUnlock(selectedDayNum, "🔒 Day " + selectedDayNum + " is locked — finish earlier days first, or enter Admin PIN to unlock:");
+    return;
+  }
+
+  // Rule 2: even the very next day waits for a new calendar day, unless nothing
+  // has been completed yet today (this check no longer depends on which day is
+  // "currentDay", so it can't be silently skipped like before).
+  let todayStr = getTodayString();
+  if (currentActiveUser.lastCompletedDate === todayStr) {
+    askAdminPinToUnlock(selectedDayNum, "🔒 Day " + selectedDayNum + " unlocks tomorrow! Enter Admin PIN to unlock early:");
+    return;
   }
 
   currentDay = selectedDayNum;
   currentQIndex = 0;
   renderQuestion();
+}
+
+function askAdminPinToUnlock(selectedDayNum, message) {
+  let overridePin = prompt(message);
+  if (overridePin === getAdminPin()) {
+    alert("🔓 Day Unlocked by Admin!");
+    currentDay = selectedDayNum;
+    currentQIndex = 0;
+    renderQuestion();
+  } else {
+    if (overridePin) alert("Incorrect Admin PIN!");
+    updateDayDropdownUI();
+  }
 }
 
 function renderQuestion() {
@@ -1518,9 +1613,18 @@ function addNewStudent() {
   let cls = document.getElementById('newStudentClass').value;
   if (!name) { alert("Enter Student Name!"); return; }
 
-  let nextNum = globalUsersList.length + 1;
-  let formattedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
-  let generatedID = `${name} ${formattedNum}`;
+  // Base the next number on the highest existing number (not list length) and keep
+  // incrementing until the generated ID is guaranteed unique — this prevents a new
+  // student from silently overwriting an existing one's saved data after a deletion.
+  let nextNum = globalUsersList.reduce((max, u) => Math.max(max, u.num || 0), 0) + 1;
+  let generatedID, formattedNum;
+  do {
+    formattedNum = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
+    generatedID = `${name} ${formattedNum}`;
+    if (!globalUsersList.some(u => u.id === generatedID)) break;
+    nextNum++;
+  } while (true);
+
   let randomPin = Math.floor(1000 + Math.random() * 9000).toString();
   let avatar = getRandomAvatar(gender, nextNum);
 
@@ -1556,7 +1660,8 @@ function updateAdminPin() {
   let p = document.getElementById('changeAdminPinVal').value.trim();
   if (p.length >= 4) {
     localStorage.setItem('app_master_pin', p);
-    alert("Master Admin PIN Updated!");
+    try { if (db) db.ref('settings/adminPin').set(p); } catch(e){}
+    alert("Master Admin PIN Updated! It will sync to every device automatically.");
     closeAdminModal();
   } else { alert("PIN must be at least 4 digits."); }
 }
