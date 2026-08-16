@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>EduPortal 2026 - Lifetime Procedural Learning Engine</title>
+  <title>AyushAcademy 2026 - Lifetime Procedural Learning Engine</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
   
   <!-- Prevent Stale Cache & Force Auto-Update on App Open -->
@@ -14,7 +14,7 @@
   <!-- iOS / iPhone PWA Web App Mode -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="EduPortal">
+  <meta name="apple-mobile-web-app-title" content="AyushAcademy">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3426/3426653.png">
 
   <!-- Async Firebase SDKs for Instant Startup Speed -->
@@ -147,7 +147,7 @@
 <div class="app-container">
 
   <div class="top-header">
-    <div style="font-weight: 900; font-size: 1.1rem;">🚀 EduPortal <span id="syncStatus" style="font-size:0.7rem; color:var(--success);">• Ready</span></div>
+    <div style="font-weight: 900; font-size: 1.1rem;">🚀 AyushAcademy <span id="syncStatus" style="font-size:0.7rem; color:var(--success);">• Ready</span></div>
     <div class="header-actions">
       <button class="sync-btn-header" onclick="forceManualCloudSync(false)" title="Force Sync with Cloud">🔄 Sync</button>
       <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
@@ -582,7 +582,6 @@ function initCloudSync() {
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
-// --- FIXED VOICE SPEECH ENGINE WITH AUTO-HINDI SCRIPT DETECTION ---
 function readQuestionAndOptionsWithTranslation() {
   if (!('speechSynthesis' in window)) {
     alert("Speech Synthesis not supported in this browser!");
@@ -594,15 +593,14 @@ function readQuestionAndOptionsWithTranslation() {
   if (!currentLoadedQuestions.length || currentQIndex >= currentLoadedQuestions.length) return;
 
   let qObj = currentLoadedQuestions[currentQIndex];
-  let cleanQ = qObj.q.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+  let cleanQ = qObj.q.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2700}-\u{27BF}]/gu, '');
   
   let opts = qObj.shuffledOptions || qObj.options || [];
   let labelsHindi = ["ऑप्शन A", "ऑप्शन B", "ऑप्शन C", "ऑप्शन D"];
   let labelsEng = ["Option A", "Option B", "Option C", "Option D"];
 
-  let passageText = qObj.passage ? qObj.passage.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '') : "";
+  let passageText = qObj.passage ? qObj.passage.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2700}-\u{27BF}]/gu, '') : "";
   
-  // Detect Hindi Devanagari script (\u0900-\u097F) in Passage, Question or Options
   let containsHindi = /[\u0900-\u097F]/.test(cleanQ) || /[\u0900-\u097F]/.test(passageText) || opts.some(o => /[\u0900-\u097F]/.test(o));
 
   let fullSpeechText = "";
@@ -612,7 +610,7 @@ function readQuestionAndOptionsWithTranslation() {
   fullSpeechText += cleanQ + ". ";
 
   opts.forEach((opt, idx) => {
-    let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+    let cleanOpt = opt.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2700}-\u{27BF}]/gu, '');
     let label = containsHindi ? labelsHindi[idx] : labelsEng[idx];
     fullSpeechText += `${label}: ${cleanOpt}. `;
   });
@@ -620,7 +618,7 @@ function readQuestionAndOptionsWithTranslation() {
   let utterance = new SpeechSynthesisUtterance(fullSpeechText);
   
   if (containsHindi) {
-    utterance.lang = 'hi-IN'; // Switches voice to Hindi Speech Engine
+    utterance.lang = 'hi-IN';
   } else {
     utterance.lang = 'en-US';
   }
