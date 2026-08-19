@@ -408,10 +408,11 @@ function forceManualCloudSync(isSilent = false) {
   db.ref('users').once('value').then((snapshot) => {
     const data = snapshot.val();
     if (data) {
+      // Safely load all cloud users without deleting or overwriting others
       globalUsersList = Object.keys(data).map(key => sanitizeAndNormalizeUser(data[key]));
       localStorage.setItem('cached_users_data', JSON.stringify(globalUsersList));
       if (syncText) syncText.innerText = '• Live Cloud';
-      if (!isSilent) showToast("✨ Successfully synchronized from Cloud!");
+      if (!isSilent) showToast("✨ Successfully synchronized " + globalUsersList.length + " students from Cloud!");
       
       if (currentActiveUser) {
         let updated = globalUsersList.find(u => u.id === currentActiveUser.id);
@@ -420,11 +421,6 @@ function forceManualCloudSync(isSilent = false) {
           refreshStatsUI();
           renderQuestion();
         }
-      }
-
-      if (currentActiveUser) {
-        let activeKey = currentActiveUser.id.replace(/\s+/g, '_');
-        db.ref('users/' + activeKey).set(sanitizeAndNormalizeUser(currentActiveUser)).catch(() => {});
       }
 
       let adminModal = document.getElementById('adminModal');
