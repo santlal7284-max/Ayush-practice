@@ -276,8 +276,8 @@
           <option value="Class 1">Class 1</option>
           <option value="Class 2">Class 2</option>
           <option value="Class 3">Class 3</option>
-          <option value="Class 4" selected>Class 4 (CBSE + JNVST)</option>
-          <option value="Class 5">Class 5 (CBSE + JNVST)</option>
+          <option value="Class 4">Class 4 (CBSE + JNVST)</option>
+          <option value="Class 5" selected>Class 5 (CBSE + JNVST Special)</option>
           <option value="Class 6">Class 6</option>
           <option value="Class 7">Class 7</option>
           <option value="Class 8">Class 8</option>
@@ -316,10 +316,15 @@ if (!localStorage.getItem('app_master_pin')) {
   localStorage.setItem('app_master_pin', '7258');
 }
 
+function generateRandomPin() {
+  return Math.floor(1000 + Math.random() * 9000).toString();
+}
+
 const defaultFallbackUsers = [
   { id: "Ayush 01", name: "Ayush", num: 1, pin: "1234", class: "Class 4", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, completedDaysMap: {}, lastCompletedDate: "", qsPerDay: 20 },
   { id: "Mahi Raj 02", name: "Mahi Raj", num: 2, pin: "1234", class: "LKG", gender: "Girl", avatar: "👧", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, completedDaysMap: {}, lastCompletedDate: "", qsPerDay: 20 },
-  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, completedDaysMap: {}, lastCompletedDate: "", qsPerDay: 20 }
+  { id: "Pratham 06", name: "Pratham", num: 6, pin: "1234", class: "Class 6", gender: "Boy", avatar: "👦", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, completedDaysMap: {}, lastCompletedDate: "", qsPerDay: 20 },
+  { id: "JNV Ayush 07", name: "JNV Ayush", num: 7, pin: "8392", class: "Class 5", gender: "Boy", avatar: "🧑‍🚀", active: true, points: 0, wrong: 0, streak: 0, userAnswers: {}, dayResetSeeds: {}, completedDaysMap: {}, lastCompletedDate: "", qsPerDay: 20 }
 ];
 
 function sanitizeAndNormalizeUser(u) {
@@ -329,7 +334,7 @@ function sanitizeAndNormalizeUser(u) {
     name: u.name || u.id || "User",
     num: u.num || 1,
     pin: u.pin || "1234",
-    class: u.class || "Class 4",
+    class: u.class || "Class 5",
     gender: u.gender || "Boy",
     avatar: u.avatar || getRandomAvatar(u.gender || "Boy", u.num || 1),
     active: u.active !== undefined ? u.active : true,
@@ -806,18 +811,139 @@ function refreshStatsUI() {
 }
 
 // ---------------------------------------------------------------------
-// DYNAMIC PROCEDURAL GENERATOR (Fixes repetition & adds Class 4/5 CBSE/NCERT)
+// EXTENDED DYNAMIC PROCEDURAL GENERATOR
 // ---------------------------------------------------------------------
 function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
   let classHash = userClass.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   let resetSeed = (currentActiveUser && currentActiveUser.dayResetSeeds && currentActiveUser.dayResetSeeds[`D${day}`]) || 0;
   let userNum = (currentActiveUser && currentActiveUser.num) ? currentActiveUser.num : 1;
 
-  // Class-specific unique mathematical seed
   let uniqueSeed = (classHash * 7919) + (day * 131) + (qIndex * 17) + (offset * 997) + (resetSeed * 333) + (userNum * 47);
   uniqueSeed = Math.abs(uniqueSeed);
 
-  // 1. LKG / UKG SECTION
+  let isJnvAyush = (currentActiveUser && (currentActiveUser.id.toLowerCase().includes("jnv ayush") || currentActiveUser.name.toLowerCase().includes("jnv ayush")));
+
+  // 1. SPECIAL JNVST 2024-2026 ENGINE FOR "JNV AYUSH" OR CLASS 5
+  if (isJnvAyush || userClass === "Class 5") {
+    let mode = (uniqueSeed + qIndex) % 5;
+
+    if (mode === 0) {
+      let jnvPassages = [
+        {
+          passage: `📖 **JNVST Passage (2024 Exam):** To achieve glory and success, one should have a strong will. Hard work and continuous efforts help a person achieve many things. Every person is different and unique. Determination or perseverance is the key to success. One must possess tolerance and courage to achieve one's aim.`,
+          q: `What is considered as the key to success in the passage?`,
+          opts: ["Determination", "Unplanned work", "Stubbornness", "Weakness"],
+          ans: "Determination",
+          tip: `💡 JNVST English Tip: Look for key term 'Determination' in passage.`
+        },
+        {
+          passage: `📖 **JNVST Science Passage (2024 Exam):** India has produced many great scientists and Jagadish Chandra Bose was one of them. He dedicated his life to Botany. He was born on 30th November, 1858. From childhood, he loved to experiment with plants and natural laws.`,
+          q: `Jagadish Chandra Bose spent his life dedicated to which field of science?`,
+          opts: ["Botany", "Medicine", "Astronomy", "Physics"],
+          ans: "Botany",
+          tip: `💡 JNVST Passage Tip: 'Botany' is explicitly mentioned.`
+        },
+        {
+          passage: `📖 **JNVST Passage (2024 Exam):** Helen Keller was an American author who was totally blind and deaf, yet she read and wrote many books. All this was possible because of her determination to overcome all disabilities.`,
+          q: `Helen Keller was able to write books despite disabilities because of her:`,
+          opts: ["Determination", "Fear", "Luck", "Wealth"],
+          ans: "Determination",
+          tip: `💡 JNVST Passage Tip: 'Determination' empowered Helen Keller.`
+        },
+        {
+          passage: `📖 **JNVST Technology Passage (2025 Exam):** A robot is a special machine. It moves and follows instructions coming from a computer. It does not make mistakes or get tired. Robots help in making cars, exploring volcanoes, and cleaning houses.`,
+          q: `Why do robots never make mistakes according to the text?`,
+          opts: ["They follow computer instructions & are machines", "They are humans", "They sleep well", "They read books"],
+          ans: "They follow computer instructions & are machines",
+          tip: `💡 Passage Fact: Robots execute computer code.`
+        },
+        {
+          passage: `📖 **2026 Predictive JNVST Passage:** Spiders spin webs to hold eggs, hide from enemies, and catch food. The webs are sticky so bugs get trapped when they fly in. Without webs, spiders cannot survive.`,
+          q: `Which word in passage means 'vital for staying alive'?`,
+          opts: ["Survival", "Trapped", "Sticky", "Flies"],
+          ans: "Survival",
+          tip: `💡 JNVST Vocabulary: Survival = staying alive.`
+        }
+      ];
+      let sel = jnvPassages[uniqueSeed % jnvPassages.length];
+      return { passage: sel.passage, q: sel.q, options: sel.opts, ans: sel.ans, tip: sel.tip };
+    }
+    else if (mode === 1) {
+      let sub = uniqueSeed % 4;
+      if (sub === 0) {
+        let cp = 100 * ((uniqueSeed % 15) + 5);
+        let sp = cp + 100;
+        let pPercent = Math.round((100 / cp) * 100);
+        return {
+          q: `JNVST Arithmetic: An item bought for ₹${cp} is sold for ₹${sp}. Profit percentage is approx:`,
+          options: [`${pPercent}%`, `${pPercent + 5}%`, `${pPercent - 2}%`, `${pPercent + 10}%`],
+          ans: `${pPercent}%`,
+          tip: `💡 Profit % = (Profit / CP) × 100.`
+        };
+      } else if (sub === 1) {
+        let side = (uniqueSeed % 10) + 10;
+        let perim = 4 * side;
+        let area = side * side;
+        return {
+          q: `JNVST Special Math: A square park has side ${side} m. Its area in sq meters is:`,
+          options: [`${area} sq.m`, `${perim} sq.m`, `${area + 20} sq.m`, `${area - 10} sq.m`],
+          ans: `${area} sq.m`,
+          tip: `💡 Area of Square = Side × Side (${side} × ${side}).`
+        };
+      } else if (sub === 2) {
+        let a = (uniqueSeed % 8) + 2;
+        let b = a * 6;
+        return {
+          q: `JNVST Decimal Math: Simplify ${b} / 0.${a} = ?`,
+          options: [`${(b / (a/10))}`, `${b / a}`, `${(b / (a/10)) / 10}`, `${(b / (a/10)) * 10}`],
+          ans: `${(b / (a/10))}`,
+          tip: `💡 Divide ${b} by 0.${a}.`
+        };
+      } else {
+        let p1 = 83, p2 = 89;
+        return {
+          q: `JNVST Paper Q: Product of all prime numbers between 80 and 90 is:`,
+          options: [`${p1 * p2}`, `7380`, `598347`, `8389`],
+          ans: `${p1 * p2}`,
+          tip: `💡 Prime numbers between 80 and 90 are 83 and 89. Multiply 83 × 89 = ${p1 * p2}.`
+        };
+      }
+    }
+    else if (mode === 2) {
+      let seriesStep = (uniqueSeed % 5) + 3;
+      let startNum = (uniqueSeed % 10) + 1;
+      let s1 = startNum, s2 = startNum + seriesStep, s3 = startNum + 2*seriesStep, s4 = startNum + 3*seriesStep;
+      let ans = startNum + 4*seriesStep;
+      return {
+        q: `JNVST Mental Ability Series: Complete pattern: ${s1}, ${s2}, ${s3}, ${s4}, [ ? ]`,
+        options: [`${ans}`, `${ans+2}`, `${ans-1}`, `${ans+5}`],
+        ans: `${ans}`,
+        tip: `💡 Series Logic: Add +${seriesStep} to previous number.`
+      };
+    }
+    else if (mode === 3) {
+      let ncertPool = [
+        { q: "Which organ secretes Bile Juice to digest fats in human body?", ans: "Liver", opts: ["Liver", "Stomach", "Pancreas", "Heart"] },
+        { q: "Vitamin C deficiency causes which of the following diseases?", ans: "Scurvy", opts: ["Scurvy", "Rickets", "Beriberi", "Anemia"] },
+        { q: "Green pigment present in plant leaves for photosynthesis is:", ans: "Chlorophyll", opts: ["Chlorophyll", "Stomata", "Xylem", "Phloem"] },
+        { q: "What is the freezing point of pure water in Celsius?", ans: "0°C", opts: ["0°C", "100°C", "37°C", "10°C"] }
+      ];
+      let sel = ncertPool[uniqueSeed % ncertPool.length];
+      return { q: `Class 5 CBSE Science: ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 NCERT Chapter Fundamental.` };
+    }
+    else {
+      let gramPool = [
+        { q: "Select the opposite (Antonym) of 'HONEST':", ans: "Dishonest", opts: ["Dishonest", "Fake", "Sincere", "Truthful"] },
+        { q: "Identify the Adjective in: 'The golden eagle flew high.'", ans: "golden", opts: ["golden", "eagle", "flew", "high"] },
+        { q: "'दयालु' शब्द का विलोम शब्द चुनिए:", ans: "निर्दयी", opts: ["निर्दयी", "कृपालु", "सज्जन", "ईमानदार"] },
+        { q: "पर्यावरण में 'जल चक्र' का मुख्य कारण क्या है?", ans: "वाष्पीकरण और संघनन", opts: ["वाष्पीकरण और संघनन", "प्रदूषण", "पेड़ काटना", "आंधी"] }
+      ];
+      let sel = gramPool[uniqueSeed % gramPool.length];
+      return { q: `JNVST Language Test: ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 Core Grammar & Vocabulary.` };
+    }
+  }
+
+  // 2. LKG / UKG SECTION
   if (userClass === "LKG" || userClass === "UKG") {
     let subMode = (uniqueSeed + qIndex) % 4;
     if (subMode === 0) {
@@ -859,7 +985,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
     }
   }
 
-  // 2. CLASS 1, 2, 3 SECTION
+  // 3. CLASS 1, 2, 3 SECTION
   if (userClass === "Class 1" || userClass === "Class 2" || userClass === "Class 3") {
     let subMode = (uniqueSeed + qIndex) % 4;
     if (subMode === 0) {
@@ -906,150 +1032,67 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
     }
   }
 
-  // 3. CLASS 4 & 5 SECTION (CBSE / NCERT + JNVST PREPARATION COMBINED)
-  if (userClass === "Class 4" || userClass === "Class 5") {
+  // 4. CLASS 4 SECTION
+  if (userClass === "Class 4") {
     let mode = (uniqueSeed + qIndex) % 4;
 
-    // Mode 0: Passages & Comprehension (JNVST + NCERT Literature/Moral)
     if (mode === 0) {
       let pThemes = [
         { topic: "पेड़ों और वनों की उपयोगिता (NCERT EVS)", goal: "पर्यावरण संतुलन और स्वच्छ हवा", key: "पेड़" },
         { topic: "जल संरक्षण (CBSE Science)", goal: "वर्षा के जल को संचित करना", key: "जल" },
-        { topic: "संतुलित आहार (NCERT Health)", goal: "विटामिन और खनिज का सेवन", key: "स्वास्थ्य" },
-        { topic: "समय का सही नियोजन (JNVST Prep)", goal: "नियमित अभ्यास व एकाग्रता", key: "समय" },
-        { topic: "नवोदय विद्यालय और आवासीय शिक्षा", goal: "ग्रामीण प्रतिभाओं का सर्वांगीण विकास", key: "नवोदय" }
+        { topic: "संतुलित आहार (NCERT Health)", goal: "विटामिन और खनिज का सेवन", key: "स्वास्थ्य" }
       ];
       let pEngThemes = [
         { topic: "Photosynthesis & Plant Life (NCERT EVS)", goal: "Absorbing Sunlight & Water", key: "Chlorophyll" },
-        { topic: "Digestion System (CBSE Science)", goal: "Chewing food properly", key: "Stomach" },
-        { topic: "Water Cycle (NCERT Science)", goal: "Evaporation & Condensation", key: "Clouds" },
-        { topic: "JNVST Mental Preparation", goal: "Speed & Accuracy in solving Qs", key: "Practice" }
+        { topic: "Digestion System (CBSE Science)", goal: "Chewing food properly", key: "Stomach" }
       ];
       let isHindi = (day + qIndex) % 2 === 1;
       let sel = isHindi ? pThemes[uniqueSeed % pThemes.length] : pEngThemes[uniqueSeed % pEngThemes.length];
 
       let pText = isHindi
-        ? `📖 **CBSE & JNVST गद्यांश (Day ${day}):** ${sel.topic} हमारे जीवन का महत्वपूर्ण हिस्सा है। ${sel.goal} से ही ${sel.key} की रक्षा सम्भव होती है। छात्र जीवन में इसका विशेष महत्त्व है।`
-        : `📖 **CBSE & JNVST Passage (Day ${day}):** ${sel.topic} plays a vital role. ${sel.goal} helps in understanding ${sel.key}. Mastering this builds a strong academic foundation.`;
+        ? `📖 **CBSE गद्यांश (Day ${day}):** ${sel.topic} हमारे जीवन का महत्वपूर्ण हिस्सा है। ${sel.goal} से ही ${sel.key} की रक्षा सम्भव होती है।`
+        : `📖 **CBSE Passage (Day ${day}):** ${sel.topic} plays a vital role. ${sel.goal} helps in understanding ${sel.key}.`;
 
       return {
         passage: pText,
-        q: isHindi ? `गद्यांश के अनुसार किसका महत्त्व सर्वाधिक दर्शाया गया है?` : `According to the passage, what is highlighted key concept?`,
+        q: isHindi ? `गद्यांश के अनुसार किसका महत्त्व सर्वाधिक दर्शाया गया है?` : `According to passage, what is highlighted?`,
         options: [sel.key, isHindi ? "आलस्य" : "Laziness", isHindi ? "समय गँवाना" : "Wasting time", isHindi ? "अज्ञानता" : "Ignorance"],
         ans: sel.key,
-        tip: isHindi ? `💡 JNVST/NCERT Tip: गद्यांश में '${sel.key}' मुख्य उत्तर है।` : `💡 Tip: Pay attention to key term '${sel.key}'.`
+        tip: `💡 Pay attention to key concept '${sel.key}'.`
       };
-    }
-
-    // Mode 1: JNVST Mental Ability & Logic
-    else if (mode === 1) {
-      let subType = uniqueSeed % 3;
-      if (subType === 0) {
-        let step = (uniqueSeed % 6) + 2;
-        let start = (uniqueSeed % 20) + 1;
-        let s1 = start, s2 = start + step, s3 = start + 2*step, s4 = start + 3*step;
-        let ans = start + 4*step;
-        return {
-          q: `JNVST Mental Ability: Complete the number series: ${s1}, ${s2}, ${s3}, ${s4}, ?`,
-          options: [`${ans}`, `${ans+2}`, `${ans-1}`, `${ans+4}`],
-          ans: `${ans}`,
-          tip: `💡 JNVST Tip: The sequence increases by +${step} each step.`
-        };
-      } else if (subType === 1) {
-        let base = (uniqueSeed % 7) + 2;
-        let sq1 = base * base;
-        let sq2 = (base + 1) * (base + 1);
-        let sq3 = (base + 2) * (base + 2);
-        let nonSq = sq3 + 5;
-        return {
-          q: `JNVST Mental Ability: Find the ODD one out among numbers:`,
-          options: [`${sq1}`, `${sq2}`, `${nonSq}`, `${sq3}`],
-          ans: `${nonSq}`,
-          tip: `💡 JNVST Tip: ${sq1}, ${sq2}, ${sq3} are square numbers, while ${nonSq} is not.`
-        };
-      } else {
-        let words = ["BOOK", "PEN", "READ", "MATH"];
-        let selWord = words[uniqueSeed % words.length];
-        let posSum = selWord.split('').reduce((acc, c) => acc + (c.charCodeAt(0) - 64), 0);
-        return {
-          q: `JNVST Logic: Sum of letter positions (A=1, B=2...) for '${selWord}':`,
-          options: [`${posSum}`, `${posSum + 3}`, `${posSum - 2}`, `${posSum + 5}`],
-          ans: `${posSum}`,
-          tip: `💡 JNVST Tip: Add position of each letter in alphabet.`
-        };
-      }
-    }
-
-    // Mode 2: CBSE/NCERT Mathematics + JNVST Arithmetic
-    else if (mode === 2) {
-      let subType = uniqueSeed % 4;
-      if (subType === 0) {
-        let l = (uniqueSeed % 8) + 4;
-        let b = (uniqueSeed % 5) + 2;
-        let perimeter = 2 * (l + b);
-        return {
-          q: `CBSE Class 4/5 Maths (Geometry): Find Perimeter of Rectangle with Length = ${l} cm and Breadth = ${b} cm:`,
-          options: [`${perimeter} cm`, `${perimeter + 4} cm`, `${l * b} cm²`, `${perimeter - 2} cm`],
-          ans: `${perimeter} cm`,
-          tip: `💡 NCERT Tip: Perimeter of Rectangle = 2 × (Length + Breadth).`
-        };
-      } else if (subType === 1) {
-        let mult = (uniqueSeed % 5) + 2;
-        let n1 = 3 * mult, n2 = 5 * mult;
-        let hcf = mult;
-        return {
-          q: `JNVST / CBSE Maths: Find Highest Common Factor (HCF) of ${n1} and ${n2}:`,
-          options: [`${hcf}`, `${hcf + 1}`, `${hcf * 2}`, `${hcf + 3}`],
-          ans: `${hcf}`,
-          tip: `💡 HCF is the largest number that divides both ${n1} and ${n2}.`
-        };
-      } else if (subType === 2) {
-        let cp = ((uniqueSeed % 8) + 2) * 100;
-        let profit = 100;
-        let sp = cp + profit;
-        let pPercent = Math.round((profit / cp) * 100);
-        return {
-          q: `CBSE / JNVST Arithmetic: An article bought for ₹${cp} is sold at ₹${sp}. Calculate Profit Percentage:`,
-          options: [`${pPercent}%`, `${pPercent + 5}%`, `${pPercent - 2}%`, `${pPercent + 10}%`],
-          ans: `${pPercent}%`,
-          tip: `💡 Profit % = (Profit / Cost Price) × 100.`
-        };
-      } else {
-        let n = (uniqueSeed % 6) + 2;
-        let num = n * 40;
-        let fractionAns = num / 4;
-        return {
-          q: `CBSE Maths (Fractions): What is 1/4 of ${num}?`,
-          options: [`${fractionAns}`, `${fractionAns + 10}`, `${fractionAns - 5}`, `${fractionAns * 2}`],
-          ans: `${fractionAns}`,
-          tip: `💡 Divide ${num} by 4.`
-        };
-      }
-    }
-
-    // Mode 3: CBSE/NCERT EVS & Science (Comprehensive Syllabus)
-    else {
+    } else if (mode === 1) {
+      let l = (uniqueSeed % 8) + 4;
+      let b = (uniqueSeed % 5) + 2;
+      let perimeter = 2 * (l + b);
+      return {
+        q: `CBSE Class 4 Maths: Find Perimeter of Rectangle with Length = ${l} cm and Breadth = ${b} cm:`,
+        options: [`${perimeter} cm`, `${perimeter + 4} cm`, `${l * b} cm²`, `${perimeter - 2} cm`],
+        ans: `${perimeter} cm`,
+        tip: `💡 Perimeter of Rectangle = 2 × (Length + Breadth).`
+      };
+    } else if (mode === 2) {
+      let n = (uniqueSeed % 6) + 2;
+      let num = n * 40;
+      let fractionAns = num / 4;
+      return {
+        q: `CBSE Maths (Fractions): What is 1/4 of ${num}?`,
+        options: [`${fractionAns}`, `${fractionAns + 10}`, `${fractionAns - 5}`, `${fractionAns * 2}`],
+        ans: `${fractionAns}`,
+        tip: `💡 Divide ${num} by 4.`
+      };
+    } else {
       let ncertEvsPool = [
         { q: "Which digestive organ produces Bile juice to digest fat?", ans: "Liver", opts: ["Liver", "Stomach", "Pancreas", "Heart"] },
         { q: "Which process carries seeds away from parent plant by wind or water?", ans: "Seed Dispersal", opts: ["Seed Dispersal", "Photosynthesis", "Germination", "Evaporation"] },
         { q: "How many milk teeth does a child normally have?", ans: "20", opts: ["20", "32", "16", "28"] },
-        { q: "Deficiency of Vitamin C causes which disease?", ans: "Scurvy", opts: ["Scurvy", "Rickets", "Beriberi", "Night Blindness"] },
-        { q: "Which organ system helps in breaking down food into nutrients?", ans: "Digestive System", opts: ["Digestive System", "Nervous System", "Excretory System", "Skeletal System"] },
-        { q: "What is the green pigment in leaves that traps sunlight called?", ans: "Chlorophyll", opts: ["Chlorophyll", "Stomata", "Vein", "Root Hair"] },
-        { q: "Water freezes into ice at what temperature?", ans: "0°C", opts: ["0°C", "100°C", "37°C", "50°C"] },
-        { q: "Which planet in our solar system is known for its beautiful rings?", ans: "Saturn", opts: ["Saturn", "Mars", "Jupiter", "Mercury"] }
+        { q: "Deficiency of Vitamin C causes which disease?", ans: "Scurvy", opts: ["Scurvy", "Rickets", "Beriberi", "Night Blindness"] }
       ];
       let sel = ncertEvsPool[uniqueSeed % ncertEvsPool.length];
-      return {
-        q: `CBSE EVS / Science (${userClass}): ${sel.q}`,
-        options: sel.opts,
-        ans: sel.ans,
-        tip: `💡 NCERT Chapter Core Concept.`
-      };
+      return { q: `CBSE EVS / Science (Class 4): ${sel.q}`, options: sel.opts, ans: sel.ans, tip: `💡 NCERT Core Concept.` };
     }
   }
 
-  // 4. CLASS 6 TO 12 SECTION (MIDDLE & SECONDARY SCHOOL)
+  // 5. CLASS 6 TO 12 SECTION
   let middleHighPool = [];
   if (userClass === "Class 6" || userClass === "Class 7" || userClass === "Class 8") {
     middleHighPool = [
@@ -1061,7 +1104,6 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
       { q: "In Indian History, who was the founder of Mughal Empire?", ans: "Babur", opts: ["Babur", "Akbar", "Humayun", "Shah Jahan"] }
     ];
   } else {
-    // Class 9, 10, 11, 12
     middleHighPool = [
       { q: "Acceleration due to gravity on Earth surface (g) is approx:", ans: "9.8 m/s²", opts: ["9.8 m/s²", "10.8 m/s²", "8.9 m/s²", "9.8 km/s"] },
       { q: "What is the pH value of pure distilled water?", ans: "7", opts: ["7", "0", "14", "1"] },
@@ -1574,7 +1616,7 @@ function addNewStudent() {
     nextNum++;
   } while (true);
 
-  let randomPin = Math.floor(1000 + Math.random() * 9000).toString();
+  let randomPin = generateRandomPin();
   let avatar = getRandomAvatar(gender, nextNum);
 
   let newUser = sanitizeAndNormalizeUser({ 
