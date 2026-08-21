@@ -581,7 +581,7 @@ function initCloudSync() {
           let workspace = document.getElementById('practiceWorkspace');
           if (workspace && !workspace.classList.contains('hidden')) {
             refreshStatsUI();
-            renderQuestion(false);
+            renderQuestionStateOnly();
           }
         }
       }
@@ -1242,7 +1242,7 @@ function handleOptionClick(selectedOpt, correctAns) {
   try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(currentActiveUser)); } catch(e){}
 
   refreshStatsUI();
-  renderQuestion(false);
+  renderQuestionStateOnly();
 }
 
 function updateDayDropdownUI() {
@@ -1280,6 +1280,57 @@ function onDayDropdownSelect(val) {
   currentDay = selectedDayNum;
   currentQIndex = 0;
   renderQuestion(true);
+}
+
+function renderQuestionStateOnly() {
+  if (!currentActiveUser || !currentLoadedQuestions.length) return;
+  
+  let qBox = document.getElementById('questionText'), 
+      optsBox = document.getElementById('optionsContainer'), 
+      tipBox = document.getElementById('tipContainer');
+
+  let q = currentLoadedQuestions[currentQIndex];
+  let qKey = `D${currentDay}_Q${currentQIndex}`;
+  let alreadyAnswered = currentActiveUser.userAnswers && currentActiveUser.userAnswers[qKey];
+
+  let btnNextQ = document.getElementById('btnNextQuestion');
+
+  let targetQs = getQsPerDayForUser(currentActiveUser);
+  if (alreadyAnswered) {
+    btnNextQ.disabled = (currentQIndex >= targetQs - 1);
+    if (q.tip) {
+      tipBox.innerText = q.tip;
+      tipBox.classList.remove('hidden');
+    } else {
+      tipBox.classList.add('hidden');
+    }
+  }
+
+  let displayOpts = q.shuffledOptions || q.options;
+  optsBox.innerHTML = '';
+
+  displayOpts.forEach(opt => {
+    let btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = opt;
+    
+    if (alreadyAnswered) {
+      btn.disabled = true;
+      if (opt === alreadyAnswered) {
+        if (opt === q.ans) {
+          btn.classList.add('selected-correct');
+          btn.innerHTML = opt + "<br/><small>✅ (Your Choice)</small>";
+        } else {
+          btn.classList.add('selected-wrong');
+          btn.innerHTML = opt + "<br/><small>❌ (Your Choice)</small>";
+        }
+      } else if (opt === q.ans) {
+        btn.classList.add('show-actual-correct');
+        btn.innerHTML = opt + "<br/><small>⭐ (Correct Answer)</small>";
+      }
+    }
+    optsBox.appendChild(btn);
+  });
 }
 
 function renderQuestion(stopSpeech = false) {
