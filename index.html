@@ -510,6 +510,8 @@ let currentDay = 1;
 let backPressTime = 0;
 let activeDashMetricType = null;
 let currentLoadedQuestions = [];
+let currentLoadedQuestionsDay = null;
+let currentLoadedQuestionsUserId = null;
 let lastSelectionTime = 0;
 
 function showToast(msg) {
@@ -958,7 +960,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
       let diffIndex = uniqueSeed % 4;
       let opts = [];
       for (let k = 0; k < 4; k++) {
-        opts.push(generateSvgDiagram(diagramType, uniqueSeed + k, k === diffIndex));
+        opts.push(generateSvgDiagram(diagramType, uniqueSeed, k === diffIndex));
       }
       return {
         q: `JNVST Mental Ability (Odd One Out): Find the figure that is DIFFERENT from others:`,
@@ -1339,7 +1341,11 @@ function renderQuestion(stopSpeech = false) {
     window.speechSynthesis.cancel();
   }
 
-  currentLoadedQuestions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
+  if (currentLoadedQuestionsDay !== currentDay || currentLoadedQuestionsUserId !== currentActiveUser.id || !currentLoadedQuestions.length) {
+    currentLoadedQuestions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
+    currentLoadedQuestionsDay = currentDay;
+    currentLoadedQuestionsUserId = currentActiveUser.id;
+  }
   updateDayDropdownUI();
 
   let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer'), tipBox = document.getElementById('tipContainer');
