@@ -419,7 +419,7 @@ function forceManualCloudSync(isSilent = false) {
         if (updated) {
           currentActiveUser = updated;
           refreshStatsUI();
-          renderQuestion();
+          renderQuestion(false);
         }
       }
 
@@ -581,7 +581,7 @@ function initCloudSync() {
           let workspace = document.getElementById('practiceWorkspace');
           if (workspace && !workspace.classList.contains('hidden')) {
             refreshStatsUI();
-            renderQuestion();
+            renderQuestion(false);
           }
         }
       }
@@ -794,7 +794,7 @@ function loadUserWorkspace() {
 
   currentQIndex = 0;
   refreshStatsUI();
-  renderQuestion();
+  renderQuestion(true);
 }
 
 function refreshStatsUI() {
@@ -1282,7 +1282,7 @@ function onDayDropdownSelect(val) {
   renderQuestion(true);
 }
 
-function renderQuestion(stopSpeech = true) {
+function renderQuestion(stopSpeech = false) {
   if (!currentActiveUser) return;
   if (stopSpeech && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel();
