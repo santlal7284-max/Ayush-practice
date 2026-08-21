@@ -1192,7 +1192,9 @@ function generateAdaptiveQuestions(userClass, day) {
 }
 
 function handleOptionClick(selectedOpt, correctAns) {
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
 
   let qKey = `D${currentDay}_Q${currentQIndex}`;
   if (currentActiveUser.userAnswers[qKey]) return;
@@ -1240,7 +1242,7 @@ function handleOptionClick(selectedOpt, correctAns) {
   try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(currentActiveUser)); } catch(e){}
 
   refreshStatsUI();
-  renderQuestion();
+  renderQuestion(false);
 }
 
 function updateDayDropdownUI() {
@@ -1277,12 +1279,14 @@ function onDayDropdownSelect(val) {
 
   currentDay = selectedDayNum;
   currentQIndex = 0;
-  renderQuestion();
+  renderQuestion(true);
 }
 
-function renderQuestion() {
+function renderQuestion(stopSpeech = true) {
   if (!currentActiveUser) return;
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if (stopSpeech && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
 
   currentLoadedQuestions = generateAdaptiveQuestions(currentActiveUser.class, currentDay);
   updateDayDropdownUI();
@@ -1364,7 +1368,7 @@ function navigateQuestion(delta) {
   let target = currentQIndex + delta;
   if (target >= 0 && target < targetQs) {
     currentQIndex = target;
-    renderQuestion();
+    renderQuestion(true);
   }
 }
 
@@ -1559,7 +1563,7 @@ function setQsPerDay(id) {
   
   if (currentActiveUser && currentActiveUser.id === id) {
     currentActiveUser.qsPerDay = targetQs;
-    renderQuestion();
+    renderQuestion(true);
   }
 }
 
@@ -1597,7 +1601,7 @@ function resetCurrentDayOnly(id) {
     if (currentActiveUser && currentActiveUser.id === id) {
       currentDay = targetDay;
       currentQIndex = 0;
-      renderQuestion();
+      renderQuestion(true);
     }
   }
 }
