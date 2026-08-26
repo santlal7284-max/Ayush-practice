@@ -491,6 +491,11 @@ function triggerSparkleBurst() {
   }
 }
 
+function renderMarkdownBold(text) {
+  if (!text) return "";
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
 function shuffleArray(arr, seed) {
   let array = [...arr];
   let m = array.length, t, i;
@@ -524,15 +529,20 @@ function showToast(msg) {
   setTimeout(() => { if (toast) toast.remove(); }, 2000);
 }
 
+function formatDateString(d) {
+  let mm = String(d.getMonth() + 1).padStart(2, '0');
+  let dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
 function getTodayString() {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  return formatDateString(new Date());
 }
 
 function getYesterdayString() {
   const d = new Date();
   d.setDate(d.getDate() - 1);
-  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  return formatDateString(d);
 }
 
 function getRandomAvatar(gender, num) {
@@ -1297,9 +1307,8 @@ function renderQuestionStateOnly() {
 
   let btnNextQ = document.getElementById('btnNextQuestion');
 
-  let targetQs = getQsPerDayForUser(currentActiveUser);
   if (alreadyAnswered) {
-    btnNextQ.disabled = (currentQIndex >= targetQs - 1);
+    btnNextQ.disabled = false;
     if (q.tip) {
       tipBox.innerText = q.tip;
       tipBox.classList.remove('hidden');
@@ -1308,6 +1317,10 @@ function renderQuestionStateOnly() {
     }
   }
 
+  renderOptionsGrid(optsBox, q, alreadyAnswered);
+}
+
+function renderOptionsGrid(optsBox, q, alreadyAnswered) {
   let displayOpts = q.shuffledOptions || q.options;
   optsBox.innerHTML = '';
 
@@ -1315,7 +1328,7 @@ function renderQuestionStateOnly() {
     let btn = document.createElement('button');
     btn.className = 'option-btn';
     btn.innerHTML = opt;
-    
+
     if (alreadyAnswered) {
       btn.disabled = true;
       if (opt === alreadyAnswered) {
@@ -1330,6 +1343,8 @@ function renderQuestionStateOnly() {
         btn.classList.add('show-actual-correct');
         btn.innerHTML = opt + "<br/><small>⭐ (Correct Answer)</small>";
       }
+    } else {
+      btn.onclick = function() { handleOptionClick(opt, q.ans); };
     }
     optsBox.appendChild(btn);
   });
@@ -1357,6 +1372,7 @@ function renderQuestion(stopSpeech = false) {
     qBox.innerText = `🎉 Excellent ${currentActiveUser.id}! Day ${currentDay} Complete!`;
     optsBox.innerHTML = '';
     fill.style.width = '100%';
+    document.getElementById('btnBackQuestion').disabled = false;
     document.getElementById('btnNextQuestion').disabled = true;
     return;
   }
@@ -1364,7 +1380,7 @@ function renderQuestion(stopSpeech = false) {
   fill.style.width = `${Math.round((currentQIndex / currentLoadedQuestions.length) * 100)}%`;
   let q = currentLoadedQuestions[currentQIndex];
 
-  if (q.passage) { passageBox.innerHTML = q.passage; passageBox.classList.remove('hidden'); }
+  if (q.passage) { passageBox.innerHTML = renderMarkdownBold(q.passage); passageBox.classList.remove('hidden'); }
   else { passageBox.classList.add('hidden'); }
 
   qBox.innerText = `Q${currentQIndex + 1}. ${q.q}`;
@@ -1378,9 +1394,8 @@ function renderQuestion(stopSpeech = false) {
 
   btnBackQ.disabled = (currentQIndex === 0);
 
-  let targetQs = getQsPerDayForUser(currentActiveUser);
   if (alreadyAnswered) {
-    btnNextQ.disabled = (currentQIndex >= targetQs - 1);
+    btnNextQ.disabled = false;
     if (q.tip) {
       tipBox.innerText = q.tip;
       tipBox.classList.remove('hidden');
@@ -1392,38 +1407,13 @@ function renderQuestion(stopSpeech = false) {
     tipBox.classList.add('hidden');
   }
 
-  let displayOpts = q.shuffledOptions || q.options;
-
-  displayOpts.forEach(opt => {
-    let btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.innerHTML = opt;
-    
-    if (alreadyAnswered) {
-      btn.disabled = true;
-      if (opt === alreadyAnswered) {
-        if (opt === q.ans) {
-          btn.classList.add('selected-correct');
-          btn.innerHTML = opt + "<br/><small>✅ (Your Choice)</small>";
-        } else {
-          btn.classList.add('selected-wrong');
-          btn.innerHTML = opt + "<br/><small>❌ (Your Choice)</small>";
-        }
-      } else if (opt === q.ans) {
-        btn.classList.add('show-actual-correct');
-        btn.innerHTML = opt + "<br/><small>⭐ (Correct Answer)</small>";
-      }
-    } else {
-      btn.onclick = function() { handleOptionClick(opt, q.ans); };
-    }
-    optsBox.appendChild(btn);
-  });
+  renderOptionsGrid(optsBox, q, alreadyAnswered);
 }
 
 function navigateQuestion(delta) {
   let targetQs = getQsPerDayForUser(currentActiveUser);
   let target = currentQIndex + delta;
-  if (target >= 0 && target < targetQs) {
+  if (target >= 0 && target <= targetQs) {
     currentQIndex = target;
     renderQuestion(true);
   }
@@ -1658,6 +1648,9 @@ function resetCurrentDayOnly(id) {
     if (currentActiveUser && currentActiveUser.id === id) {
       currentDay = targetDay;
       currentQIndex = 0;
+      currentLoadedQuestions = [];
+      currentLoadedQuestionsDay = null;
+      currentLoadedQuestionsUserId = null;
       renderQuestion(true);
     }
   }
@@ -1685,6 +1678,9 @@ function resetUserProgress(id) {
       if (currentActiveUser && currentActiveUser.id === id) {
         currentDay = 1;
         currentQIndex = 0;
+        currentLoadedQuestions = [];
+        currentLoadedQuestionsDay = null;
+        currentLoadedQuestionsUserId = null;
         loadUserWorkspace();
       }
     }
