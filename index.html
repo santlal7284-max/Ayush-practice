@@ -878,7 +878,15 @@ async function readQuestionAndOptionsWithTranslation() {
     return clean.replace(/[\*\_\#\~\`]/g, '').replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2700}-\u{27BF}]/gu, '');
   };
 
-  let cleanQ = cleanMarkdownAndHTML(qObj.q);
+  // Question text is prefixed with a subject/class label for on-screen display
+  // (e.g. "Class 6 Physics: What is..."). Strip that label before speaking it,
+  // so only the actual question is read aloud.
+  let stripSubjectLabel = (text) => {
+    if (!text) return "";
+    return text.replace(/^[^:?]{2,60}:\s*/, '');
+  };
+
+  let cleanQ = stripSubjectLabel(cleanMarkdownAndHTML(qObj.q));
   let opts = qObj.shuffledOptions || qObj.options || [];
   let labelsHindi = ["ऑप्शन A", "ऑप्शन B", "ऑप्शन C", "ऑप्शन D"];
   let labelsEng = ["Option A", "Option B", "Option C", "Option D"];
@@ -1820,10 +1828,6 @@ function renderQuestion(stopSpeech = false) {
   }
 
   renderOptionsGrid(optsBox, q, alreadyAnswered);
-
-  if (isLittleKidUser(currentActiveUser)) {
-    setTimeout(() => { readQuestionAndOptionsWithTranslation(); }, 400);
-  }
 }
 
 function navigateQuestion(delta) {
