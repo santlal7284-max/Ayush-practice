@@ -869,7 +869,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
 
   // 1. SPECIAL JNVST 2024-2026 ENGINE FOR "JNV AYUSH" OR CLASS 5
   if (isJnvAyush || userClass === "Class 5") {
-    let mode = (uniqueSeed + qIndex) % 6;
+    let mode = (qIndex + day + userNum) % 6;
 
     if (mode === 0) {
       let jnvPassages = [
@@ -1003,7 +1003,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
 
   // 2. LKG / UKG SECTION
   if (userClass === "LKG" || userClass === "UKG") {
-    let subMode = (uniqueSeed + qIndex) % 4;
+    let subMode = (qIndex + day + userNum) % 4;
     if (subMode === 0) {
       let cnt = (uniqueSeed % 6) + 1;
       let emoji = ["🍎", "⭐", "🎈", "🐱", "🐶", "🚗", "🌸"][uniqueSeed % 7];
@@ -1045,7 +1045,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
 
   // 3. CLASS 1, 2, 3 SECTION
   if (userClass === "Class 1" || userClass === "Class 2" || userClass === "Class 3") {
-    let subMode = (uniqueSeed + qIndex) % 4;
+    let subMode = (qIndex + day + userNum) % 4;
     if (subMode === 0) {
       let a = (uniqueSeed % 15) + 3;
       let b = ((uniqueSeed + 3) % 12) + 2;
@@ -1092,7 +1092,7 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
 
   // 4. CLASS 4 SECTION
   if (userClass === "Class 4") {
-    let mode = (uniqueSeed + qIndex) % 4;
+    let mode = (qIndex + day + userNum) % 4;
 
     if (mode === 0) {
       let pThemes = [
