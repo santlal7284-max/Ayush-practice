@@ -640,16 +640,40 @@ function forceSyncAllDevices() {
 
 function getAdminPin() { return localStorage.getItem('app_master_pin') || "7258"; }
 
-function readQuestionAndOptionsWithTranslation() {
+function speakUtteranceAsync(text, lang) {
+  return new Promise((resolve) => {
+    if (!text) { resolve(); return; }
+    let utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    utterance.rate = 0.85;
+    utterance.onend = resolve;
+    utterance.onerror = resolve;
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+async function translateTextViaApi(text, langPair) {
+  try {
+    let resp = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
+    let data = await resp.json();
+    if (data && data.responseData && data.responseData.translatedText) {
+      return data.responseData.translatedText;
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function readQuestionAndOptionsWithTranslation() {
   if (!('speechSynthesis' in window)) {
     alert("Speech Synthesis not supported in this browser!");
     return;
   }
-  
+
   window.speechSynthesis.cancel();
   if (!currentLoadedQuestions.length || currentQIndex >= currentLoadedQuestions.length) return;
 
   let qObj = currentLoadedQuestions[currentQIndex];
+  let speechBtn = document.getElementById('speechBtn');
 
   let cleanMarkdownAndHTML = (text) => {
     if(!text) return "";
@@ -662,29 +686,42 @@ function readQuestionAndOptionsWithTranslation() {
   let labelsHindi = ["ऑप्शन A", "ऑप्शन B", "ऑप्शन C", "ऑप्शन D"];
   let labelsEng = ["Option A", "Option B", "Option C", "Option D"];
   let passageText = cleanMarkdownAndHTML(qObj.passage);
-  
+
   let containsHindi = /[\u0900-\u097F]/.test(cleanQ) || /[\u0900-\u097F]/.test(passageText) || opts.some(o => /[\u0900-\u097F]/.test(cleanMarkdownAndHTML(o)));
 
-  let fullSpeechText = "";
-  if (passageText) fullSpeechText += passageText + ". ";
-  fullSpeechText += cleanQ + ". ";
+  let buildSpeechText = (useHindiLabels) => {
+    let text = "";
+    if (passageText) text += passageText + ". ";
+    text += cleanQ + ". ";
+    opts.forEach((opt, idx) => {
+      let cleanOpt = cleanMarkdownAndHTML(opt);
+      let label = useHindiLabels ? labelsHindi[idx] : labelsEng[idx];
+      if (cleanOpt) text += `${label}: ${cleanOpt}. `;
+    });
+    return text;
+  };
 
-  opts.forEach((opt, idx) => {
-    let cleanOpt = cleanMarkdownAndHTML(opt);
-    let label = containsHindi ? labelsHindi[idx] : labelsEng[idx];
-    if (cleanOpt) fullSpeechText += `${label}: ${cleanOpt}. `;
-  });
+  let primaryText = buildSpeechText(containsHindi);
+  let primaryLang = containsHindi ? 'hi-IN' : 'en-US';
+  let secondaryLang = containsHindi ? 'en-US' : 'hi-IN';
+  let translateLangPair = containsHindi ? 'hi|en' : 'en|hi';
 
-  let utterance = new SpeechSynthesisUtterance(fullSpeechText);
-  utterance.lang = containsHindi ? 'hi-IN' : 'en-US';
-  utterance.rate = 0.85;
-
-  let speechBtn = document.getElementById('speechBtn');
   if (speechBtn) speechBtn.innerText = '🔊 ...';
-  utterance.onend = function() { if (speechBtn) speechBtn.innerText = '🔊'; };
-  utterance.onerror = function() { if (speechBtn) speechBtn.innerText = '🔊'; };
 
-  window.speechSynthesis.speak(utterance);
+  try {
+    // 1. Speak in the question's original language first
+    await speakUtteranceAsync(primaryText, primaryLang);
+
+    // 2. Fetch (and cache) translation to the other language, then speak it too
+    if (qObj._speechTranslation === undefined) {
+      qObj._speechTranslation = await translateTextViaApi(primaryText, translateLangPair);
+    }
+    if (qObj._speechTranslation) {
+      await speakUtteranceAsync(qObj._speechTranslation, secondaryLang);
+    }
+  } finally {
+    if (speechBtn) speechBtn.innerText = '🔊';
+  }
 }
 
 function selectUser(userObj) {
@@ -1151,49 +1188,205 @@ function generateProceduralSingleQuestion(userClass, day, qIndex, offset) {
   }
 
   // 5. CLASS 6 TO 12 SECTION
-  let middleHighPool = [];
+  let subjectPools = [];
   if (userClass === "Class 6" || userClass === "Class 7" || userClass === "Class 8") {
-    middleHighPool = [
-      { q: "What is the SI unit of Force?", ans: "Newton", opts: ["Newton", "Joule", "Pascal", "Watt"] },
-      { q: "Powerhouse of the cell is known as:", ans: "Mitochondria", opts: ["Mitochondria", "Nucleus", "Ribosome", "Golgi Body"] },
-      { q: "What is the chemical formula of Common Salt?", ans: "NaCl", opts: ["NaCl", "H2O", "CO2", "NaOH"] },
-      { q: "Solve linear equation: 2x + 5 = 15. Value of x = ?", ans: "5", opts: ["5", "10", "7.5", "4"] },
-      { q: "Which layer of atmosphere protects Earth from UV rays?", ans: "Ozone Layer", opts: ["Ozone Layer", "Troposphere", "Mesosphere", "Exosphere"] },
-      { q: "In Indian History, who was the founder of Mughal Empire?", ans: "Babur", opts: ["Babur", "Akbar", "Humayun", "Shah Jahan"] }
+    subjectPools = [
+      { name: "Physics", items: [
+        { q: "What is the SI unit of Force?", ans: "Newton", opts: ["Newton", "Joule", "Pascal", "Watt"] },
+        { q: "What is the SI unit of Power?", ans: "Watt", opts: ["Watt", "Newton", "Joule", "Ampere"] },
+        { q: "Sound travels fastest in which medium?", ans: "Solid", opts: ["Solid", "Liquid", "Gas", "Vacuum"] },
+        { q: "A simple machine used to lift heavy loads with less effort, like a see-saw, is called a:", ans: "Lever", opts: ["Lever", "Pulley", "Wedge", "Screw"] },
+        { q: "Which mirror is used as a side mirror in vehicles?", ans: "Convex Mirror", opts: ["Convex Mirror", "Concave Mirror", "Plane Mirror", "Flat Mirror"] },
+        { q: "Which layer of atmosphere protects Earth from UV rays?", ans: "Ozone Layer", opts: ["Ozone Layer", "Troposphere", "Mesosphere", "Exosphere"] },
+        { q: "What is the SI unit of Length?", ans: "Metre", opts: ["Metre", "Kilogram", "Second", "Litre"] },
+        { q: "What is the SI unit of Time?", ans: "Second", opts: ["Second", "Minute", "Hour", "Metre"] },
+        { q: "What is the SI unit of Electric Current?", ans: "Ampere", opts: ["Ampere", "Volt", "Ohm", "Watt"] },
+        { q: "Which instrument is used to measure temperature?", ans: "Thermometer", opts: ["Thermometer", "Barometer", "Speedometer", "Odometer"] },
+        { q: "Which instrument is used to measure atmospheric pressure?", ans: "Barometer", opts: ["Barometer", "Thermometer", "Hygrometer", "Anemometer"] },
+        { q: "The force that pulls every object towards the centre of the Earth is called:", ans: "Gravity", opts: ["Gravity", "Friction", "Magnetism", "Tension"] }
+      ]},
+      { name: "Chemistry", items: [
+        { q: "What is the chemical formula of Common Salt?", ans: "NaCl", opts: ["NaCl", "H2O", "CO2", "NaOH"] },
+        { q: "What is the chemical symbol of Iron?", ans: "Fe", opts: ["Fe", "Ir", "In", "Fr"] },
+        { q: "Rusting of iron is an example of which type of change?", ans: "Chemical Change", opts: ["Chemical Change", "Physical Change", "No Change", "Nuclear Change"] },
+        { q: "What is the chemical formula of water?", ans: "H2O", opts: ["H2O", "CO2", "O2", "H2O2"] },
+        { q: "Which gas is most abundant in Earth's atmosphere?", ans: "Nitrogen", opts: ["Nitrogen", "Oxygen", "Carbon Dioxide", "Argon"] },
+        { q: "What is the chemical symbol of Oxygen?", ans: "O", opts: ["O", "Ox", "O2", "Om"] },
+        { q: "Which gas do living beings need for breathing/respiration?", ans: "Oxygen", opts: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Helium"] },
+        { q: "The process where a solid changes directly into gas without becoming liquid is called:", ans: "Sublimation", opts: ["Sublimation", "Evaporation", "Condensation", "Melting"] },
+        { q: "Which acid is naturally present in lemon?", ans: "Citric Acid", opts: ["Citric Acid", "Acetic Acid", "Sulphuric Acid", "Lactic Acid"] },
+        { q: "What is the chemical symbol of Gold?", ans: "Au", opts: ["Au", "Go", "Gd", "Ag"] },
+        { q: "A combination of two or more substances that are not chemically joined is called a:", ans: "Mixture", opts: ["Mixture", "Compound", "Element", "Solution only"] },
+        { q: "Acidic substances generally have a pH value:", ans: "Less than 7", opts: ["Less than 7", "Equal to 7", "Greater than 7", "Equal to 14"] }
+      ]},
+      { name: "Biology", items: [
+        { q: "Powerhouse of the cell is known as:", ans: "Mitochondria", opts: ["Mitochondria", "Nucleus", "Ribosome", "Golgi Body"] },
+        { q: "Which pigment gives plants their green colour and helps in photosynthesis?", ans: "Chlorophyll", opts: ["Chlorophyll", "Melanin", "Haemoglobin", "Carotene"] },
+        { q: "How many chambers does the human heart have?", ans: "4", opts: ["4", "2", "3", "5"] },
+        { q: "Which is the largest organ of the human body?", ans: "Skin", opts: ["Skin", "Liver", "Lungs", "Brain"] },
+        { q: "Which blood cells help in carrying oxygen throughout the body?", ans: "Red Blood Cells", opts: ["Red Blood Cells", "White Blood Cells", "Platelets", "Plasma"] },
+        { q: "Which organ pumps blood throughout the human body?", ans: "Heart", opts: ["Heart", "Lungs", "Kidney", "Liver"] },
+        { q: "Which part of the plant mainly carries out photosynthesis?", ans: "Leaves", opts: ["Leaves", "Roots", "Stem", "Flower"] },
+        { q: "Approximately how many bones are there in an adult human body?", ans: "206", opts: ["206", "126", "306", "156"] },
+        { q: "Which organ filters the blood and produces urine in the human body?", ans: "Kidneys", opts: ["Kidneys", "Liver", "Lungs", "Stomach"] },
+        { q: "Insects breathe through tiny openings on their body called:", ans: "Spiracles", opts: ["Spiracles", "Gills", "Lungs", "Nostrils"] },
+        { q: "Which vitamin is produced in the human body when skin is exposed to sunlight?", ans: "Vitamin D", opts: ["Vitamin D", "Vitamin A", "Vitamin C", "Vitamin K"] },
+        { q: "The process by which green plants prepare their own food using sunlight is called:", ans: "Photosynthesis", opts: ["Photosynthesis", "Respiration", "Digestion", "Transpiration"] }
+      ]},
+      { name: "Maths", items: [
+        { q: "Solve linear equation: 2x + 5 = 15. Value of x = ?", ans: "5", opts: ["5", "10", "7.5", "4"] },
+        { q: "What is the formula for area of a triangle?", ans: "1/2 × base × height", opts: ["1/2 × base × height", "base × height", "2 × base × height", "base + height"] },
+        { q: "What is the HCF of 12 and 18?", ans: "6", opts: ["6", "3", "36", "2"] },
+        { q: "What is the LCM of 4 and 6?", ans: "12", opts: ["12", "24", "10", "6"] },
+        { q: "Which of these is a prime number?", ans: "17", opts: ["17", "15", "21", "9"] },
+        { q: "What is 15% of 200?", ans: "30", opts: ["30", "20", "15", "40"] },
+        { q: "What is the value of 7² (7 squared)?", ans: "49", opts: ["49", "14", "42", "63"] },
+        { q: "The sum of interior angles of a quadrilateral is:", ans: "360°", opts: ["360°", "180°", "270°", "90°"] },
+        { q: "What comes next in the pattern: 2, 4, 8, 16, __ ?", ans: "32", opts: ["32", "24", "20", "18"] },
+        { q: "Which of these numbers is NOT a multiple of 5?", ans: "42", opts: ["42", "25", "30", "50"] },
+        { q: "What is 1/2 + 1/4 ?", ans: "3/4", opts: ["3/4", "2/6", "1/6", "2/4"] },
+        { q: "Which of these is a factor of 24?", ans: "8", opts: ["8", "5", "7", "9"] }
+      ]},
+      { name: "History-GK", items: [
+        { q: "In Indian History, who was the founder of Mughal Empire?", ans: "Babur", opts: ["Babur", "Akbar", "Humayun", "Shah Jahan"] },
+        { q: "Which is the longest river in India?", ans: "Ganga", opts: ["Ganga", "Yamuna", "Godavari", "Brahmaputra"] },
+        { q: "What is the capital of India?", ans: "New Delhi", opts: ["New Delhi", "Mumbai", "Kolkata", "Chennai"] },
+        { q: "In which year did India become a Republic?", ans: "1950", opts: ["1950", "1947", "1952", "1935"] },
+        { q: "Who is known as the Father of the Nation in India?", ans: "Mahatma Gandhi", opts: ["Mahatma Gandhi", "Jawaharlal Nehru", "Sardar Patel", "B.R. Ambedkar"] },
+        { q: "Which is the national bird of India?", ans: "Peacock", opts: ["Peacock", "Parrot", "Eagle", "Sparrow"] },
+        { q: "Which is the national animal of India?", ans: "Tiger", opts: ["Tiger", "Lion", "Elephant", "Deer"] },
+        { q: "Who wrote India's National Anthem 'Jana Gana Mana'?", ans: "Rabindranath Tagore", opts: ["Rabindranath Tagore", "Bankim Chandra Chattopadhyay", "Sarojini Naidu", "Subhash Chandra Bose"] },
+        { q: "Which is the largest continent in the world?", ans: "Asia", opts: ["Asia", "Africa", "Europe", "Australia"] },
+        { q: "Which planet is known as the 'Red Planet'?", ans: "Mars", opts: ["Mars", "Venus", "Jupiter", "Saturn"] },
+        { q: "Who was the first President of India?", ans: "Dr. Rajendra Prasad", opts: ["Dr. Rajendra Prasad", "Jawaharlal Nehru", "Dr. S. Radhakrishnan", "Zakir Husain"] },
+        { q: "Which festival is known as the 'Festival of Lights' in India?", ans: "Diwali", opts: ["Diwali", "Holi", "Dussehra", "Raksha Bandhan"] }
+      ]}
     ];
   } else {
-    middleHighPool = [
-      { q: "Acceleration due to gravity on Earth surface (g) is approx:", ans: "9.8 m/s²", opts: ["9.8 m/s²", "10.8 m/s²", "8.9 m/s²", "9.8 km/s"] },
-      { q: "What is the pH value of pure distilled water?", ans: "7", opts: ["7", "0", "14", "1"] },
-      { q: "Value of sin(90°) in trigonometry:", ans: "1", opts: ["1", "0", "1/2", "√3/2"] },
-      { q: "Which fundamental particles carry negative electric charge?", ans: "Electrons", opts: ["Electrons", "Protons", "Neutrons", "Photons"] },
-      { q: "Who authored the book 'Discovery of India'?", ans: "Jawaharlal Nehru", opts: ["Jawaharlal Nehru", "Mahatma Gandhi", "Subhash Chandra Bose", "Rabindranath Tagore"] }
+    subjectPools = [
+      { name: "Physics", items: [
+        { q: "Acceleration due to gravity on Earth surface (g) is approx:", ans: "9.8 m/s²", opts: ["9.8 m/s²", "10.8 m/s²", "8.9 m/s²", "9.8 km/s"] },
+        { q: "Which fundamental particles carry negative electric charge?", ans: "Electrons", opts: ["Electrons", "Protons", "Neutrons", "Photons"] },
+        { q: "What is the SI unit of Work and Energy?", ans: "Joule", opts: ["Joule", "Newton", "Watt", "Pascal"] },
+        { q: "Newton's Third Law states that every action has an equal and opposite:", ans: "Reaction", opts: ["Reaction", "Force", "Mass", "Velocity"] },
+        { q: "What is the approximate speed of light in vacuum?", ans: "3 × 10^8 m/s", opts: ["3 × 10^8 m/s", "3 × 10^6 m/s", "3 × 10^5 m/s", "3 × 10^10 m/s"] },
+        { q: "What is the SI unit of Power?", ans: "Watt", opts: ["Watt", "Joule", "Newton", "Pascal"] },
+        { q: "Ohm's Law relates Voltage, Current and:", ans: "Resistance", opts: ["Resistance", "Power", "Frequency", "Charge"] },
+        { q: "Which type of lens is used to correct short-sightedness (myopia)?", ans: "Concave Lens", opts: ["Concave Lens", "Convex Lens", "Plane Lens", "Bifocal Lens"] },
+        { q: "What is the SI unit of electrical resistance?", ans: "Ohm", opts: ["Ohm", "Volt", "Ampere", "Watt"] },
+        { q: "The force of attraction between any two masses in the universe is called:", ans: "Gravitational Force", opts: ["Gravitational Force", "Magnetic Force", "Electrostatic Force", "Nuclear Force"] },
+        { q: "What is the SI unit of Frequency?", ans: "Hertz", opts: ["Hertz", "Joule", "Watt", "Ohm"] },
+        { q: "Which Newton's Law states: 'For every action, there is an equal and opposite reaction'?", ans: "Third Law of Motion", opts: ["Third Law of Motion", "First Law of Motion", "Second Law of Motion", "Law of Gravitation"] }
+      ]},
+      { name: "Chemistry", items: [
+        { q: "What is the pH value of pure distilled water?", ans: "7", opts: ["7", "0", "14", "1"] },
+        { q: "What is the atomic number of Hydrogen?", ans: "1", opts: ["1", "2", "0", "8"] },
+        { q: "What is the valency of Carbon?", ans: "4", opts: ["4", "2", "6", "8"] },
+        { q: "Which of these is a Noble Gas?", ans: "Helium", opts: ["Helium", "Oxygen", "Nitrogen", "Chlorine"] },
+        { q: "A substance that speeds up a chemical reaction without being consumed is called a:", ans: "Catalyst", opts: ["Catalyst", "Reactant", "Product", "Solvent"] },
+        { q: "What is the atomic number of Oxygen?", ans: "8", opts: ["8", "6", "7", "16"] },
+        { q: "Which particle in an atom has no electric charge?", ans: "Neutron", opts: ["Neutron", "Proton", "Electron", "Ion"] },
+        { q: "What is the common chemical name of Baking Soda?", ans: "Sodium Bicarbonate", opts: ["Sodium Bicarbonate", "Sodium Chloride", "Sodium Hydroxide", "Calcium Carbonate"] },
+        { q: "An acidic solution generally has a pH value:", ans: "Less than 7", opts: ["Less than 7", "Equal to 7", "Greater than 7", "Equal to 14"] },
+        { q: "Which element has the chemical symbol 'Na'?", ans: "Sodium", opts: ["Sodium", "Nitrogen", "Neon", "Nickel"] },
+        { q: "The process of separating a liquid mixture based on differences in boiling points is called:", ans: "Distillation", opts: ["Distillation", "Filtration", "Sublimation", "Decantation"] },
+        { q: "The modern periodic table arranges elements mainly according to their:", ans: "Atomic Number", opts: ["Atomic Number", "Atomic Mass", "Valency", "Density"] }
+      ]},
+      { name: "Biology", items: [
+        { q: "Powerhouse of the cell is known as:", ans: "Mitochondria", opts: ["Mitochondria", "Nucleus", "Ribosome", "Golgi Body"] },
+        { q: "DNA has which characteristic structure?", ans: "Double Helix", opts: ["Double Helix", "Single Strand", "Triple Helix", "Circular Ring"] },
+        { q: "Who discovered human blood groups (ABO system)?", ans: "Karl Landsteiner", opts: ["Karl Landsteiner", "Louis Pasteur", "Edward Jenner", "Alexander Fleming"] },
+        { q: "How many chromosomes does a normal human cell have?", ans: "46", opts: ["46", "23", "44", "48"] },
+        { q: "Photosynthesis mainly produces glucose and which gas as by-product?", ans: "Oxygen", opts: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"] },
+        { q: "Which cell organelle is mainly responsible for protein synthesis?", ans: "Ribosome", opts: ["Ribosome", "Mitochondria", "Golgi Body", "Lysosome"] },
+        { q: "The basic functional unit of the kidney is called a:", ans: "Nephron", opts: ["Nephron", "Neuron", "Alveolus", "Nephridium"] },
+        { q: "Which hormone regulates blood sugar level in the human body?", ans: "Insulin", opts: ["Insulin", "Adrenaline", "Thyroxine", "Estrogen"] },
+        { q: "Which blood vessels carry oxygenated blood away from the heart?", ans: "Arteries", opts: ["Arteries", "Veins", "Capillaries", "Nerves"] },
+        { q: "Photosynthesis in a plant cell mainly occurs in the:", ans: "Chloroplast", opts: ["Chloroplast", "Mitochondria", "Nucleus", "Vacuole"] },
+        { q: "The branch of biology dealing with heredity and variation is called:", ans: "Genetics", opts: ["Genetics", "Ecology", "Taxonomy", "Physiology"] },
+        { q: "Deficiency of which vitamin causes Night Blindness?", ans: "Vitamin A", opts: ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"] }
+      ]},
+      { name: "Maths", items: [
+        { q: "Value of sin(90°) in trigonometry:", ans: "1", opts: ["1", "0", "1/2", "√3/2"] },
+        { q: "Pythagoras theorem applies to which type of triangle?", ans: "Right-angled Triangle", opts: ["Right-angled Triangle", "Equilateral Triangle", "Isosceles Triangle", "Scalene Triangle"] },
+        { q: "What is the value of π (pi), rounded to 2 decimal places?", ans: "3.14", opts: ["3.14", "3.41", "1.34", "4.13"] },
+        { q: "The sum of angles in a triangle is always:", ans: "180°", opts: ["180°", "90°", "360°", "270°"] },
+        { q: "What is the probability of getting Heads on a single fair coin toss?", ans: "1/2", opts: ["1/2", "1", "1/4", "0"] },
+        { q: "What is the value of cos(0°) in trigonometry?", ans: "1", opts: ["1", "0", "1/2", "√3/2"] },
+        { q: "A quadratic equation ax² + bx + c = 0 has a maximum of how many roots?", ans: "2", opts: ["2", "1", "3", "0"] },
+        { q: "What is the formula for the area of a circle with radius r?", ans: "πr²", opts: ["πr²", "2πr", "πr", "πd"] },
+        { q: "In a right-angled triangle, the side opposite the right angle is called the:", ans: "Hypotenuse", opts: ["Hypotenuse", "Base", "Perpendicular", "Adjacent"] },
+        { q: "What is the square root of 144?", ans: "12", opts: ["12", "14", "11", "16"] },
+        { q: "If a fair die is thrown once, what is the probability of getting an even number?", ans: "1/2", opts: ["1/2", "1/3", "1/6", "2/3"] },
+        { q: "The sum of all interior angles of a quadrilateral is:", ans: "360°", opts: ["360°", "180°", "270°", "90°"] }
+      ]},
+      { name: "History-GK", items: [
+        { q: "Who authored the book 'Discovery of India'?", ans: "Jawaharlal Nehru", opts: ["Jawaharlal Nehru", "Mahatma Gandhi", "Subhash Chandra Bose", "Rabindranath Tagore"] },
+        { q: "Who was the first Prime Minister of India?", ans: "Jawaharlal Nehru", opts: ["Jawaharlal Nehru", "Sardar Patel", "Dr. Rajendra Prasad", "Lal Bahadur Shastri"] },
+        { q: "In which year did India gain Independence?", ans: "1947", opts: ["1947", "1950", "1942", "1930"] },
+        { q: "In which year was the United Nations founded?", ans: "1945", opts: ["1945", "1919", "1950", "1939"] },
+        { q: "What is the capital of Maharashtra?", ans: "Mumbai", opts: ["Mumbai", "Pune", "Nagpur", "Nashik"] },
+        { q: "Who was the Chairman of the Drafting Committee of the Indian Constitution?", ans: "Dr. B.R. Ambedkar", opts: ["Dr. B.R. Ambedkar", "Jawaharlal Nehru", "Mahatma Gandhi", "Sardar Patel"] },
+        { q: "Who was the first woman Prime Minister of India?", ans: "Indira Gandhi", opts: ["Indira Gandhi", "Sonia Gandhi", "Pratibha Patil", "Sarojini Naidu"] },
+        { q: "In which year was the Quit India Movement launched?", ans: "1942", opts: ["1942", "1930", "1919", "1947"] },
+        { q: "Who is known as the 'Iron Man of India'?", ans: "Sardar Vallabhbhai Patel", opts: ["Sardar Vallabhbhai Patel", "Jawaharlal Nehru", "Bhagat Singh", "Subhash Chandra Bose"] },
+        { q: "Which Indian city is popularly known as the 'Silicon Valley of India'?", ans: "Bengaluru", opts: ["Bengaluru", "Hyderabad", "Pune", "Chennai"] },
+        { q: "On which date did the Indian Constitution come into effect?", ans: "26th January 1950", opts: ["26th January 1950", "15th August 1947", "26th November 1949", "2nd October 1950"] },
+        { q: "Which is the smallest state in India by area?", ans: "Goa", opts: ["Goa", "Sikkim", "Tripura", "Kerala"] }
+      ]}
     ];
   }
 
-  let sel = middleHighPool[uniqueSeed % middleHighPool.length];
+  let subjectMode = (qIndex + day + userNum) % subjectPools.length;
+  let chosenSubject = subjectPools[subjectMode];
+  let sel = chosenSubject.items[uniqueSeed % chosenSubject.items.length];
   return {
-    q: `${userClass} Curriculum: ${sel.q}`,
+    q: `${userClass} ${chosenSubject.name}: ${sel.q}`,
     options: sel.opts,
     ans: sel.ans,
-    tip: `💡 Standard ${userClass} Syllabus concept.`
+    tip: `💡 Standard ${userClass} ${chosenSubject.name} concept.`
   };
 }
 
 function generateAdaptiveQuestions(userClass, day) {
   let questions = [];
   let targetQs = getQsPerDayForUser(currentActiveUser);
-  let usedQuestionTexts = new Set(currentActiveUser.globalUsedQs || []);
+  const MIN_GAP_DAYS = 3;
+
+  // Build a map of questionText -> most recent day it was used.
+  // History entries are stored as "day::questionText". Older entries saved
+  // before this fix are plain text with no day info — we can't judge their
+  // recency, so they don't block reuse (but old-format duplicates already
+  // got filtered by the previous logic when they were generated).
+  let lastUsedDayMap = {};
+  (currentActiveUser.globalUsedQs || []).forEach(entry => {
+    let sep = entry.indexOf('::');
+    if (sep > -1) {
+      let entryDay = parseInt(entry.slice(0, sep), 10);
+      let qText = entry.slice(sep + 2);
+      if (!isNaN(entryDay)) {
+        lastUsedDayMap[qText] = Math.max(lastUsedDayMap[qText] !== undefined ? lastUsedDayMap[qText] : -Infinity, entryDay);
+      }
+    }
+  });
+
+  let usedInThisBatch = new Set();
+
+  let isBlocked = (qText) => {
+    if (usedInThisBatch.has(qText)) return true;
+    let lastDay = lastUsedDayMap[qText];
+    return (lastDay !== undefined && (day - lastDay) < MIN_GAP_DAYS);
+  };
 
   for (let i = 0; i < targetQs; i++) {
     let offset = 0;
     let qObj = generateProceduralSingleQuestion(userClass, day, i, offset);
 
-    while (usedQuestionTexts.has(qObj.q) && offset < 100) {
+    while (isBlocked(qObj.q) && offset < 300) {
       offset++;
       qObj = generateProceduralSingleQuestion(userClass, day, i, offset);
     }
-    usedQuestionTexts.add(qObj.q);
+    usedInThisBatch.add(qObj.q);
 
     let optSeed = (day * 100) + i + (offset * 13);
     qObj.shuffledOptions = shuffleArray(qObj.options, optSeed);
@@ -1216,8 +1409,9 @@ function handleOptionClick(selectedOpt, correctAns) {
   if (currentLoadedQuestions[currentQIndex]) {
     let qText = currentLoadedQuestions[currentQIndex].q;
     if (!currentActiveUser.globalUsedQs) currentActiveUser.globalUsedQs = [];
-    if (!currentActiveUser.globalUsedQs.includes(qText)) {
-      currentActiveUser.globalUsedQs.push(qText);
+    currentActiveUser.globalUsedQs.push(`${currentDay}::${qText}`);
+    if (currentActiveUser.globalUsedQs.length > 400) {
+      currentActiveUser.globalUsedQs = currentActiveUser.globalUsedQs.slice(-400);
     }
   }
 
