@@ -137,6 +137,32 @@
       0% { opacity: 1; transform: translate(0, 0) scale(0.5); }
       100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.5); }
     }
+
+    .mascot-box { font-size: 2.4rem; flex-shrink: 0; line-height: 1; user-select: none; }
+    .mascot-box.bounce-happy { animation: mascotBounce 0.6s ease-in-out; }
+    .mascot-box.wobble-sad { animation: mascotWobble 0.6s ease-in-out; }
+    @keyframes mascotBounce {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-14px) rotate(-8deg); }
+      50% { transform: translateY(0) rotate(8deg); }
+      75% { transform: translateY(-8px) rotate(-4deg); }
+    }
+    @keyframes mascotWobble {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(-6px) rotate(-6deg); }
+      75% { transform: translateX(6px) rotate(6deg); }
+    }
+
+    .confetti-particle { position: fixed; pointer-events: none; z-index: 99999; top: -30px; animation: confettiFall linear forwards; font-size: 1.6rem; }
+    @keyframes confettiFall {
+      0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+      100% { opacity: 0.9; transform: translateY(var(--fallY)) rotate(var(--spin)); }
+    }
+
+    .sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .sticker-cell { background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 14px; padding: 10px 4px; text-align: center; font-size: 1.8rem; }
+    .sticker-cell.locked { opacity: 0.25; filter: grayscale(1); }
+    .sticker-cell .sname { display: block; font-size: 0.6rem; font-weight: 700; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; }
   </style>
 </head>
 <body>
@@ -147,6 +173,7 @@
     <div style="font-weight: 900; font-size: 1.1rem;">🚀 AyushAcademy <span id="syncStatus" style="font-size:0.7rem; color:var(--success);">• Ready</span></div>
     <div class="header-actions">
       <button class="sync-btn-header" onclick="forceManualCloudSync(false)" title="Force Sync with Cloud">🔄 Sync</button>
+      <button class="theme-btn" id="musicToggleBtn" onclick="toggleBgMusic()" title="Background Music">🔇</button>
       <button class="theme-btn" id="themeIconBtn" onclick="toggleTheme()">🌙</button>
     </div>
   </div>
@@ -176,7 +203,10 @@
         <h1 id="userDisplayName">Ayush 01 🎓</h1>
         <p><span id="userClassBadge" class="badge" style="background:rgba(255,255,255,0.2); color:white;">Class 4</span></p>
       </div>
-      <button class="btn btn-secondary" onclick="logoutStudent()" style="font-size: 0.8rem; padding: 6px 12px;">Logout</button>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="btn btn-secondary hidden" id="stickerBookBtn" onclick="openStickerBook()" style="font-size: 0.8rem; padding: 6px 10px;" title="My Stickers">🌟 <span id="stickerCountBadge">0</span></button>
+        <button class="btn btn-secondary" onclick="logoutStudent()" style="font-size: 0.8rem; padding: 6px 12px;">Logout</button>
+      </div>
     </div>
 
     <div class="card" style="margin-top: 10px;">
@@ -198,6 +228,7 @@
       <div id="passageContainer" class="passage-box hidden"></div>
       
       <div class="question-header">
+        <div id="mascotBox" class="mascot-box hidden"><span id="mascotFace">🐻</span></div>
         <div class="question-box" id="questionText">Loading...</div>
         <button class="speech-btn hidden" id="speechBtn" onclick="readQuestionAndOptionsWithTranslation()" title="Listen Question & Options">🔊</button>
       </div>
@@ -212,6 +243,17 @@
     </div>
   </div>
 
+</div>
+
+<div id="stickerBookModal" class="modal-overlay hidden">
+  <div class="modal-card" style="max-width: 420px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+      <h3>🌟 My Sticker Book</h3>
+      <button style="background:none; border:none; color:var(--text-main); font-size:1.5rem; cursor:pointer;" onclick="closeStickerBook()">&times;</button>
+    </div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Finish a day's practice to earn a new sticker!</p>
+    <div id="stickerGrid" class="sticker-grid"></div>
+  </div>
 </div>
 
 <div id="adminModal" class="modal-overlay hidden">
@@ -345,6 +387,7 @@ function sanitizeAndNormalizeUser(u) {
     dayResetSeeds: u.dayResetSeeds || {},
     completedDaysMap: u.completedDaysMap || {},
     globalUsedQs: Array.isArray(u.globalUsedQs) ? u.globalUsedQs : [],
+    stickers: Array.isArray(u.stickers) ? u.stickers : [],
     lastCompletedDate: u.lastCompletedDate || "",
     qsPerDay: (u.qsPerDay !== undefined && parseInt(u.qsPerDay, 10) > 0) ? parseInt(u.qsPerDay, 10) : 20
   };
@@ -488,6 +531,160 @@ function triggerSparkleBurst() {
     p.style.setProperty('--dy', (Math.random() * -250 - 50) + 'px');
     document.body.appendChild(p);
     setTimeout(() => p.remove(), 800);
+  }
+}
+
+// ---------- Little-Kid Fun Features (Mascot, Stickers, Confetti, Music) ----------
+
+const MASCOT_CLASSES = ["LKG", "UKG"];
+function isLittleKidUser(user) {
+  return !!(user && MASCOT_CLASSES.includes(user.class));
+}
+
+function showMascotReaction(type) {
+  let box = document.getElementById('mascotBox');
+  let face = document.getElementById('mascotFace');
+  if (!box || !face) return;
+  box.classList.remove('bounce-happy', 'wobble-sad');
+  void box.offsetWidth; // restart animation
+  if (type === 'happy') {
+    face.innerText = ["🐻", "🎉", "😄", "🥳"][Math.floor(Math.random() * 4)];
+    box.classList.add('bounce-happy');
+    setTimeout(() => { face.innerText = "🐻"; }, 1200);
+  } else if (type === 'sad') {
+    face.innerText = "🥺";
+    box.classList.add('wobble-sad');
+    setTimeout(() => { face.innerText = "🐻"; }, 1200);
+  } else {
+    face.innerText = "🐻";
+  }
+}
+
+const PRAISE_PHRASES_EN = ["Shabaash!", "Well done!", "Super!", "You're a star!", "Great job!"];
+const PRAISE_PHRASES_HI = ["शाबाश!", "बहुत बढ़िया!", "वाह क्या बात है!", "तुम कमाल के हो!"];
+const ENCOURAGE_PHRASES = ["Koi baat nahi, phir try karo!", "It's okay, try again!", "Almost there, try once more!"];
+
+function speakShortPraise(isCorrect) {
+  if (!('speechSynthesis' in window)) return;
+  try {
+    let text, lang;
+    if (isCorrect) {
+      let useHindi = Math.random() < 0.5;
+      text = useHindi ? PRAISE_PHRASES_HI[Math.floor(Math.random() * PRAISE_PHRASES_HI.length)] : PRAISE_PHRASES_EN[Math.floor(Math.random() * PRAISE_PHRASES_EN.length)];
+      lang = useHindi ? 'hi-IN' : 'en-US';
+    } else {
+      text = ENCOURAGE_PHRASES[Math.floor(Math.random() * ENCOURAGE_PHRASES.length)];
+      lang = 'en-US';
+    }
+    let utt = new SpeechSynthesisUtterance(text);
+    utt.lang = lang;
+    utt.rate = 0.95;
+    window.speechSynthesis.speak(utt);
+  } catch(e) {}
+}
+
+const STICKER_SET = [
+  { emoji: "🦄", name: "Unicorn" }, { emoji: "🐼", name: "Panda" }, { emoji: "🦁", name: "Lion" },
+  { emoji: "🐸", name: "Frog" }, { emoji: "🐳", name: "Whale" }, { emoji: "🦋", name: "Butterfly" },
+  { emoji: "🐝", name: "Bee" }, { emoji: "🌈", name: "Rainbow" }, { emoji: "🌟", name: "Star" },
+  { emoji: "🍭", name: "Candy" }, { emoji: "🎈", name: "Balloon" }, { emoji: "🚀", name: "Rocket" },
+  { emoji: "🐧", name: "Penguin" }, { emoji: "🐢", name: "Turtle" }, { emoji: "🦊", name: "Fox" },
+  { emoji: "🍦", name: "Ice Cream" }, { emoji: "🌻", name: "Sunflower" }, { emoji: "🐬", name: "Dolphin" }
+];
+
+function awardRandomSticker(user) {
+  if (!user) return null;
+  if (!Array.isArray(user.stickers)) user.stickers = [];
+  let ownedNames = new Set(user.stickers);
+  let notOwned = STICKER_SET.filter(s => !ownedNames.has(s.name));
+  let pickPool = notOwned.length > 0 ? notOwned : STICKER_SET;
+  let picked = pickPool[Math.floor(Math.random() * pickPool.length)];
+  user.stickers.push(picked.name);
+  return picked;
+}
+
+function updateStickerBookButtonVisibility() {
+  let btn = document.getElementById('stickerBookBtn');
+  let countEl = document.getElementById('stickerCountBadge');
+  if (!btn || !currentActiveUser) return;
+  if (isLittleKidUser(currentActiveUser)) {
+    btn.classList.remove('hidden');
+    if (countEl) countEl.innerText = (currentActiveUser.stickers || []).length;
+  } else {
+    btn.classList.add('hidden');
+  }
+}
+
+function openStickerBook() {
+  if (!currentActiveUser) return;
+  let grid = document.getElementById('stickerGrid');
+  let owned = currentActiveUser.stickers || [];
+  let ownedCounts = {};
+  owned.forEach(name => { ownedCounts[name] = (ownedCounts[name] || 0) + 1; });
+
+  grid.innerHTML = STICKER_SET.map(s => {
+    let count = ownedCounts[s.name] || 0;
+    let locked = count === 0;
+    return `<div class="sticker-cell ${locked ? 'locked' : ''}">${s.emoji}<span class="sname">${s.name}${count > 1 ? ' x' + count : ''}</span></div>`;
+  }).join('');
+
+  document.getElementById('stickerBookModal').classList.remove('hidden');
+  history.pushState({ page: 'stickerBook' }, '');
+}
+
+function closeStickerBook() {
+  document.getElementById('stickerBookModal').classList.add('hidden');
+}
+
+function triggerConfettiCelebration() {
+  const emojis = ['🎉', '🎊', '⭐', '🌟', '🎈', '🥳', '✨'];
+  for (let i = 0; i < 35; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-particle';
+    p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = (Math.random() * window.innerWidth) + 'px';
+    p.style.setProperty('--fallY', (window.innerHeight + 60) + 'px');
+    p.style.setProperty('--spin', (Math.random() * 720 - 360) + 'deg');
+    p.style.animationDuration = (1.4 + Math.random() * 1.2) + 's';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 3000);
+  }
+}
+
+// Simple gentle looping background music using Web Audio (no external files needed)
+let bgMusicPlaying = false;
+let bgMusicTimer = null;
+function playBgMusicNote() {
+  try {
+    if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+    const notes = [523, 587, 659, 784, 880]; // gentle pentatonic scale
+    const freq = notes[Math.floor(Math.random() * notes.length)];
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.3);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.6);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 1.6);
+  } catch(e) {}
+}
+function toggleBgMusic() {
+  let btn = document.getElementById('musicToggleBtn');
+  bgMusicPlaying = !bgMusicPlaying;
+  if (bgMusicPlaying) {
+    if (btn) btn.innerText = '🎵';
+    playBgMusicNote();
+    bgMusicTimer = setInterval(playBgMusicNote, 1800);
+    localStorage.setItem('app_bg_music', 'on');
+  } else {
+    if (btn) btn.innerText = '🔇';
+    if (bgMusicTimer) clearInterval(bgMusicTimer);
+    localStorage.setItem('app_bg_music', 'off');
   }
 }
 
@@ -843,6 +1040,7 @@ function loadUserWorkspace() {
 
   currentQIndex = 0;
   refreshStatsUI();
+  updateStickerBookButtonVisibility();
   renderQuestion(true);
 }
 
@@ -1415,13 +1613,17 @@ function handleOptionClick(selectedOpt, correctAns) {
     }
   }
 
+  let isKid = isLittleKidUser(currentActiveUser);
+
   if (selectedOpt === correctAns) {
     currentActiveUser.points = (currentActiveUser.points || 0) + 10;
     playSound('correct');
     triggerSparkleBurst();
+    if (isKid) { showMascotReaction('happy'); speakShortPraise(true); }
   } else {
     currentActiveUser.wrong = (currentActiveUser.wrong || 0) + 1;
     playSound('wrong');
+    if (isKid) { showMascotReaction('sad'); speakShortPraise(false); }
   }
 
   let targetQs = getQsPerDayForUser(currentActiveUser);
@@ -1439,15 +1641,25 @@ function handleOptionClick(selectedOpt, correctAns) {
       currentActiveUser.lastCompletedDate = todayStr;
     }
 
-    setTimeout(() => {
-      alert("🎉 Outstanding! Day " + currentDay + " Completed (" + targetQs + " Questions)! Next Day will unlock tomorrow on Next Date!");
-    }, 200);
+    if (isKid) {
+      let newSticker = awardRandomSticker(currentActiveUser);
+      setTimeout(() => {
+        triggerConfettiCelebration();
+        let stickerMsg = newSticker ? `\n\nYou earned a new sticker: ${newSticker.emoji} ${newSticker.name}!` : "";
+        alert("🎉 Outstanding! Day " + currentDay + " Completed (" + targetQs + " Questions)!" + stickerMsg + "\nNext Day will unlock tomorrow on Next Date!");
+      }, 200);
+    } else {
+      setTimeout(() => {
+        alert("🎉 Outstanding! Day " + currentDay + " Completed (" + targetQs + " Questions)! Next Day will unlock tomorrow on Next Date!");
+      }, 200);
+    }
   }
 
   let dbKey = currentActiveUser.id.replace(/\s+/g, '_');
   try { if (db) db.ref('users/' + dbKey).set(sanitizeAndNormalizeUser(currentActiveUser)); } catch(e){}
 
   refreshStatsUI();
+  updateStickerBookButtonVisibility();
   renderQuestionStateOnly();
 }
 
@@ -1557,6 +1769,12 @@ function renderQuestion(stopSpeech = false) {
   }
   updateDayDropdownUI();
 
+  let mascotBox = document.getElementById('mascotBox');
+  if (mascotBox) {
+    if (isLittleKidUser(currentActiveUser)) { mascotBox.classList.remove('hidden'); showMascotReaction('idle'); }
+    else { mascotBox.classList.add('hidden'); }
+  }
+
   let qBox = document.getElementById('questionText'), optsBox = document.getElementById('optionsContainer'), passageBox = document.getElementById('passageContainer'), tipBox = document.getElementById('tipContainer');
   let fill = document.getElementById('progressFill');
 
@@ -1602,6 +1820,10 @@ function renderQuestion(stopSpeech = false) {
   }
 
   renderOptionsGrid(optsBox, q, alreadyAnswered);
+
+  if (isLittleKidUser(currentActiveUser)) {
+    setTimeout(() => { readQuestionAndOptionsWithTranslation(); }, 400);
+  }
 }
 
 function navigateQuestion(delta) {
@@ -1976,6 +2198,12 @@ window.addEventListener('pageshow', function() {
 });
 
 window.onpopstate = function(e) {
+  let stickerModal = document.getElementById('stickerBookModal');
+  if (stickerModal && !stickerModal.classList.contains('hidden')) {
+    stickerModal.classList.add('hidden');
+    return;
+  }
+
   let adminModal = document.getElementById('adminModal');
   if (adminModal && !adminModal.classList.contains('hidden')) {
     adminModal.classList.add('hidden');
